@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# 실제 앱 데이터. 비공개 저장소 camp-project-1-data에서 가져온다
+/data/app/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
