@@ -14,6 +14,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 실제 앱 데이터는 비공개 저장소에 있다. 읽기 전용 토큰으로 받아 data/app/에 둔다
+      - name: Checkout app data
+        uses: actions/checkout@v4
+        with:
+          repository: uyeon0/camp-project-1-data
+          token: ${{ secrets.DATA_REPO_TOKEN }}
+          path: .app-data
+
+      - name: Copy app data
+        run: |
+          mkdir -p data/app
+          cp .app-data/app/*.json data/app/
+          rm -rf .app-data
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24
