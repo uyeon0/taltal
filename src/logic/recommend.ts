@@ -9,6 +9,10 @@ export const MAX_CANDIDATES = 30;
 // "약간"으로만 쓰는 재료(고명)는 세지 않는다. 0을 주면 "사지 않고 만들 수 있는 요리"가 된다.
 export const MAX_PURCHASES = 3;
 
+// 남는 양 점수에서 재료 보관 등급별 가중치. 빨리 상하는 재료가 남을수록 점수가 나빠진다.
+// 값 자체에는 근거가 없고, 테스트 바구니로 비교해 정했다 (10/30, research-storage.md).
+export const PERISH_WEIGHT: Record<string, number> = { "빨리 상함": 3, "보통": 1.5, "오래 감": 1 };
+
 const round1 = (n: number) => Math.round(n * 10) / 10;
 const EPS = 1e-9;
 
@@ -50,7 +54,11 @@ export function filterCandidates(recipes: Recipe[], inventory: Stock[], servings
 
 type Score = { left: number; buyGrams: number };
 
-/** 가진 재료가 적게 남을수록, 그다음 사는 g이 적을수록 좋다. */
+/**
+ * 가진 재료가 적게 남을수록, 그다음 사는 g이 적을수록 좋다.
+ * left는 재료마다 남은 비율에 보관 등급 가중치를 곱해 더한 값이다. g 합으로 보면 무거운 재료(계란, 대파)만 줄이고
+ * 가벼운 채소(숙주, 상추)는 그대로 남기는 조합이 뽑혀서 비율로 본다.
+ */
 function better(a: Score, b: Score): boolean {
   if (Math.abs(a.left - b.left) > 1e-6) return a.left < b.left;
   return a.buyGrams < b.buyGrams;
@@ -72,10 +80,11 @@ export function recommend(
   const stock = toStock(inventory);
   const recipes = data.candidates;
   const maxPurchases = options.maxPurchases ?? MAX_PURCHASES;
+  const weight = new Map(data.ingredients.map((i) => [i.id, PERISH_WEIGHT[i.perishability ?? ""] ?? 1]));
 
   let best: Recipe[] = [];
   for (let k = Math.min(options.meals, recipes.length); k > 0 && best.length === 0; k--) {
-    best = searchBest(recipes, stock, k, options.servings, maxPurchases);
+    best = searchBest(recipes, stock, k, options.servings, maxPurchases, weight);
   }
 
   const total = new Map<string, number>();
@@ -125,7 +134,14 @@ export function recommend(
  * k개 조합 중 가진 재료를 넘겨 쓰지 않고, 사는 재료가 maxPurchases가지 이하이며, better()로 가장 좋은 것.
  * 없으면 빈 배열.
  */
-function searchBest(recipes: Recipe[], stock: Map<string, number>, k: number, servings: number, maxPurchases: number): Recipe[] {
+function searchBest(
+  recipes: Recipe[],
+  stock: Map<string, number>,
+  k: number,
+  servings: number,
+  maxPurchases: number,
+  weight: Map<string, number>,
+): Recipe[] {
   const uses = recipes.map((r) => needs(r, servings));
   const used = new Map<string, number>();
   const firmCount = new Map<string, number>(); // 재료별로 "약간"이 아닌 분량으로 쓰는 레시피 수
@@ -166,7 +182,7 @@ function searchBest(recipes: Recipe[], stock: Map<string, number>, k: number, se
   const dfs = (from: number) => {
     if (chosen.length === k) {
       let left = 0;
-      for (const [id, g] of stock) left += Math.max(0, g - (used.get(id) ?? 0));
+      for (const [id, g] of stock) left += ((weight.get(id) ?? 1) * Math.max(0, g - (used.get(id) ?? 0))) / g;
       const s = { left, buyGrams: check()!.buyGrams };
       if (!bestScore || better(s, bestScore)) {
         bestScore = s;

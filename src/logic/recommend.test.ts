@@ -7,7 +7,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { test } from "node:test";
 
-import { MAX_PURCHASES, filterCandidates, recommend } from "./recommend.ts";
+import { MAX_PURCHASES, PERISH_WEIGHT, filterCandidates, recommend } from "./recommend.ts";
 import type { Ingredient, Recipe, Stock } from "./types.ts";
 
 const dataDir = process.env.APP_DATA_DIR ?? path.join(process.cwd(), "data", "app");
@@ -54,7 +54,9 @@ test("고명은 optional로 표시된다", () => {
   }
 });
 
-test("구매 한도 안에서 남는 양이 가장 적은 조합을 고른다", () => {
+const weightOf = (id: string) => PERISH_WEIGHT[ingredients.find((i) => i.id === id)?.perishability ?? ""] ?? 1;
+
+test("구매 한도 안에서 남는 양 점수가 가장 낮은 조합을 고른다", () => {
   const servings = 2;
   const candidates = filterCandidates(recipes, basket, servings);
   const stock = new Map(basket.map((s) => [s.ingredientId, s.grams]));
@@ -73,12 +75,12 @@ test("구매 한도 안에서 남는 양이 가장 적은 조합을 고른다", 
         if ([...used].some(([id, g]) => stock.has(id) && g > stock.get(id)! + 1e-9)) continue;
         const buys = [...used].filter(([id]) => firm.has(id) && !stock.has(id)).length;
         if (buys > MAX_PURCHASES) continue;
-        const left = [...stock].reduce((s, [id, g]) => s + Math.max(0, g - (used.get(id) ?? 0)), 0);
+        const left = [...stock].reduce((s, [id, g]) => s + (weightOf(id) * Math.max(0, g - (used.get(id) ?? 0))) / g, 0);
         minLeft = Math.min(minLeft, left);
       }
   const result = recommend(basket, { meals: 3, servings }, { candidates, ingredients });
-  const left = result.leftovers.reduce((s, l) => s + l.leftGrams, 0);
-  assert.ok(Math.abs(left - minLeft) < 1, `${left} vs ${minLeft}`);
+  const left = result.leftovers.reduce((s, l) => s + (weightOf(l.ingredientId) * l.leftGrams) / l.startGrams, 0);
+  assert.ok(Math.abs(left - minLeft) < 0.01, `${left} vs ${minLeft}`);
 });
 
 // 사용자가 앱에서 써 본 묶음: 고기 두 가지만 있음
@@ -117,10 +119,19 @@ test("고기 두 가지만 있어도 사지 않고 만들 수 있는 요리를 �
   assert.equal(r.meals[0].name, "돼지불고기");
 });
 
+test("빨리 상하는 재료를 먼저 쓴다", () => {
+  // 기준 묶음에서 애호박(빨리 상함)을 다 쓰는 조합이 나와야 한다
+  const r = run(basket, 3);
+  const zucchini = r.leftovers.find((l) => l.ingredientId === "애호박")!;
+  assert.equal(zucchini.leftGrams, 0);
+});
+
 test("인분 수만큼 사용량이 늘어난다", () => {
-  const one = run(basket, 1, 1).meals[0];
+  // 가진 양을 넘기지 않도록 재고를 넉넉히 잡는다. 데이터가 바뀌어도 2인분이 재고 안에 들어가게 하려는 것이다.
+  const plenty = basket.map((s) => ({ ...s, grams: s.grams * 10 }));
+  const one = run(plenty, 1, 1).meals[0];
   const r = recipes.find((x) => x.id === one.recipeId)!;
-  const two = recommend(basket, { meals: 1, servings: 2 }, { candidates: [r], ingredients }).meals[0];
+  const two = recommend(plenty, { meals: 1, servings: 2 }, { candidates: [r], ingredients }).meals[0];
   for (const u of one.uses) assert.ok(Math.abs(two.uses.find((x) => x.ingredientId === u.ingredientId)!.grams - u.grams * 2) < 0.2);
 });
 
