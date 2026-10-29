@@ -13,9 +13,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ko" className="h-full antialiased">
-      <body className="min-h-full bg-zinc-100 text-zinc-900">
-        <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-white">
+    <html lang="ko" className="h-full font-sans antialiased">
+      <body className="min-h-full bg-muted">
+        <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-background">
           {children}
         </div>
       </body>
