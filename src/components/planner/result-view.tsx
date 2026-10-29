@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { inUnit, num, shoppingAmount } from "@/lib/amount";
-import type { Ingredient, Meal, Recipe, Result } from "@/logic/types";
+import type { Ingredient, Leftover, Meal, Recipe, Result } from "@/logic/types";
 
 type Props = {
   outcome: Outcome;
@@ -23,11 +23,18 @@ type Props = {
   onRetry: () => void;
 };
 
-const percent = (ratio: number) => Math.round(ratio * 100);
-
 // "약간"으로만 쓰는 고명(optional)은 없어도 되므로 장보기 수에서 뺀다
 const mustBuy = (result: Result) => result.shoppingList.filter((s) => !s.optional);
 const niceToHave = (result: Result) => result.shoppingList.filter((s) => s.optional);
+
+// 1g 아래로 남으면 다 쓴 것으로 본다 (사용량은 0.1g 단위로 반올림돼 온다)
+const isUsedUp = (l: Leftover) => l.leftGrams < 1;
+
+/** 받침이 있으면 "은", 없으면 "는" */
+const topic = (word: string) => {
+  const code = word.charCodeAt(word.length - 1) - 0xac00;
+  return code >= 0 && code < 11172 && code % 28 !== 0 ? "은" : "는";
+};
 
 export function ResultView({ outcome, servings, byId, onBack, onRetry }: Props) {
   const [open, setOpen] = useState<{ meal: Meal; recipe: Recipe } | null>(null);
@@ -94,45 +101,54 @@ function Loading() {
       <Skeleton className="h-20 w-full" />
       <Skeleton className="h-24 w-full" />
       <Skeleton className="h-24 w-full" />
-      <Skeleton className="h-24 w-full" />
     </div>
   );
 }
 
-const MODE_NOTE: Record<Mode, string> = {
-  noBuy: "가진 재료만으로 만들어요. 고명은 없어도 돼요.",
-  buy: "재료를 3가지까지 조금씩 사면 가진 재료를 더 다 쓸 수 있어요.",
-};
-
 type ModesProps = Omit<DoneProps, "mode" | "options" | "best"> & { modes: Record<Mode, Comparison> };
 
-/** 사지 않고 만들 수 있는 조합과 조금 사서 더 다 쓰는 조합을 나눠 보여 준다 */
+/**
+ * 사지 않고 만들 수 있는 조합을 먼저 보여 준다. 설문에서 문제는 추가 구매보다 사 둔 재료가 버려지는 것이었다.
+ * 조금 사서 더 다 쓰는 조합은 아래 카드로 따로 권한다.
+ */
 function Modes({ modes, ...rest }: ModesProps) {
-  const [mode, setMode] = useState<Mode>(modes.noBuy.options.length > 0 ? "noBuy" : "buy");
-  const top = (m: Mode) => modes[m].options[modes[m].best];
+  const canSkipBuying = modes.noBuy.options.length > 0;
+  const [mode, setMode] = useState<Mode>(canSkipBuying ? "noBuy" : "buy");
+  const buyTop = modes.buy.options[modes.buy.best];
 
   return (
     <>
-      <section className="flex flex-col gap-2">
-        <ToggleGroup type="single" variant="outline" value={mode} onValueChange={(v) => v && setMode(v as Mode)} className="w-full">
-          {(["noBuy", "buy"] as const).map((m) => (
-            <ToggleGroupItem
-              key={m}
-              value={m}
-              disabled={modes[m].options.length === 0}
-              className="h-auto flex-1 flex-col gap-0.5 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              <span className="font-semibold">{m === "noBuy" ? "사지 않고" : "조금 사서"}</span>
-              <span className="text-xs opacity-80">
-                {modes[m].options.length === 0 ? "만들 수 있는 요리 없음" : `${top(m).dishes}가지 · ${percent(top(m).result.leftoverRatio)}% 남음`}
-              </span>
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-        <p className="text-sm text-muted-foreground">{MODE_NOTE[mode]}</p>
-      </section>
+      {mode === "buy" && canSkipBuying && (
+        <Button variant="link" className="self-start px-0" onClick={() => setMode("noBuy")}>
+          <ChevronLeft />
+          사지 않는 조합 보기
+        </Button>
+      )}
+      {mode === "buy" && !canSkipBuying && (
+        <Alert>
+          <AlertDescription>가진 재료만으로 만들 수 있는 요리가 없어서, 조금 사는 조합을 보여 드려요.</AlertDescription>
+        </Alert>
+      )}
 
       <Done key={mode} mode={mode} options={modes[mode].options} best={modes[mode].best} {...rest} />
+
+      {mode === "noBuy" && buyTop && (
+        <button type="button" onClick={() => setMode("buy")} className="text-left">
+          <Card className="border-dashed transition-colors hover:bg-accent">
+            <CardContent className="flex items-center gap-3">
+              <ShoppingCart className="size-5 shrink-0 text-muted-foreground" />
+              <div className="flex flex-1 flex-col gap-0.5">
+                <p className="font-semibold">조금 사면 더 다 쓸 수 있어요</p>
+                <p className="text-sm text-muted-foreground">
+                  {mustBuy(buyTop.result).length > 0 && `${mustBuy(buyTop.result).map((s) => s.ingredientId).join("·")}를 조금 사면 `}
+                  {buyTop.dishes}가지 요리 · 다 쓰는 재료 {buyTop.result.leftovers.filter(isUsedUp).length}개
+                </p>
+              </div>
+              <ChevronRight className="size-4 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </button>
+      )}
     </>
   );
 }
@@ -152,18 +168,19 @@ function Done({ mode, options, best, candidates, inventory, servings, byId, onOp
   const [selected, setSelected] = useState(best);
   const { result, dishes } = options[selected];
   const unitOf = new Map(inventory.map((it) => [it.id, it.unit]));
-  const bestOption = options[best];
   const optional = new Set(niceToHave(result).map((s) => s.ingredientId));
+  // 사용자가 입력한 단위로 보여 준다. 예: 두부 300g → 1모
+  const amount = (id: string, grams: number) => inUnit(byId.get(id)!, grams, unitOf.get(id) ?? "g");
+
+  const usedUp = result.leftovers.filter(isUsedUp);
+  const remaining = result.leftovers.filter((l) => !isUsedUp(l)).sort((a, b) => b.leftGrams / b.startGrams - a.leftGrams / a.startGrams);
+  const usedUpNames = usedUp.map((l) => l.ingredientId).join("·");
 
   return (
     <>
       <section className="flex flex-col gap-2">
         <h1 className="text-xl font-bold">
-          {mode === "noBuy"
-            ? `사지 않고 ${bestOption.dishes}가지 요리를 만들 수 있어요`
-            : percent(bestOption.result.leftoverRatio) <= 10
-              ? `조금 사면 ${bestOption.dishes}가지 요리로 거의 다 써요`
-              : `조금 사면 ${bestOption.dishes}가지 요리를 만들 수 있어요`}
+          {mode === "noBuy" ? `사지 않고 ${dishes}가지 요리를 만들 수 있어요` : `조금 사면 ${dishes}가지 요리를 만들 수 있어요`}
         </h1>
         {options.length > 1 && (
           <ToggleGroup type="single" variant="outline" value={String(selected)} onValueChange={(v) => v && setSelected(Number(v))} className="w-full">
@@ -174,8 +191,7 @@ function Done({ mode, options, best, candidates, inventory, servings, byId, onOp
                 className="h-auto flex-1 flex-col gap-0.5 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
               >
                 <span className="font-semibold">{o.dishes}가지</span>
-                <span className="text-xs opacity-80">{percent(o.result.leftoverRatio)}% 남음</span>
-                <span className="text-xs opacity-80">{mustBuy(o.result).length === 0 ? "장보기 없음" : `장보기 ${mustBuy(o.result).length}`}</span>
+                <span className="text-xs opacity-80">다 쓰는 재료 {o.result.leftovers.filter(isUsedUp).length}개</span>
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
@@ -185,15 +201,32 @@ function Done({ mode, options, best, candidates, inventory, servings, byId, onOp
       <Card className="bg-primary text-primary-foreground">
         <CardContent className="flex flex-col gap-1">
           <p className="text-lg font-bold">
-            {dishes}가지 요리 · {percent(result.leftoverRatio) === 0 ? "가진 재료를 다 써요" : `가진 재료의 ${percent(result.leftoverRatio)}%만 남아요`}
+            {usedUp.length === 0 ? "다 쓰는 재료는 아직 없어요" : remaining.length === 0 ? "가진 재료를 다 써요" : `${usedUpNames}${topic(usedUpNames)} 다 써요`}
           </p>
-          <p className="text-sm opacity-80">
-            {mustBuy(result).length === 0 ? "장보기 없이 끝나요" : `장보기 ${mustBuy(result).length}가지 · 조금씩`}
-          </p>
+          {remaining.length > 0 && (
+            <p className="text-sm opacity-80">남는 재료: {remaining.map((l) => `${l.ingredientId} ${amount(l.ingredientId, l.leftGrams)}`).join(" · ")}</p>
+          )}
+          {mustBuy(result).length > 0 && <p className="text-sm opacity-80">장보기 {mustBuy(result).length}가지 · 조금씩</p>}
         </CardContent>
       </Card>
 
+      <section className="flex flex-col gap-2">
+        <h2 className="font-semibold">재료별로 보면</h2>
+        <ul className="flex flex-col gap-3 rounded-lg border px-4 py-3">
+          {[...remaining, ...usedUp].map((l) => (
+            <li key={l.ingredientId} className="flex flex-col gap-1">
+              <div className="flex justify-between text-sm">
+                <span className="font-medium">{l.ingredientId}</span>
+                <span className="text-muted-foreground">{isUsedUp(l) ? "다 써요" : `${amount(l.ingredientId, l.leftGrams)} 남음`}</span>
+              </div>
+              <Progress value={((l.startGrams - l.leftGrams) / l.startGrams) * 100} aria-label={`${l.ingredientId} 쓰는 비율`} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section className="flex flex-col gap-3">
+        <h2 className="font-semibold">요리</h2>
         {result.meals.map((meal, i) => {
           const recipe = candidates.find((r) => r.id === meal.recipeId);
           const own = meal.uses.filter((u) => !meal.toBuy.includes(u.ingredientId));
@@ -210,9 +243,7 @@ function Done({ mode, options, best, candidates, inventory, servings, byId, onOp
                     <ChevronRight className="size-4 text-muted-foreground" />
                   </div>
                   {own.length > 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      {own.map((u) => `${u.ingredientId} ${num(u.grams)}g`).join(" · ")}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{own.map((u) => `${u.ingredientId} ${amount(u.ingredientId, u.grams)}`).join(" · ")}</p>
                   )}
                   {buy.length > 0 && (
                     <p className="flex items-center gap-1 text-sm">
@@ -250,25 +281,6 @@ function Done({ mode, options, best, candidates, inventory, servings, byId, onOp
           <p className="text-sm">{niceToHave(result).map((s) => s.ingredientId).join(", ")}</p>
         </section>
       )}
-
-      <section className="flex flex-col gap-2">
-        <h2 className="font-semibold">남는 재료</h2>
-        <ul className="flex flex-col gap-3 rounded-lg border px-4 py-3">
-          {result.leftovers.map((l) => {
-            const ingredient = byId.get(l.ingredientId)!;
-            const unit = unitOf.get(l.ingredientId) ?? "g";
-            return (
-              <li key={l.ingredientId} className="flex flex-col gap-1">
-                <div className="flex justify-between text-sm">
-                  <span className="font-medium">{l.ingredientId}</span>
-                  <span className="text-muted-foreground">{l.leftGrams === 0 ? "다 써요" : `${inUnit(ingredient, l.leftGrams, unit)} 남음`}</span>
-                </div>
-                <Progress value={(l.leftGrams / l.startGrams) * 100} aria-label={`${l.ingredientId} 남는 비율`} />
-              </li>
-            );
-          })}
-        </ul>
-      </section>
 
       <p className="text-center text-xs text-muted-foreground">
         한 번에 {servings}인분 기준이에요. 재료 무게는 추정치라 실제와 다를 수 있어요.
