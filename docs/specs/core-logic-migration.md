@@ -30,7 +30,9 @@
 | --- | --- | --- |
 | `_app/styles/globals.css` | 지금 `src/app/globals.css` | 토큰 적용은 앱 공통 기반 작업에서 한다 |
 | `_app/api-routes/` | `src/app/api/*/route.ts` | 후보와 레시피 상세 처리 함수 |
-| `features/find-meals/model/recommend.ts` | `src/logic/recommend.ts` | `filterCandidates`, `recommend` |
+| `features/find-meals/model/filter-candidates.server.ts` | `src/logic/recommend.ts` 일부 | `filterCandidates`, `MAX_CANDIDATES`. 서버 전용 |
+| `features/find-meals/model/recommend.ts` | `src/logic/recommend.ts` 일부 | `recommend`, `PERISH_WEIGHT`. 브라우저에서 쓴다 |
+| `features/find-meals/model/inventory.ts` | `src/logic/recommend.ts` 일부 | 두 함수가 함께 쓰는 계산과 `MAX_PURCHASES` |
 | `features/find-meals/model/types.ts` | `src/logic/types.ts` 일부 | `Result`, `Meal`, `Leftover` |
 | `features/find-meals/model/compare.ts` | `src/components/planner/planner.tsx`의 `compare`, `DISH_COUNTS`, 모드 정의 | 3·4·5가지 비교와 사지 않는·조금 사는 묶음 계산. 화면 코드는 가져오지 않는다 |
 | `features/find-meals/api/` | `planner.tsx`의 후보 요청 | `POST /api/candidates` 요청 함수 |

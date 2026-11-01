@@ -28,7 +28,8 @@ _app → _pages → widgets → features → entities → shared
 - 모듈은 자기보다 아래 층만 import한다.
 - `_app`과 `shared`를 뺀 층은 슬라이스로 나뉜다. 같은 층의 다른 슬라이스를 import하지 않는다.
 - 슬라이스 밖에서는 슬라이스의 공개 API(`index.ts`)로만 가져온다.
-- 서버에서만 쓰는 코드는 `index.server.ts`로 따로 내보낸다. 클라이언트 코드는 `index.server.ts`를 import하지 않는다.
+- 서버에서만 쓰는 코드는 파일 이름을 `*.server.ts`로 짓고 첫 줄에 `import 'server-only'`를 둔다. 슬라이스 밖으로는 `index.server.ts`로만 내보내고, `index.ts`에는 넣지 않는다.
+- 브라우저 코드가 `index.server.ts`를 import하면 빌드가 실패한다. 서버와 브라우저가 함께 쓰는 순수 함수는 `.server`를 붙이지 않은 파일에 둔다.
 - 슬라이스 안에서는 자기 슬라이스의 파일을 상대 경로로 가져온다. `@/` 경로는 다른 슬라이스의 공개 API를 가져올 때만 쓴다.
 - 이 규칙은 ESLint(`eslint.config.mts`)로 강제한다. 상위 층, 같은 층의 다른 슬라이스, 슬라이스 내부 파일을 가져오면 lint가 실패한다.
 - 이 규칙에는 예외를 두지 않는다. 규칙을 지키기 어려운 코드가 생기면 위치를 다시 정하고, 정하기 어려우면 사용자에게 확인한다.
