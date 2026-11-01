@@ -25,7 +25,9 @@ export function filterCandidates(
   const stock = toStock(inventory);
   const ranked = recipes.flatMap((r) => {
     const need = needs(r, servings);
-    if (need.some((n) => stock.has(n.ingredientId) && n.grams > stock.get(n.ingredientId)! + EPS)) return [];
+    // 가진 양을 넘으면 빼되, 고명("약간")은 모자라도 빼지 않는다. 모자란 만큼은 장보기에 "있으면 좋음"으로 들어간다
+    if (need.some((n) => !n.vague && stock.has(n.ingredientId) && n.grams > stock.get(n.ingredientId)! + EPS))
+      return [];
     const lack = need.filter((n) => !n.vague && !stock.has(n.ingredientId));
     const uses = need.filter((n) => stock.has(n.ingredientId));
     // 가진 재료를 고명("약간")으로만 쓰는 레시피는 가진 재료를 쓴다고 보지 않는다

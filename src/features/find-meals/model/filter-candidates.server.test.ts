@@ -45,3 +45,16 @@ test('같은 재료가 여러 줄이면 합으로 재고와 비교한다', () =>
   assert.deepEqual(filterCandidates([twice], [{ ingredientId: '대파', grams: 100 }], 1), []);
   assert.equal(filterCandidates([twice], [{ ingredientId: '대파', grams: 110 }], 1).length, 1);
 });
+
+test('가진 재료를 고명으로 가진 양보다 많이 써도 후보에서 빼지 않는다', () => {
+  // 깨는 1g뿐인데 고명으로 4g을 쓴다. 깨가 아예 없을 때처럼 후보로 남는다
+  const garnish = recipe(4, [
+    ['깨', 4, true],
+    ['두부', 150, false]
+  ]);
+  const stock = [
+    { ingredientId: '깨', grams: 1 },
+    { ingredientId: '두부', grams: 300 }
+  ];
+  assert.equal(filterCandidates([garnish], stock, 1).length, 1);
+});

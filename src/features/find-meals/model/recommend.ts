@@ -86,10 +86,13 @@ function toResult(
       if (!n.vague) firm.add(n.ingredientId);
     }
   }
-  // 가진 재료는 가진 양 안에서만 쓰므로, 장보기에는 없는 재료만 들어간다
-  const shoppingList = [...total]
-    .filter(([id]) => !stock.has(id))
-    .map(([id, g]) => ({ ingredientId: id, grams: round1(g), optional: !firm.has(id) }));
+  // 가진 재료는 고명이 아닌 분량을 가진 양 안에서만 쓴다. 그래서 가진 재료가 장보기에 들어가는 것은
+  // 고명이 가진 양보다 많을 때뿐이고, 그 모자란 양은 "있으면 좋음"이다
+  const shoppingList = [...total].flatMap(([id, g]) => {
+    const have = stock.get(id);
+    if (have === undefined) return [{ ingredientId: id, grams: round1(g), optional: !firm.has(id) }];
+    return g > have + EPS ? [{ ingredientId: id, grams: round1(g - have), optional: true }] : [];
+  });
   const toBuy = new Set(shoppingList.map((s) => s.ingredientId));
 
   const grade = new Map(ingredients.map((i) => [i.id, i.perishability ?? null]));
@@ -106,7 +109,10 @@ function toResult(
       recipeId: r.id,
       name: r.name,
       uses,
-      toBuy: uses.filter((u) => toBuy.has(u.ingredientId)).map((u) => u.ingredientId),
+      // 가진 재료는 이 요리가 고명으로 쓸 때만 살 재료로 본다
+      toBuy: uses
+        .filter((u, i) => toBuy.has(u.ingredientId) && (!stock.has(u.ingredientId) || need[i].vague))
+        .map((u) => u.ingredientId),
       pantryNeeded: [...new Set(r.ingredients.map((i) => i.ingredientId).filter((id) => special.has(id)))],
       ...urgency,
       day: 0
@@ -181,19 +187,20 @@ function searchBest(
   const uses = recipes.map((r) => needs(r, servings));
   const used = new Map<string, number>();
   const firmCount = new Map<string, number>(); // 재료별로 "약간"이 아닌 분량으로 쓰는 레시피 수
+  const firmUsed = new Map<string, number>(); // 재료별로 "약간"이 아닌 분량으로 쓰는 g 합
   const chosen: number[] = [];
   let best: number[] = [];
   let bestScore: Score | null = null;
 
-  // 가진 재료를 넘겨 쓰면 null. 아니면 사는 g 합.
-  // 사는 가짓수는 없는 재료 중 "약간"이 아닌 분량으로 쓰는 것만 센다.
+  // 가진 재료를 고명이 아닌 분량으로 넘겨 쓰면 null. 아니면 사는 g 합.
+  // 사는 가짓수는 없는 재료 중 "약간"이 아닌 분량으로 쓰는 것만 센다. 가진 재료의 고명이 모자란 양은 세지 않는다.
   const check = (): { buyGrams: number } | null => {
     let buys = 0;
     let buyGrams = 0;
     for (const [id, g] of used) {
       const have = stock.get(id);
       if (have !== undefined) {
-        if (g > have + EPS) return null;
+        if ((firmUsed.get(id) ?? 0) > have + EPS) return null;
       } else if (firmCount.has(id)) {
         buys++;
         buyGrams += g;
@@ -211,6 +218,9 @@ function searchBest(
         const c = (firmCount.get(n.ingredientId) ?? 0) + sign;
         if (c === 0) firmCount.delete(n.ingredientId);
         else firmCount.set(n.ingredientId, c);
+        const f = (firmUsed.get(n.ingredientId) ?? 0) + sign * n.grams;
+        if (f < EPS) firmUsed.delete(n.ingredientId);
+        else firmUsed.set(n.ingredientId, f);
       }
     }
   };

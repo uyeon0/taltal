@@ -110,7 +110,7 @@ const meat: Stock[] = [
   { ingredientId: '쇠고기', grams: 200 }
 ];
 
-dataTest('가진 재료는 가진 양까지만 쓰고, 장보기에 넣지 않는다', () => {
+dataTest('가진 재료는 고명이 모자랄 때만 "있으면 좋음"으로 장보기에 들어가고, 그 밖에는 가진 양까지만 쓴다', () => {
   for (const [inv, servings] of [
     [basket, 2],
     [meat, 1]
@@ -118,11 +118,14 @@ dataTest('가진 재료는 가진 양까지만 쓰고, 장보기에 넣지 않�
     for (const meals of [1, 3, 5]) {
       const r = run([...inv], meals, servings);
       const have = new Set(inv.map((s) => s.ingredientId));
-      for (const s of r.shoppingList) assert.ok(!have.has(s.ingredientId), `${s.ingredientId}를 더 사라고 함`);
+      for (const s of r.shoppingList)
+        assert.ok(!have.has(s.ingredientId) || s.optional, `${s.ingredientId}를 더 사라고 함`);
+      const extra = new Map(r.shoppingList.map((s) => [s.ingredientId, s.grams]));
       const used = new Map<string, number>();
       for (const m of r.meals)
         for (const u of m.uses) used.set(u.ingredientId, (used.get(u.ingredientId) ?? 0) + u.grams);
-      for (const s of inv) assert.ok((used.get(s.ingredientId) ?? 0) <= s.grams + 0.5, s.ingredientId);
+      for (const s of inv)
+        assert.ok((used.get(s.ingredientId) ?? 0) <= s.grams + (extra.get(s.ingredientId) ?? 0) + 0.5, s.ingredientId);
     }
   }
 });
@@ -328,4 +331,41 @@ test('고명으로만 쓰는 재료는 요리 순서와 이유에 넣지 않는�
   assert.equal(meal(2).day, 1);
   assert.equal(meal(1).urgency, '오래 감');
   assert.deepEqual(meal(1).urgentIngredients, ['감자']);
+});
+
+test('고명이 가진 양보다 많으면 모자란 만큼만 "있으면 좋음"으로 장보기에 넣는다', () => {
+  const ing = (id: string): Ingredient => ({
+    id,
+    aliases: [],
+    pantry: null,
+    unitGrams: { g: 1 },
+    inputUnits: ['g'],
+    gramsSource: null,
+    perishability: '보통'
+  });
+  const rec: Recipe = {
+    id: 1,
+    name: '두부무침',
+    type: '나물',
+    cookingTime: '10분',
+    level: '쉬움',
+    servingsOriginal: 1,
+    ingredients: [
+      { ingredientId: '깨', grams: 4, vague: true, amountText: '약간', role: '부재료' },
+      { ingredientId: '두부', grams: 150, vague: false, amountText: '1/2모', role: '주재료' }
+    ]
+  };
+  const stock = [
+    { ingredientId: '깨', grams: 1 },
+    { ingredientId: '두부', grams: 300 }
+  ];
+  const r = recommend(
+    stock,
+    { meals: 1, servings: 1, maxPurchases: 0 },
+    { candidates: [rec], ingredients: [ing('깨'), ing('두부')] }
+  );
+  assert.equal(r.status, 'ok');
+  assert.deepEqual(r.shoppingList, [{ ingredientId: '깨', grams: 3, optional: true }]);
+  assert.deepEqual(r.meals[0].toBuy, ['깨']);
+  assert.equal(r.leftovers.find((l) => l.ingredientId === '깨')!.leftGrams, 0);
 });
