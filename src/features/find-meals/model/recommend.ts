@@ -90,8 +90,11 @@ function toResult(
   // 고명이 가진 양보다 많을 때뿐이고, 그 모자란 양은 "있으면 좋음"이다
   const shoppingList = [...total].flatMap(([id, g]) => {
     const have = stock.get(id);
-    if (have === undefined) return [{ ingredientId: id, grams: round1(g), optional: !firm.has(id) }];
-    return g > have + EPS ? [{ ingredientId: id, grams: round1(g - have), optional: true }] : [];
+    // 0.1g 단위로 반올림하면 0이 되는 양은 반올림하지 않고 둔다. 화면이 "0.1g 미만"으로 보여 준다
+    if (have === undefined) return [{ ingredientId: id, grams: round1(g) || g, optional: !firm.has(id) }];
+    // 고명이 모자란 양이 반올림하면 0인 정도면 계산 오차로 보고 장보기에 넣지 않는다
+    const short = round1(g - have);
+    return short > 0 ? [{ ingredientId: id, grams: short, optional: true }] : [];
   });
   const toBuy = new Set(shoppingList.map((s) => s.ingredientId));
 

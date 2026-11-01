@@ -9,7 +9,7 @@ const call = (id: string) =>
   GET(new Request(`http://localhost/api/recipes/${id}`), { params: Promise.resolve({ id }) });
 
 test('숫자만으로 된 번호가 아니면 400이다', async () => {
-  for (const id of ['0x10', '1e1', '12.0', ' 12 ', '-1', 'abc', '']) {
+  for (const id of ['0x10', '1e1', '12.0', ' 12 ', '-1', 'abc', '', '007']) {
     assert.equal((await call(id)).status, 400, id);
   }
 });

@@ -369,3 +369,34 @@ test('고명이 가진 양보다 많으면 모자란 만큼만 "있으면 좋음
   assert.deepEqual(r.meals[0].toBuy, ['깨']);
   assert.equal(r.leftovers.find((l) => l.ingredientId === '깨')!.leftGrams, 0);
 });
+
+test('고명이 모자란 양이 반올림하면 0인 정도면 장보기에 넣지 않는다', () => {
+  const ing = (id: string): Ingredient => ({
+    id,
+    aliases: [],
+    pantry: null,
+    unitGrams: { g: 1 },
+    inputUnits: ['g'],
+    gramsSource: null,
+    perishability: '보통'
+  });
+  const rec: Recipe = {
+    id: 1,
+    name: '두부무침',
+    type: '나물',
+    cookingTime: '10분',
+    level: '쉬움',
+    servingsOriginal: 1,
+    ingredients: [
+      { ingredientId: '깨', grams: 1.01, vague: true, amountText: '약간', role: '부재료' },
+      { ingredientId: '두부', grams: 150, vague: false, amountText: '1/2모', role: '주재료' }
+    ]
+  };
+  const stock = [
+    { ingredientId: '깨', grams: 1 },
+    { ingredientId: '두부', grams: 300 }
+  ];
+  const r = recommend(stock, { meals: 1, servings: 1 }, { candidates: [rec], ingredients: [ing('깨'), ing('두부')] });
+  assert.deepEqual(r.shoppingList, []);
+  assert.deepEqual(r.meals[0].toBuy, []);
+});
