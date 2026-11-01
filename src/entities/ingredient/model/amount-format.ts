@@ -8,6 +8,7 @@
 
 import { round1 } from '@/shared/lib/number';
 
+import { gramsPerUnit } from './to-grams';
 import type { Ingredient, InputUnit } from './types';
 
 /** 양이 0이라고 볼 g 아래 값. 0이 아닌 값은 아무리 작아도 양수로 다룬다 */
@@ -45,7 +46,7 @@ const gramsText = (grams: number) => (grams < TINY_UNIT ? '0.1g 미만' : `${tri
 
 /** g 값을 입력 단위로 바꿔 표시 문구와 종류를 돌려준다 */
 export function describeAmount(ingredient: Ingredient, grams: number, unit: InputUnit): AmountView {
-  const per = unit === 'g' ? 1 : (ingredient.unitGrams[unit] ?? 0);
+  const per = gramsPerUnit(ingredient, unit);
   // 환산 근거가 없는 단위는 g으로 보여 준다
   const label = per > 0 ? unit : 'g';
   const perG = per > 0 ? per : 1;
@@ -88,7 +89,7 @@ export function formatAmount(
   options: { withGrams?: boolean } = {}
 ): string {
   const view = describeAmount(ingredient, grams, unit);
-  const converted = unit !== 'g' && (ingredient.unitGrams[unit] ?? 0) > 0;
+  const converted = unit !== 'g' && gramsPerUnit(ingredient, unit) > 0;
   if (!options.withGrams || !converted || view.kind === 'zero' || view.kind === 'tiny') return view.text;
   return `${view.text} (${gramsText(grams)})`;
 }
