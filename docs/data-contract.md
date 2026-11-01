@@ -12,7 +12,7 @@
 | `recipes.json` | 추천에 쓰는 레시피와 1인분 재료 g |
 | `recipe-steps.json` | 레시피별 요약과 조리 과정 |
 
-서버는 `data/app/`에서 파일을 읽는다. `APP_DATA_DIR` 환경 변수를 지정하면 그 폴더에서 읽는다. 파일이 없으면 `entities/ingredient`, `entities/recipe`에 둔 가짜 데이터를 쓴다.
+서버는 `data/app/`에서 파일을 읽는다. `APP_DATA_DIR` 환경 변수를 지정하면 그 폴더에서 읽는다. 파일이 없으면 API가 500 오류를 돌려준다.
 
 입력할 수 있는 재료의 g 값은 모두 AI 추정치다(`gramsSource: "AI 추정"`). 그래서 환산한 양은 정확한 값처럼 표시하지 않는다.
 
@@ -76,8 +76,8 @@ type RecipeDetail = {
 
 | 요청 | 본문 | 성공 응답 | 실패 |
 | --- | --- | --- | --- |
-| `POST /api/candidates` | `{ inventory: Stock[], servings: number }` | `{ candidates: Recipe[] }` | 형식이 틀리면 400 |
-| `GET /api/recipes/[id]` | 없음 | `RecipeDetail` | 번호가 틀리면 400, 레시피가 없으면 404 |
+| `POST /api/candidates` | `{ inventory: Stock[], servings: number }` | `{ candidates: Recipe[] }` | 형식이 틀리면 400, 앱 데이터가 없거나 서버 오류면 500 |
+| `GET /api/recipes/[id]` | 없음 | `RecipeDetail` | 번호가 틀리면 400, 레시피가 없으면 404, 앱 데이터가 없거나 서버 오류면 500 |
 
 `servings`는 1 이상 10 이하의 정수만 받는다. 화면은 1~4를 보낸다. 실패 응답의 본문은 `{ error: string }`이다.
 
