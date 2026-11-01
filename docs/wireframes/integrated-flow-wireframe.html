@@ -1,0 +1,1482 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>입력부터 결과까지 · 통합 흐름 시안</title>
+<!--
+  기본 양념 12개는 시안용 예시입니다. 기본 접힘, 안내 옆 버튼으로 본문에서 펼칩니다.
+  실제 앱은 ingredients.json에서 pantry가 "기본"인 항목을 조회하며 목록을 하드코딩하지 않습니다.
+
+  구현 기준: docs/requirements/와 docs/design.md. 이 시안은 배치 참고 자료다.
+
+  긴 이름·많은 재료 예시는 테스트용 버튼으로 불러옵니다. 임의 예시 재료이며 실제 지원 목록이 아닙니다.
+  검색 결과가 없어도 선택한 재료는 유지합니다. 미지원 재료를 자유 텍스트로 등록하지 않습니다.
+
+  예외 상태 검토: 상단 ‘다음 OCR 결과’로 정상/인식 없음/부분 인식을 선택합니다.
+  사진 재선택은 실제 업로드가 아닌 예시 재실행입니다. 기존 초안을 유지하고 새 항목만 병합합니다.
+  재인식이 기존 항목을 고치지 않으므로, 이미 읽힌 값의 수정은 항목 편집에서 합니다.
+  검토 취소 확인의 닫기·Esc는 계속 검토하는 의미이며 초안을 버리지 않습니다.
+
+  통합 흐름 와이어프레임 · 개발 참고용 독립 실행 HTML
+  작성일: 2026-10-31
+
+  UI/UX 라이팅은 임의 문구입니다.
+  제목·안내·버튼·오류 메시지는 확정된 서비스 문구가 아닙니다.
+  실제 구현 전 별도로 검토하고 확정해야 합니다.
+
+  [실행]
+  이 파일 하나를 브라우저에서 열면 실행됩니다.
+  외부 이미지·폰트·라이브러리·서버에 의존하지 않습니다.
+  데이터는 메모리에만 보관하며 새로고침하면 초기화됩니다.
+
+  [개발 시 참고할 동작]
+  - 일반 입력/OCR 검토 모두: 여러 재료 선택 → 일괄 담기 → 수량 확인.
+  - 선택만 하거나 선택창을 닫았을 때는 원래 목록을 변경하지 않습니다.
+  - 보유량은 필수이며, 수량을 확인하면 다음 미완료 재료를 펼칩니다.
+  - OCR 검토는 확정된 재고와 분리된 초안입니다. 검토 완료 시에만 병합합니다.
+  - 중복 재료는 기존 보유량을 유지합니다. 자동으로 수량을 합산하지 않습니다.
+  - 입력 → 계산 중 → 결과 → 재료 수정 → 재추천 흐름을 확인할 수 있습니다.
+  - 수정·오류·재시도 시 재료와 인분을 유지합니다.
+  - 상세와 재료 사용량은 모든 화면 너비에서 바텀시트로 표시합니다.
+
+  [실제 서비스에 그대로 사용하면 안 되는 부분]
+  - OCR은 고정 예시입니다. 실제 파일 선택·업로드·문자 인식·정규화는 없습니다.
+  - 영수증 구매 개수/포장 단위를 실제 보유량으로 자동 확정하면 안 됩니다.
+  - 추천은 재고를 비율로 나누는 가상 계산입니다. 실제 추천 알고리즘이 아닙니다.
+  - 요리명·조리시간·양념·조리법·재료 배분량은 흐름 확인용 가상 데이터입니다.
+    해당 조합의 조리 가능성이나 영양/안전성을 검증하지 않았습니다.
+  - 인분은 화면과 1인당 배분량에만 반영됩니다. 실제 인분별 추천/분량 조정은
+    서비스 추천 로직과 데이터 스키마에 맞춰 구현해야 합니다.
+  - 3·4·5가지 결과, 추가 구매 제안과 상세는 가상입니다.
+    불리한 가짓수 숨김, 실제 레시피 순서와 추가 구매량은 실제 로직으로 교체합니다.
+  - 단위 변경은 시안용입니다. 단위 환산·포장 규격·재료별 검증은 별도 구현합니다.
+  - 대기 시간은 타이머입니다. API 연결·요청 취소·오류 분류·중복 요청 처리는 없습니다.
+  - 상단 '다음 추천 결과'는 테스트 장치이며 제품 화면에 포함하지 않습니다.
+    재시도 결과도 이 선택을 따릅니다. 성공 복구를 보려면 정상 결과로 바꾸세요.
+  - 화면 전환은 연결되어 있지만 로그인·서버 저장·영구 저장·실제 추천 API는 없습니다.
+
+  [개별 시안과의 관계]
+  통합본은 상태 유지와 화면 전환을 확인하는 자료입니다.
+  각 화면의 세부 구성은 아래 개별 시안을 함께 참고합니다.
+    ingredient-input-wireframe.html : 입력 폼과 수량 편집
+    recipe-results-wireframe.html  : 결과와 전체 재료 상세
+  통합 결과의 레시피 내용은 간소화된 가상 데이터이며, 개별 결과 시안을 대체하지 않습니다.
+  확정한 디자인 무드·토큰은 별도 디자인 작업 결과를 적용합니다.
+  실제 제품에서는 접근성, 키보드/모바일 입력, 긴 목록, API 지연/오류를 다시 검증합니다.
+
+  [구조 참고 레퍼런스]
+  Splitwise 항목 검토/추가:
+  https://mobbin.com/flows/2d19b1bf-55fb-4ee5-b1e1-009a1b464304
+  Mercury 원본 문서 대조:
+  https://refero.design/pages/b07b0a0e-95a6-4edb-9e77-ea9b73a86f32
+-->
+<style>
+/* Standalone prototype styles. Product tokens are defined separately. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #eee;
+  color: #222;
+  font-family: Arial,'Malgun Gothic',sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+button, a, summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  color: inherit;
+}
+
+button:focus-visible, a:focus-visible, summary:focus-visible {
+  outline: 3px solid #777;
+  outline-offset: 3px;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+.workbench {
+  max-width: 860px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.bench-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.bench-head h1 {
+  font-size: 17px;
+  margin: 0;
+}
+
+.bench-head p {
+  font-size: 12px;
+  color: #666;
+  margin: 3px 0;
+}
+
+.phone {
+  max-width: 440px;
+  margin: auto;
+  background: #fff;
+  min-height: 760px;
+  border: 1px solid #ccc;
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 19px 22px;
+  border-bottom: 1px solid #eee;
+}
+
+.top button {
+  border: 0;
+  background: none;
+  padding: 3px 0;
+  font-size: 14px;
+}
+
+.content {
+  padding: 26px 22px 30px;
+}
+
+.content h2 {
+  font-size: 25px;
+  line-height: 1.4;
+  letter-spacing: -1px;
+  margin: 0 0 9px;
+  text-wrap: balance;
+}
+
+.intro {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 24px;
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  background: #eee;
+  border-radius: 8px;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  color: #777;
+  font-size: 10px;
+}
+
+summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  padding: 12px 0;
+  color: #555;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary:after {
+  content: ' ＋';
+  float: right;
+}
+
+details[open]>summary:after {
+  content: ' −';
+}
+
+.plain {
+  border: 0;
+  background: none;
+  text-decoration: underline;
+  padding: 0;
+  font-size: 13px;
+}
+
+.notice {
+  font-size: 13px;
+  line-height: 1.7;
+  padding: 14px;
+  background: #f1f1f1;
+  border-radius: 8px;
+  margin: 18px 0;
+}
+
+.primary {
+  background: #222;
+  color: #fff;
+  border: 0;
+  border-radius: 9px;
+  padding: 13px 22px;
+  margin-top: 16px;
+}
+
+.secondary {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 9px;
+  padding: 12px 20px;
+}
+
+dialog {
+  width: min(440px,100%);
+  max-height: 88dvh;
+  border: 0;
+  border-radius: 20px 20px 0 0;
+  padding: 0;
+  position: fixed;
+  top: auto;
+  bottom: 0;
+  margin: 0 auto;
+  box-shadow: 0 -8px 40px #0002;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+dialog::backdrop {
+  background: #0006;
+}
+
+.sheet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 18px 22px;
+  z-index: 1;
+}
+
+.sheet-head strong {
+  font-size: 14px;
+}
+
+.close {
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  background: #fff;
+}
+
+.sheet-body {
+  padding: 24px;
+}
+
+.sheet-body h2 {
+  font-size: 24px;
+  line-height: 1.4;
+  margin: 8px 0;
+}
+
+.sheet-body h3 {
+  font-size: 16px;
+  margin: 27px 0 12px;
+}
+
+.sheet-body p, .sheet-body li {
+  font-size: 14px;
+  color: #555;
+}
+
+.sheet-body ol {
+  padding-left: 20px;
+}
+
+.sheet-body li {
+  margin: 14px 0;
+}
+
+.sheet-body small {
+  color: #777;
+  font-size: 12px;
+}
+
+.footer {
+  font-size: 12px;
+  color: #777;
+  max-width: 440px;
+  margin: 16px auto;
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+@media(max-width:480px) {
+  .workbench {
+    margin: 12px auto;
+    padding: 0 8px;
+  }
+
+  .phone {
+    border-radius: 14px;
+  }
+
+  .content {
+    padding: 24px 20px;
+  }
+
+  .bench-head {
+    gap: 10px;
+  }
+
+}
+
+@media(prefers-reduced-motion:reduce) {
+
+}
+
+@media(max-width:380px) {
+  .placeholder {
+    width: 52px;
+    height: 58px;
+  }
+
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.actions button {
+  flex: 1;
+  margin: 0;
+  min-height: 46px;
+  font-size: 14px;
+}
+
+.row {
+  border-bottom: 1px solid #eee;
+  padding: 17px 0;
+}
+
+.row-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  text-align: left;
+}
+
+.row-copy {
+  flex: 1;
+}
+
+.row-copy strong {
+  display: block;
+  font-size: 16px;
+}
+
+.row-copy small {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 3px;
+}
+
+.row-amount {
+  font-size: 14px;
+  text-align: right;
+}
+
+.flag {
+  display: inline-block;
+  background: #eee;
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.editor {
+  padding: 16px;
+  background: #f4f4f4;
+  border-radius: 10px;
+  margin-top: 12px;
+}
+
+.editor p {
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.presets button {
+  min-height: 42px;
+  border: 1px solid #bbb;
+  background: #fff;
+  border-radius: 7px;
+  padding: 9px 12px;
+}
+
+.fields {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fields input, .fields select {
+  min-width: 0;
+  width: 50%;
+  padding: 11px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+}
+
+.editor .primary {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.editor .plain {
+  display: block;
+  margin-top: 14px;
+  color: #666;
+}
+
+.source {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 20px 0;
+}
+
+.source button {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.receipt-thumb {
+  background: #eee;
+  width: 38px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: #777;
+}
+
+.source strong {
+  display: block;
+  font-size: 13px;
+}
+
+.source small {
+  font-size: 11px;
+  color: #666;
+}
+
+.progress {
+  font-size: 13px;
+  margin: 20px 0 0;
+  color: #555;
+}
+
+.bottom-action {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding: 16px 0 0;
+  border-top: 1px solid #eee;
+  margin-top: 22px;
+}
+
+.bottom-action .primary {
+  width: 100%;
+  margin: 0;
+}
+
+.primary:disabled {
+  background: #ddd;
+  color: #777;
+}
+
+.add-inline {
+  border: 1px solid #aaa;
+  background: #fff;
+  width: 100%;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 18px;
+}
+
+.picker {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.picker button {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 13px 5px;
+}
+
+.picker .placeholder {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 8px;
+}
+
+.receipt {
+  font-family: monospace;
+  background: #f6f6f6;
+  padding: 24px;
+  line-height: 2.4;
+  white-space: pre-wrap;
+  font-size: 14px;
+}
+
+.toast {
+  font-size: 13px;
+  background: #eee;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 16px 0;
+}
+
+.manual-entry {
+  display: flex;
+  width: fit-content;
+  margin-left: auto;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  color: #555;
+  font-size: 13px;
+}
+
+.manual-entry:hover {
+  color: #222;
+  text-decoration: underline;
+}
+
+.confirmation-note {
+  margin: 0 0 10px;
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+}
+
+.servings {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:24px 0;
+  font-size:15px;
+}
+
+.servings select {
+  padding:9px 16px;
+  border:1px solid #aaa;
+  border-radius:7px;
+  background:#fff;
+}
+
+.portion-info {
+  font-size:16px;
+  margin:8px 0 24px;
+}
+
+.count-label {
+  font-size:14px;
+}
+
+.tabs {
+  display:flex;
+  gap:4px;
+  background:#eee;
+  padding:4px;
+  border-radius:8px;
+}
+
+.tabs button {
+  flex:1;
+  padding:10px;
+  border:0;
+  background:transparent;
+  border-radius:6px;
+}
+
+.tabs button[aria-pressed=true] {
+  background:#fff;
+  box-shadow:0 1px 4px #0002;
+}
+
+.stock-overview {
+  margin:18px 0;
+  background:#f3f3f3;
+  padding:16px;
+  border-radius:12px;
+}
+
+.overview-line {
+  display:grid;
+  grid-template-columns:90px 1fr;
+  gap:10px;
+  font-size:14px;
+  margin:8px 0;
+}
+
+.overview-line strong {
+  font-weight:500;
+}
+
+.overview-detail {
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:1px solid #bbb;
+  border-radius:7px;
+  background:#fff;
+}
+
+.recipe {
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-align:left;
+  padding:20px 0;
+  border:0;
+  border-bottom:1px solid #eee;
+  background:#fff;
+}
+
+.recipe>span:last-child {
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.purchase-card {
+  padding:20px;
+  background:#f5f5f5;
+  border:1px solid #ccc;
+  border-radius:12px;
+  margin-top:24px;
+}
+
+.purchase-card h3 {
+  font-size:18px;
+  margin:0;
+}
+
+.purchase-card p {
+  font-size:13px;
+}
+
+.purchase-card .primary {
+  width:100%;
+  font-size:14px;
+}
+
+.demo-note {
+  font-size:11px;
+  color:#666;
+  margin-top:24px;
+}
+
+.tools {
+  max-width:440px;
+  margin:12px auto;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  font-size:12px;
+}
+
+.tools select {
+  padding:8px;
+  border:1px solid #aaa;
+  border-radius:6px;
+  background:#fff;
+}
+
+.spinner {
+  width:30px;
+  height:30px;
+  border:3px solid #ddd;
+  border-top-color:#333;
+  border-radius:50%;
+  margin:0 auto 24px;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform:rotate(360deg);
+  }
+
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .spinner {
+    animation:none;
+  }
+
+}
+
+.picker button[aria-pressed="true"] {
+  border: 2px solid #222;
+  background: #eee;
+}
+
+.picker button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.ocr-test {
+  max-width:440px;
+  margin:12px auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12px;
+  color:#555;
+}
+
+.ocr-test select {
+  padding:8px;
+  border:1px solid #aaa;
+  border-radius:6px;
+  background:#fff;
+}
+
+.ocr-recovery {
+  margin:18px 0;
+  padding:16px;
+  background:#f3f3f3;
+  border-radius:10px;
+}
+
+.ocr-recovery strong {
+  font-size:15px;
+}
+
+.ocr-recovery p {
+  font-size:13px;
+  color:#555;
+}
+
+.ocr-recovery .secondary {
+  font-size:13px;
+  padding:10px;
+}
+
+.ocr-recovery .plain {
+  display:block;
+  margin-top:14px;
+}
+
+.cancel-actions {
+  display:grid;
+  gap:10px;
+  margin-top:24px;
+}
+
+.cancel-actions button {
+  width:100%;
+  margin:0;
+}
+
+.row-button {
+  display:grid;
+  grid-template-columns:58px minmax(0,1fr) minmax(68px,90px);
+  gap:12px;
+}
+
+.row-copy {
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+
+.row-amount {
+  font-variant-numeric:tabular-nums;
+  overflow-wrap:anywhere;
+}
+
+.row .placeholder {
+  width:58px;
+  height:58px;
+}
+
+.picker {
+  align-items:stretch;
+}
+
+.picker-name {
+  display:block;
+  overflow-wrap:anywhere;
+  font-size:13px;
+}
+
+.picker small {
+  display:block;
+  margin-top:4px;
+  font-size:11px;
+}
+
+.picker-search {
+  width:100%;
+  padding:12px;
+  border:1px solid #aaa;
+  border-radius:8px;
+  font:inherit;
+}
+
+.search-label {
+  display:block;
+  font-size:13px;
+  margin:12px 0 6px;
+}
+
+.search-empty {
+  padding:24px 10px;
+  text-align:center;
+}
+
+.search-empty strong {
+  font-size:16px;
+}
+
+.search-empty p {
+  font-size:13px;
+  color:#666;
+}
+
+.search-empty .secondary {
+  font-size:13px;
+}
+
+.layout-test {
+  max-width:440px;
+  margin:12px auto;
+  font-size:12px;
+  color:#666;
+}
+
+.layout-test button {
+  font-size:12px;
+  background:#fff;
+  border:1px solid #aaa;
+  border-radius:6px;
+  padding:8px;
+}
+
+.layout-test span {
+  display:block;
+  margin-top:5px;
+}
+
+.sheet-body>.bottom-action {
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+
+@media(max-width:380px) {
+  .row-button {
+    grid-template-columns:44px minmax(0,1fr) 68px;
+    gap:8px;
+  }
+
+  .row .placeholder {
+    width:44px;
+    height:48px;
+  }
+
+  .row-amount {
+    font-size:13px;
+  }
+
+}
+
+dialog {
+  max-height:min(88dvh,calc(var(--visible-height,100dvh) - 16px));
+  scroll-padding:76px 0 96px;
+}
+
+.sheet-body {
+  padding-bottom:max(24px,env(safe-area-inset-bottom));
+}
+
+input,select {
+  scroll-margin-top:80px;
+  scroll-margin-bottom:110px;
+}
+
+@media(pointer:coarse) {
+  input,select {
+    font-size:16px!important;
+  }
+
+}
+
+/* 보조 정보는 본문에서 펼치며 고정 하단 영역을 확장하지 않습니다. */
+.pantry-guide{margin:20px 0;font-size:13px;color:#555}
+.pantry-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 10px}
+.pantry-heading button{min-height:44px;padding:8px 2px;border:0;background:transparent;color:#333;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.pantry-guide ul{list-style:none;padding:12px 0 0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;font-size:14px;color:#333}
+.pantry-guide ul[hidden]{display:none}
+.pantry-guide li{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<main class="workbench">
+<header class="bench-head"><div><h1>입력 → OCR → 추천 / 통합 흐름</h1><p>가상 데이터로 전체 화면 전환을 확인해요</p></div></header>
+<div class="tools"><label for="outcome">다음 추천 결과</label><select id="outcome"><option value="success">정상 결과</option><option value="error">서버 오류</option><option value="empty">추천 없음</option></select></div><div class="ocr-test"><label for="ocr-mode">다음 OCR 결과</label><select id="ocr-mode"><option value="normal">정상 인식</option><option value="empty">인식 결과 없음</option><option value="partial">일부만 인식</option></select></div><div class="layout-test"><button id="long-list" type="button">긴 이름·많은 재료 예시 더하기</button><span id="layout-status" role="status"></span></div><section class="phone"><nav class="top"><button id="back">← 입력 화면</button></nav><div class="content" id="app"></div></section>
+<p class="footer">실제 OCR·추천 API 대신 예시를 사용합니다. 위 상태 선택은 테스트용이며 재시도에도 적용됩니다.</p>
+</main>
+<dialog id="detail" aria-labelledby="sheet-title"><div class="sheet-head"><strong id="sheet-title">재료 추가</strong><button class="close" aria-label="닫기">✕</button></div><div class="sheet-body" id="sheet-body"></div></dialog>
+<script>
+'use strict';
+// 확정된 보유 목록과 검토 중 초안을 분리합니다.
+const catalog = {
+    두부: {
+        unit: '모', presets: [.5, 1, 2]
+    }, 계란: {
+        unit: '개', presets: [2, 6, 10]
+    }, 대파: {
+        unit: '대', presets: [.5, 1, 2]
+    }, 애호박: {
+        unit: '개', presets: [.5, 1, 2]
+    }, 양파: {
+        unit: '개', presets: [.5, 1, 2]
+    }, 감자: {
+        unit: '개', presets: [1, 2, 3]
+    }
+};
+const state = {
+    servings: 2, count: 5, buy: false, outcome: 'success', result: [], timer: null,
+    view: 'home', stock: [], draft: [], edit: -1, notice: '', source: 1, pickerTarget: 'draft'
+};
+const app = document.getElementById('app'), sheet = document.getElementById('detail');
+// 입력 폼과 동일하게 직접 수량 입력은 필요할 때만 펼칩니다.
+const gramsPerUnit = { 두부: 300, 계란: 50, 대파: 100, 애호박: 300, 양파: 200, 감자: 150 };
+// 표시 전용: 작은 양수는 자릿수를 늘려 0으로 보이지 않게 합니다. 세부 표기 정책은 구현 과제입니다.
+const fmt = n => n > 0 && n < .01
+  ? n.toLocaleString('ko-KR', {maximumSignificantDigits:3, useGrouping:false})
+  : Number(n.toFixed(2)).toString();
+const unresolved = () => state.draft.filter(x => x.qty === null || x.needsCheck).length;
+function startScan(source = 1, preserve = false) {
+    const previousDraft = preserve ? state.draft.map(x => ({ ...x })) : [];
+    const mode = document.getElementById('ocr-mode').value || 'normal';
+    state.ocrStatus = mode;
+    state.source = source;
+    state.view = 'review';
+    state.edit = -1;
+    state.notice = '';
+    const items = source === 1 ? [{
+            name: '두부', qty: null, unit: '모', raw: '국산두부 300g × 1', reason: '포장 수량 확인'
+        }, {
+            name: '계란', qty: 6, unit: '개', raw: '계란 6구 × 1', reason: ''
+        }, {
+            name: '대파', qty: null, unit: '대', raw: '대파 1봉 × 1', reason: '한 봉에 몇 대인지 확인'
+        }
+    ] : [{
+            name: '양파', qty: 2, unit: '개', raw: '양파 2개', reason: ''
+        }, {
+            name: '계란', qty: 6, unit: '개', raw: '계란 6구 × 1', reason: ''
+        }
+    ];
+    const recognized = mode === 'empty' ? [] : mode === 'partial' ? items.slice(0, 1) : items;
+    state.draft = recognized.map(x => {
+        const existing = state.stock.find(y => y.name === x.name);
+        return existing ? {
+            ...x, qty: existing.qty, unit: existing.unit, duplicate: true, needsCheck: false
+        }
+            : {
+                ...x, duplicate: false, needsCheck: x.qty === null
+            };
+    });
+    if (preserve) {
+        const fresh = state.draft;
+        state.draft = previousDraft;
+        for (const row of fresh) {
+            if (!state.draft.some(x => x.name === row.name))
+                state.draft.push(row);
+        }
+    }
+    render();
+}
+function editor(x, i) {
+    const c = catalog[x.name];
+    return `<div class="editor"><p>${x.duplicate ? '기존 보유량을 유지하고 있어요. 수정하면 확정할 때 반영해요.' : x.reason || '현재 가진 양을 확인해 주세요.'}</p><div class="presets">${c.presets.map(q => `<button data-qty="${q}" data-index="${i}">${fmt(q)}${c.unit}</button>`).join('')}</div><details class="custom-quantity"><summary>직접 입력</summary><div class="fields"><input id="quantity" type="number" min="0.01" step="any" inputmode="decimal" aria-label="보유 수량" placeholder="직접 입력" value="${x.qty ?? ''}"><select id="unit" data-previous="${x.unit}" aria-label="단위">${[...new Set([c.unit, 'g'])].map(u => `<option ${x.unit === u ? 'selected' : ''}>${u}</option>`).join('')}</select></div><button class="primary" data-action="save" data-index="${i}">이 수량으로 확인</button></details><button class="plain" data-action="remove" data-index="${i}">${state.view === 'review' ? '이번 추가에서 제외' : '재료 삭제'}</button><p id="validation" role="alert"></p></div>`;
+}
+
+// 시안용 기본 양념 예시. 제품에서는 ingredients.json의 pantry === "기본"을 사용합니다.
+const pantryExamples = ['간장', '고추장', '고춧가루', '된장', '설탕', '소금', '식용유', '식초', '쌀', '참기름', '통깨', '후춧가루'];
+function pantryGuide() {
+  return `<section class="pantry-guide" aria-label="기본 양념 안내"><div class="pantry-heading"><span>기본 양념은 있다고 보고 계산해요.</span><button type="button" data-pantry-toggle aria-expanded="false" aria-controls="pantry-list">12개 보기 ⌄</button></div><ul id="pantry-list" hidden>${pantryExamples.map(name=>`<li>${name}</li>`).join('')}</ul></section>`;
+}
+function render() {
+    if (['loading', 'result', 'error', 'empty'].includes(state.view)) {
+        renderFlow();
+        return;
+    }
+    const review = state.view === 'review', list = review ? state.draft : state.stock;
+    document.getElementById('back').textContent = review ? '← 검토 취소' : '← 입력 화면';
+    app.innerHTML = review ? `<h2>읽어온 재료를 확인해 주세요</h2><p class="intro">틀린 내용만 고치고 한 번에 추가해요.</p><div class="source"><span class="receipt-thumb" aria-hidden="true">원본</span><div><strong>예시 영수증 ${state.source}</strong><small>원문과 비교할 수 있어요</small></div><button class="plain" data-action="source">원본 보기</button></div><p class="progress">${list.length}개 항목 · ${unresolved() ? `수량 확인 ${unresolved()}개 필요` : '수량 입력 완료'}</p>` : `<h2>어떤 재료가 있나요?</h2><p class="intro">가진 재료와 보유량을 모아주세요.</p><div class="actions"><button class="secondary" data-action="pick-home">재료 추가</button><button class="primary" data-action="scan">사진으로 추가</button></div>${state.notice ? `<p class="toast" role="status">${state.notice}</p>` : ''}`;
+    if (review)
+        app.innerHTML += ocrRecoveryPanel();
+    app.innerHTML += list.map((x, i) => `<div class="row"><button class="row-button" data-edit="${i}" aria-expanded="${state.edit === i}"><span class="placeholder" aria-hidden="true">이미지</span><span class="row-copy"><strong>${x.name}</strong>${review ? `<small>읽은 내용: ${x.raw}</small>${x.duplicate ? '<span class="flag">기존 재료 · 보유량 유지</span>' : x.needsCheck ? '<span class="flag">수량 확인 필요</span>' : ''}` : ''}</span><span class="row-amount">${x.qty === null ? '수량 입력' : fmt(x.qty) + x.unit} ›</span></button>${state.edit === i ? editor(x, i) : ''}</div>`).join('');
+    app.innerHTML += review ? `<button class="manual-entry" data-action="pick-draft">＋ 직접 입력</button><div class="bottom-action"><p class="confirmation-note">확인한 내용을 내 재료 목록에 반영해요</p><button class="primary" data-action="confirm" ${!list.length || unresolved() ? 'disabled' : ''}>검토 완료</button></div>` : `${list.length ? '' : '<p class="notice">재료를 직접 고르거나 사진으로 추가할 수 있어요.</p>'}<button class="add-inline" data-action="scan-two">다른 영수증으로 추가해 보기</button>`;
+    if (!review) {
+        app.innerHTML += `${pantryGuide()}<div class="servings"><label for="servings">각 요리 분량</label><select id="servings">${[1, 2, 3, 4].map(n => `<option value="${n}" ${n === state.servings ? 'selected' : ''}>${n}인분</option>`).join('')}</select></div><div class="bottom-action"><button class="primary" data-flow="recommend" ${!state.stock.length || state.stock.some(x => !x.qty) ? 'disabled' : ''}>조합 찾기</button></div>`;
+    }
+}
+// 선택 중에는 원본 목록을 변경하지 않고, 확인할 때 한 번에 반영합니다.
+function showPicker(target) {
+    state.pickerTarget = target;
+    state.pending = [];
+    state.pickerQuery = '';
+    document.getElementById('sheet-title').textContent = '추가할 재료 선택';
+    renderPicker();
+    sheet.showModal();
+    sheet.scrollTop = 0;
+}
+function renderPicker() {
+    const list = state.pickerTarget === 'draft' ? state.draft : state.stock;
+    const names = Object.keys(catalog).filter(name => name.includes((state.pickerQuery || '').trim()));
+    const escapeAttr = value => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    document.getElementById('sheet-body').innerHTML = `
+    <p>필요한 재료를 여러 개 고른 뒤 담아주세요.</p>
+    <label class="search-label" for="picker-search">재료 검색</label>
+    <input id="picker-search" type="search" class="picker-search" placeholder="재료 이름 검색" value="${escapeAttr(state.pickerQuery || '')}">
+    ${!names.length ? '<div class="search-empty" role="status"><strong>일치하는 재료가 없어요</strong><p>다른 이름으로 검색해 보세요.<br>직접 입력도 지원하는 재료 목록에서 선택해요.</p><button class="secondary" data-clear-search>검색어 지우기</button></div>' : ''}
+    <div class="picker">${names.map(name => {
+        const added = list.some(x => x.name === name);
+        const selected = state.pending.includes(name);
+        return `<button data-pick="${name}" aria-pressed="${selected}" ${added ? 'disabled' : ''}><span class="placeholder" aria-hidden="true">이미지</span><span class="picker-name">${name}</span>${added ? '<small>담김</small>' : selected ? '<small>선택됨 ✓</small>' : ''}</button>`;
+    }).join('')}</div>
+    <div class="bottom-action"><button class="primary" data-picker-confirm ${state.pending.length ? '' : 'disabled'}>선택한 재료 ${state.pending.length}개 담기</button></div>`;
+}
+function pick(name) {
+    const list = state.pickerTarget === 'draft' ? state.draft : state.stock;
+    if (list.some(x => x.name === name))
+        return;
+    state.pending = state.pending.includes(name)
+        ? state.pending.filter(x => x !== name)
+        : [...state.pending, name];
+    renderPicker();
+}
+function commitPicker() {
+    if (!state.pending.length)
+        return;
+    const list = state.pickerTarget === 'draft' ? state.draft : state.stock;
+    const firstNewIndex = list.length;
+    for (const name of state.pending) {
+        if (list.some(x => x.name === name))
+            continue;
+        const existing = state.pickerTarget === 'draft' && state.stock.find(x => x.name === name);
+        list.push({ name, qty: existing ? existing.qty : null,
+            unit: existing ? existing.unit : catalog[name].unit,
+            raw: '직접 추가', duplicate: !!existing,
+            needsCheck: !existing || !existing.qty, reason: '보유량을 입력해 주세요.' });
+    }
+    state.pending = [];
+    state.edit = list.findIndex((x, i) => i >= firstNewIndex && (x.qty === null || x.needsCheck));
+    sheet.close();
+    render();
+}
+function setQuantity(i, qty, unit) {
+    const list = state.view === 'review' ? state.draft : state.stock;
+    if (!Number.isFinite(qty) || qty <= 0 || qty > 100000)
+        return false;
+    Object.assign(list[i], {
+        qty, unit, needsCheck: false, reason: ''
+    });
+    state.edit = list.findIndex(x => x.qty === null || x.needsCheck);
+    render();
+    return true;
+}
+function confirmDraft() {
+    if (unresolved() || !state.draft.length)
+        return;
+    let added = 0;
+    for (const x of state.draft) {
+        const old = state.stock.find(y => y.name === x.name);
+        if (old)
+            Object.assign(old, {
+                qty: x.qty, unit: x.unit
+            });
+        else {
+            state.stock.push({
+                name: x.name, qty: x.qty, unit: x.unit
+            });
+            added++;
+        }
+    }
+    state.view = 'home';
+    state.draft = [];
+    state.edit = -1;
+    state.notice = `${added}개 재료를 추가했어요. 기존 재료는 중복으로 더하지 않았어요.`;
+    render();
+}
+app.addEventListener('change', e => {
+    if (e.target.id !== 'unit')
+        return;
+    const field = document.getElementById('quantity');
+    const list = state.view === 'review' ? state.draft : state.stock;
+    const row = list[state.edit];
+    const factor = gramsPerUnit[row.name];
+    const previous = e.target.dataset.previous;
+    const value = Number(field.value);
+    if (field.value !== '' && Number.isFinite(value)) {
+        field.value = Number((value * (previous === 'g' ? 1 : factor) /
+            (e.target.value === 'g' ? 1 : factor)).toFixed(3));
+    }
+    e.target.dataset.previous = e.target.value;
+});
+app.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || b.disabled)
+        return;
+    if (b.dataset.edit !== undefined) {
+        state.edit = state.edit === +b.dataset.edit ? -1 : +b.dataset.edit;
+        render();
+        return;
+    }
+    if (b.dataset.qty) {
+        setQuantity(+b.dataset.index, +b.dataset.qty, catalog[(state.view === 'review' ? state.draft : state.stock)[+b.dataset.index].name].unit);
+        return;
+    }
+    switch (b.dataset.action) {
+        case 'scan':
+            startScan();
+            break;
+        case 'scan-two':
+            startScan(2);
+            break;
+        case 'pick-home':
+            showPicker('home');
+            break;
+        case 'pick-draft':
+            showPicker('draft');
+            break;
+        case 'save':
+            if (!setQuantity(+b.dataset.index, Number(document.getElementById('quantity').value), document.getElementById('unit').value))
+                document.getElementById('validation').textContent = '0보다 크고 100,000 이하인 수량을 입력해 주세요.';
+            break;
+        case 'remove':
+            (state.view === 'review' ? state.draft : state.stock).splice(+b.dataset.index, 1);
+            state.edit = -1;
+            render();
+            break;
+        case 'confirm':
+            confirmDraft();
+            break;
+        case 'source':
+            document.getElementById('sheet-title').textContent = '원본 예시';
+            document.getElementById('sheet-body').innerHTML = `<p>이미지 대신 표시한 가상 영수증입니다.</p><div class="receipt">${state.source === 1 ? '국산두부 300g × 1\n계란 6구 × 1\n대파 1봉 × 1' : '양파 2개\n계란 6구 × 1'}</div>`;
+            sheet.showModal();
+            sheet.scrollTop = 0;
+            break;
+    }
+});
+sheet.addEventListener('click', e => {
+    const b = e.target.closest('[data-pick]');
+    if (b && !b.disabled)
+        pick(b.dataset.pick);
+    if (e.target.closest('[data-picker-confirm]'))
+        commitPicker();
+});
+sheet.querySelector('.close').addEventListener('click', () => sheet.close());
+document.getElementById('back').addEventListener('click', () => {
+    if (['loading', 'result', 'error', 'empty'].includes(state.view)) {
+        clearTimeout(state.timer);
+        state.view = 'home';
+        state.edit = -1;
+        render();
+        return;
+    }
+    if (state.view === 'review')
+        requestReviewCancel();
+});
+render();
+// Integration layer: demo recommendations are derived from the confirmed input snapshot.
+function recommend() {
+    if (!state.stock.length || state.stock.some(x => !Number.isFinite(x.qty) || x.qty <= 0))
+        return;
+    clearTimeout(state.timer);
+    state.view = 'loading';
+    state.buy = false;
+    render();
+    state.timer = setTimeout(() => {
+        state.result = state.stock.map(x => ({ ...x }));
+        state.view = state.outcome === 'success' ? 'result' : state.outcome;
+        render();
+    }, 900);
+}
+function allocation() {
+    const ratio = state.count === 3 ? .6 : state.count === 4 ? .8 : 1;
+    return state.result.map((x, i) => {
+        const consumed = (i === state.result.length - 1 && !state.buy) ? ratio * .8 : ratio;
+        const used = x.qty * consumed;
+        return { ...x, used, left: Math.max(0, x.qty - used) };
+    });
+}
+function demoRecipes() {
+    return Array.from({ length: state.count }, (_, i) => ({
+        name: ['재료 모둠전', '채소 볶음', '따뜻한 국', '간단 찜', '한 그릇 요리'][i],
+        time: [20, 15, 15, 20, 10][i],
+        ingredients: allocation().map(x => ({ ...x, used: x.used / state.count }))
+    }));
+}
+function renderFlow() {
+    document.getElementById('back').textContent = '← 재료 수정';
+    if (state.view === 'loading') {
+        app.innerHTML = '<div class="empty" role="status"><div class="spinner"></div><h2>재료를 나눠 쓰는<br>조합을 찾고 있어요</h2><p>입력한 재료와 수량은 그대로 있어요.</p></div>';
+        return;
+    }
+    if (state.view === 'error' || state.view === 'empty') {
+        const error = state.view === 'error';
+        app.innerHTML = `<div class="empty"><h2>${error ? '추천을 불러오지 못했어요' : '만들 수 있는 조합을 찾지 못했어요'}</h2><p>${error ? '입력한 재료는 유지하고 있어요.' : '재료를 더 넣거나 수량을 확인해 주세요.'}</p><button class="primary" data-flow="${error ? 'retry' : 'edit'}">${error ? '다시 시도' : '재료 수정하기'}</button>${error ? '<p><button class="plain" data-flow="edit">재료 수정하기</button></p>' : ''}</div>`;
+        return;
+    }
+    const rows = allocation(), full = rows.filter(x => !x.left), left = rows.filter(x => x.left);
+    app.innerHTML = `<h2>${state.buy ? '청고추를 더해 이렇게 만들어요' : '가진 재료로 이렇게 만들어요'}</h2><p class="portion-info">각 요리 <strong>${state.servings}인분</strong> 기준이에요</p><p class="count-label">몇 가지 요리를 만들까요?</p><div class="tabs" aria-label="요리 가짓수">${[3, 4, 5].map(n => `<button data-flow="count" data-count="${n}" aria-pressed="${n === state.count}">${n}가지</button>`).join('')}</div><section class="stock-overview"><div class="overview-line"><span>다 써요 <b>${full.length}개</b></span><strong>${full.map(x => x.name).join(' · ') || '없음'}</strong></div><div class="overview-line"><span>남아요 <b>${left.length}개</b></span><strong>${left.map(x => `${x.name} ${fmt(x.left)}${x.unit}`).join(' · ') || '남는 재료 없음'}</strong></div><button class="overview-detail" data-flow="stock">재료별 사용량 보기 ›</button></section>${state.buy ? '<button class="plain" data-flow="no-buy">← 구매 없이 보기</button>' : ''}${demoRecipes().map((r, i) => `<button class="recipe" data-flow="recipe" data-recipe="${i}"><span class="placeholder">이미지</span><span class="row-copy"><strong>${r.name}</strong><small>${r.ingredients.map(x => `${x.name} ${fmt(x.used)}${x.unit}`).join(' · ')}</small></span><span>${r.time}분 ›</span></button>`).join('')}${state.buy ? '' : `<section class="purchase-card"><h3>남은 ${rows.at(-1).name}까지 써볼까요?</h3><p>청고추 조금 (15g)을 더하는 예시 조합이에요.</p><button class="primary" data-flow="buy">조금 사는 조합 보기 →</button></section>`}<p class="demo-note">흐름 검토용 가상 요리·배분량입니다. 실제 조리용 레시피가 아닙니다.</p>`;
+}
+function openFlowSheet(kind, index = 0) {
+    document.getElementById('sheet-title').textContent = kind === 'stock' ? '재료 사용량' : '레시피 상세';
+    if (kind === 'stock') {
+        document.getElementById('sheet-body').innerHTML = `<h2>요리하고 나면</h2>${allocation().map(x => `<div class="row"><strong>${x.name}</strong><p>${fmt(x.qty)}${x.unit} 중 ${fmt(x.used)}${x.unit} 사용 · ${x.left ? fmt(x.left) + x.unit + ' 남음' : '다 써요'}</p><details><summary>요리별 배분 보기</summary>${demoRecipes().map(r => `<p>${r.name} ${fmt(x.used / state.count)}${x.unit}</p>`).join('')}</details></div>`).join('')}`;
+    }
+    else {
+        const r = demoRecipes()[index];
+        document.getElementById('sheet-body').innerHTML = `<h2>${r.name}</h2><p>${state.servings}인분 · ${r.time}분</p><h3>이 요리에 사용하는 재료</h3>${r.ingredients.map(x => `<div class="ingredient"><span>${x.name}</span><span>${fmt(x.used)}${x.unit}</span></div>`).join('')}${state.buy && index === 0 ? '<div class="ingredient"><span>청고추</span><span>15g</span></div>' : ''}<div class="ingredient"><span>소금</span><span>약간</span></div><div class="ingredient"><span>물</span><span>적당량</span></div><p>1인당 재고 배분: ${r.ingredients.map(x => `${x.name} ${fmt(x.used / state.servings)}${x.unit}`).join(' · ')}</p><h3>만드는 법</h3><p>실제 조리법 대신 상세 화면의 스크롤과 복귀를 확인하는 예시입니다.</p><p class="notice">이 시안의 요리와 수량은 입력값 전달을 확인하기 위한 가상 데이터입니다.</p>`;
+    }
+    sheet.showModal();
+    sheet.scrollTop = 0;
+}
+app.addEventListener('change', e => { if (e.target.id === 'servings')
+    state.servings = Number(e.target.value); });
+document.getElementById('outcome').addEventListener('change', e => state.outcome = e.target.value);
+app.addEventListener('click', e => {
+    const b = e.target.closest('[data-flow]');
+    if (!b || b.disabled)
+        return;
+    switch (b.dataset.flow) {
+        case 'recommend':
+        case 'retry':
+            recommend();
+            break;
+        case 'edit':
+            state.view = 'home';
+            state.edit = -1;
+            render();
+            break;
+        case 'count':
+            state.count = Number(b.dataset.count);
+            render();
+            break;
+        case 'buy':
+            state.buy = true;
+            render();
+            break;
+        case 'no-buy':
+            state.buy = false;
+            render();
+            break;
+        case 'stock':
+            openFlowSheet('stock');
+            break;
+        case 'recipe':
+            openFlowSheet('recipe', Number(b.dataset.recipe));
+            break;
+    }
+});
+// OCR 예외: 재인식해도 현재 초안의 수량/수정값을 우선 유지합니다.
+function ocrRecoveryPanel() {
+    if (state.ocrStatus !== 'empty' && state.ocrStatus !== 'partial')
+        return '';
+    const hasDraft = state.draft.length > 0;
+    const title = state.ocrStatus === 'empty' ? '이번 사진에서 재료를 읽지 못했어요' : '일부 항목만 읽었어요';
+    return `<section class="ocr-recovery" role="status"><strong>${title}</strong><p>${hasDraft ? '현재 목록은 그대로 유지했어요. 빠진 재료를 직접 고르거나 다른 사진으로 보완해 주세요.' : '글자가 잘 보이는 사진을 다시 선택하거나 재료를 직접 골라 주세요.'}</p><button class="secondary" data-ocr-recovery="retry">다른 사진 선택 · 예시</button>${!hasDraft ? '<button class="plain" data-ocr-recovery="manual">직접 고르기</button>' : ''}</section>`;
+}
+function requestReviewCancel() {
+    if (!state.draft.length) {
+        discardReview();
+        return;
+    }
+    document.getElementById('sheet-title').textContent = '검토를 그만둘까요?';
+    document.getElementById('sheet-body').innerHTML = `<h2>이 초안은 반영되지 않아요</h2><p>읽어온 재료와 검토 중 수정한 내용은 버려져요.<br>기존 재료와 보유량은 그대로 유지해요.</p><div class="cancel-actions"><button class="primary" data-review-cancel="keep">계속 검토하기</button><button class="secondary" data-review-cancel="discard">초안 버리고 돌아가기</button></div>`;
+    sheet.showModal();
+    sheet.scrollTop = 0;
+}
+function discardReview() {
+    state.view = 'home';
+    state.draft = [];
+    state.edit = -1;
+    state.ocrStatus = 'normal';
+    state.notice = '초안을 반영하지 않고 돌아왔어요.';
+    render();
+}
+app.addEventListener('click', e => {
+    const b = e.target.closest('[data-ocr-recovery]');
+    if (!b)
+        return;
+    if (b.dataset.ocrRecovery === 'retry')
+        startScan(state.source, true);
+    else
+        showPicker('draft');
+});
+sheet.addEventListener('click', e => {
+    const b = e.target.closest('[data-review-cancel]');
+    if (!b)
+        return;
+    sheet.close();
+    if (b.dataset.reviewCancel === 'discard')
+        discardReview();
+});
+// 검색으로 숨겨진 재료도 선택 상태를 유지합니다.
+sheet.addEventListener('input', e => {
+    if (e.target.id !== 'picker-search')
+        return;
+    state.pickerQuery = e.target.value;
+    const cursor = e.target.selectionStart;
+    renderPicker();
+    const search = document.getElementById('picker-search');
+    search.focus({ preventScroll: true });
+    if (cursor !== null)
+        search.setSelectionRange(cursor, cursor);
+});
+sheet.addEventListener('click', e => {
+    if (!e.target.closest('[data-clear-search]'))
+        return;
+    state.pickerQuery = '';
+    renderPicker();
+    document.getElementById('picker-search').focus();
+});
+function loadLongListExample() {
+    if (state.view === 'review' && state.draft.length) {
+        document.getElementById('layout-status').textContent = '초안을 먼저 완료하거나 취소한 뒤 예시를 불러와 주세요.';
+        return;
+    }
+    if (state.timer)
+        clearTimeout(state.timer);
+    const fixtureNames = ['손질한 국산 친환경 브로콜리와 줄기', '껍질을 벗긴 단호박', '팽이버섯', '표고버섯', '느타리버섯', '시금치', '청경채', '숙주나물', '오이', '파프리카', '양배추', '감자'];
+    for (const name of fixtureNames) {
+        if (!catalog[name])
+            catalog[name] = { unit: 'g', presets: [100, 200, 300] };
+        if (!gramsPerUnit[name])
+            gramsPerUnit[name] = 1;
+        if (!state.stock.some(x => x.name === name))
+            state.stock.push({ name, qty: 200, unit: 'g' });
+    }
+    state.view = 'home';
+    state.edit = -1;
+    render();
+    document.getElementById('layout-status').textContent = '긴 이름을 포함한 예시 재료를 목록에 더했어요. 새로고침하면 초기화해요.';
+}
+document.getElementById('long-list').addEventListener('click', loadLongListExample);
+// 바텀시트 복귀: 호출한 버튼이 재렌더링되어도 같은 의미의 버튼으로 초점을 돌립니다.
+(() => {
+    const overlay = document.getElementById('detail');
+    let origin = null;
+    let originSelector = '';
+    let position = 0;
+    document.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button || overlay.contains(button) || overlay.open)
+            return;
+        origin = button;
+        position = window.scrollY;
+        const attributes = ['data-recipe', 'data-edit', 'data-action', 'data-flow', 'data-act'];
+        const attribute = attributes.find(name => button.hasAttribute(name));
+        originSelector = attribute ? '[' + attribute + '="' + CSS.escape(button.getAttribute(attribute)) + '"]' : button.id ? '#' + CSS.escape(button.id) : '';
+    }, true);
+    overlay.addEventListener('close', () => {
+        requestAnimationFrame(() => {
+            let target = origin && origin.isConnected ? origin : null;
+            if (!target && originSelector)
+                target = document.querySelector(originSelector);
+            if (!target)
+                target = document.getElementById('back');
+            if (target)
+                target.focus({ preventScroll: true });
+            window.scrollTo({ top: position, behavior: 'instant' });
+        });
+    });
+    // 키보드 등으로 보이는 영역이 줄면 시트 높이를 해당 영역에 맞춥니다.
+    function fitViewport() {
+        const viewport = window.visualViewport;
+        document.documentElement.style.setProperty('--visible-height', (viewport ? viewport.height : window.innerHeight) + 'px');
+        const field = document.activeElement;
+        if (field && field.matches('input,select') && (!overlay.open || overlay.contains(field))) {
+            requestAnimationFrame(() => field.scrollIntoView({ block: 'nearest', inline: 'nearest' }));
+        }
+    }
+    if (window.visualViewport)
+        window.visualViewport.addEventListener('resize', fitViewport);
+    window.addEventListener('resize', fitViewport);
+    fitViewport();
+})();
+
+document.addEventListener('click', event => {
+  const button = event.target.closest('[data-pantry-toggle]');
+  if (!button) return;
+  const list = document.getElementById('pantry-list');
+  const expanded = button.getAttribute('aria-expanded') !== 'true';
+  button.setAttribute('aria-expanded', String(expanded));
+  button.textContent = expanded ? '목록 접기 ⌃' : '12개 보기 ⌄';
+  list.hidden = !expanded;
+});
+</script>
+</body>
+</html>
