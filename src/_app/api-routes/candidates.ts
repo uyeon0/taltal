@@ -4,6 +4,8 @@ import type { Stock } from '@/entities/ingredient';
 import { getRecipes } from '@/entities/recipe/index.server';
 import { filterCandidates } from '@/features/find-meals';
 
+import { serverError } from './server-error';
+
 type Body = { inventory: Stock[]; servings: number };
 
 function isBody(x: unknown): x is Body {
@@ -22,6 +24,10 @@ export async function POST(request: Request) {
   const body: unknown = await request.json().catch(() => null);
   if (!isBody(body)) return Response.json({ error: '잘못된 요청입니다.' }, { status: 400 });
 
-  const candidates = filterCandidates(await getRecipes(), body.inventory, body.servings);
-  return Response.json({ candidates });
+  try {
+    const candidates = filterCandidates(await getRecipes(), body.inventory, body.servings);
+    return Response.json({ candidates });
+  } catch (error) {
+    return serverError(error);
+  }
 }

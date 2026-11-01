@@ -1,1 +1,1 @@
-export { readAppJson } from './read-app-json';
+export { MissingAppDataError, assertAppData, readAppJson } from './read-app-json';

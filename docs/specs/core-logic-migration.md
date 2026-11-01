@@ -35,9 +35,9 @@
 | `features/find-meals/model/compare.ts` | `src/components/planner/planner.tsx`의 `compare`, `DISH_COUNTS`, 모드 정의 | 3·4·5가지 비교와 사지 않는·조금 사는 묶음 계산. 화면 코드는 가져오지 않는다 |
 | `features/find-meals/api/` | `planner.tsx`의 후보 요청 | `POST /api/candidates` 요청 함수 |
 | `entities/ingredient/model/` | `src/logic/types.ts` 일부, `src/lib/amount-format.ts`, `src/lib/amount.ts`의 `toGrams` | `Ingredient`, `Stock`, `INPUT_UNITS`, `InputUnit`, `toGrams`, `formatAmount`, `describeAmount`, `amountsReconcile` |
-| `entities/ingredient/api/` | `src/server/data.ts`, `src/data/fake.ts` 일부 | 재료 읽기(서버 전용), 가짜 재료 |
+| `entities/ingredient/api/` | `src/server/data.ts` | 재료 읽기(서버 전용) |
 | `entities/recipe/model/` | `src/logic/types.ts` 일부, `src/server/data.ts`의 `RecipeDetail` | `Recipe`, `RecipeIngredient`, `RecipeDetail` |
-| `entities/recipe/api/` | `src/server/data.ts`, `src/data/fake.ts` 일부 | 레시피와 상세 읽기(서버 전용), 상세 요청 함수(브라우저), 가짜 레시피 |
+| `entities/recipe/api/` | `src/server/data.ts` | 레시피와 상세 읽기(서버 전용), 상세 요청 함수(브라우저) |
 | `shared/db/` | `src/server/data.ts` 일부 | `APP_DATA_DIR` 또는 `data/app/`에서 JSON을 읽는 함수. 도메인 타입을 쓰지 않는다 |
 
 - 슬라이스마다 `index.ts`로 공개 API를 내보낸다. 서버 전용 읽기 함수는 `index.server.ts`로 내보내고 파일 첫 줄에 `import "server-only"`를 둔다.
@@ -48,21 +48,24 @@
 ## 코드 수정
 
 - `INPUT_UNITS`, `InputUnit`을 추가하고 `unitGrams`를 `Partial<Record<InputUnit, number>>`, `inputUnits`를 `InputUnit[]`로 좁힌다. `formatAmount`, `toGrams`의 단위 인자도 `InputUnit`으로 바꾼다.
-- 가짜 데이터의 `unitGrams`에서 입력 단위가 아닌 키(`약간` 등)를 뺀다.
+- 테스트용 가짜 재료의 `unitGrams`에서 입력 단위가 아닌 키(`약간` 등)를 뺀다.
 - 주석에서 내부 카드 번호(`PROJ1-`), 기록 저장소 문서 이름, 저장소 공개 여부 설명을 지우고, "1일째"를 요리 순서 표현으로 바꾼다. 문서 경로는 `docs/` 기준으로 쓴다.
 
 ## 가짜 데이터
 
-`data/app/`이 없으면 쓰는 가짜 데이터가 다음 상태를 낼 수 있어야 한다. 각 상태를 내는 재료 묶음을 가짜 데이터 옆에 상수로 둔다.
+가짜 데이터는 테스트에서만 쓴다. 앱은 실제 데이터가 없으면 가짜 데이터로 대신하지 않고 API가 500 오류를 돌려준다.
+
+- 가짜 재료와 레시피는 `features/find-meals/model/__fixtures__/`에 두고 공개 API로 내보내지 않는다. 레시피 상세의 가짜 데이터는 두지 않는다.
+- 다음 결과 상태를 내는 재료 묶음을 같은 파일에 상수로 둔다.
 
 | 상태 | 조건 |
 | --- | --- |
 | 정상 | 사지 않는 묶음으로 3·4·5가지가 모두 나온다 |
 | 조금 사는 묶음 | 사지 않는 묶음과 결과가 다르다 |
-| `partial` | 5가지를 요청하면 더 적게 나온다 |
+| `partial` | 사지 않는 묶음으로 요청보다 적게 나온다 |
 | `empty` | 두 묶음 모두 추천이 없다 |
 
-지금 가짜 데이터가 이 상태를 모두 내지 못하면 재료와 레시피를 직접 만들어 더한다. 실제 레시피 내용은 옮기지 않는다.
+- 데이터 파일이 있는지는 `'use cache'` 함수 밖에서 확인한다. 캐시 함수 안에서 던진 오류는 프로덕션에서 내용이 감춰져 라우트가 데이터 없음과 다른 오류를 구분하지 못한다.
 
 ## 개발 도구
 
@@ -73,7 +76,7 @@
 - 테스트를 더한다.
   - 3·4·5가지 비교: 가짓수가 늘어도 남는 비율이 줄지 않는 결과를 빼는지, `partial`을 어떻게 남기는지
   - 실제 데이터의 모든 재료에서 `inputUnits`가 `INPUT_UNITS` 안에 있고 `unitGrams`의 키와 같은지
-  - 가짜 데이터가 위 네 상태를 내는지
+  - 테스트용 가짜 데이터가 위 네 상태를 내는지
 - 실제 데이터 테스트는 데이터가 없으면 건너뛴다. 실패로 두지 않는다.
 
 ### ESLint
@@ -115,9 +118,9 @@
 
 ## 완료 기준
 
-- `npm test`가 실제 데이터와 가짜 데이터 양쪽에서 통과한다. 기존 27개가 모두 들어 있다.
+- `npm test`가 실제 데이터가 있을 때와 없을 때 모두 통과한다. 없으면 실제 데이터 테스트를 건너뛴다. 기존 27개가 모두 들어 있다.
 - `npm run lint`, `npm run typecheck`, `npm run build`가 통과한다.
-- 서버 API 두 개가 성공, 400, 404 응답을 문서대로 돌려준다.
+- 서버 API 두 개가 성공, 400, 404, 데이터가 없을 때 500 응답을 문서대로 돌려준다.
 - `fsd-review`에서 층 위반이 없다.
 - 옛 화면 코드와 레시피 데이터가 브랜치에 없다.
 - 새 경로를 총괄 세션에 알린다.
