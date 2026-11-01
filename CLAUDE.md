@@ -37,4 +37,6 @@
 - `main`에 바로 커밋하지 않고 작업 브랜치를 만든다. `main`에 push하면 Vercel에 자동 배포된다.
 - 개발 작업마다 GitHub 이슈를 하나 둔다. 이슈 제목은 작업 이름만 쓴다(예: `재료 입력 화면`). 잘게 나눈 할 일은 Notion에서 관리하고, 이슈와 PR에는 Notion 태스크 ID만 적는다.
 - 작업 브랜치는 PR로 `main`에 합친다. PR 제목은 커밋과 같은 `<type>: <설명>` 형식이고, 본문은 PR 템플릿을 따른다. 머지 커밋으로 합치고 스쿼시하지 않는다.
+- GitHub에 댓글이나 리뷰 답글을 쓸 때는 끝에 `🤖 Generated with [Claude Code](https://claude.com/product/claude-code)` 서명을 붙인다. PR 본문, 이슈 본문, 커밋 메시지에는 붙이지 않는다.
+- PR 머지는 `yoouyeon` 계정으로 한다. 머지 커밋 작성자가 `yoouyeon`이어야 하므로, 이 세션의 `gh`(`uyeon0`)로 머지하지 않고 사용자가 GitHub에서 직접 머지한다.
 - 커밋 전에 `git status`로 다른 작업의 파일이 섞이지 않았는지 보고, 이번 작업의 파일만 스테이징한다. `git add .`와 `git add -A`를 쓰지 않는다.
