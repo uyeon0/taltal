@@ -17,6 +17,8 @@ const ZERO_G = 1e-6;
 export const TOLERANCE_G = 0.1;
 /** 표시 단위로 이 값보다 적으면 "미만"으로 쓴다 */
 export const TINY_UNIT = 0.1;
+/** g으로 쓸 때 이 값보다 적으면 "0.1g 미만"으로 쓴다. 표시 단위 기준(TINY_UNIT)과 따로 둔다 */
+export const TINY_GRAMS = 0.1;
 
 const FRACTIONS: [number, string][] = [
   [0, ''],
@@ -42,7 +44,7 @@ export type AmountView = {
 const trim = (n: number) => String(round1(n));
 
 // g 단위 표시와 같게, 반올림하기 전 값으로 0.1g 미만인지 판단한다
-const gramsText = (grams: number) => (grams < TINY_UNIT ? '0.1g 미만' : `${trim(grams)}g`);
+const gramsText = (grams: number) => (grams < TINY_GRAMS ? '0.1g 미만' : `${trim(grams)}g`);
 
 /** g 값을 입력 단위로 바꿔 표시 문구와 종류를 돌려준다 */
 export function describeAmount(ingredient: Ingredient, grams: number, unit: InputUnit): AmountView {
@@ -54,7 +56,7 @@ export function describeAmount(ingredient: Ingredient, grams: number, unit: Inpu
   if (!(grams > ZERO_G)) return { text: `0${label}`, kind: 'zero', value: 0 };
 
   if (label === 'g') {
-    if (grams < TINY_UNIT) return { text: '0.1g 미만', kind: 'tiny', value: null };
+    if (grams < TINY_GRAMS) return { text: '0.1g 미만', kind: 'tiny', value: null };
     return { text: `${trim(grams)}g`, kind: 'exact', value: round1(grams) };
   }
 

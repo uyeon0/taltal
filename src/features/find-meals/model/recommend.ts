@@ -99,9 +99,7 @@ function toResult(
     const need = needs(r, servings);
     const uses = need.map((n) => ({ ingredientId: n.ingredientId, grams: round1(n.grams) }));
     // 고명("약간")으로만 쓰는 재료는 그 재료 때문에 먼저 만들 이유가 되지 않으므로 순서 계산에서 뺀다
-    const firmUses = need
-      .filter((n) => !n.vague)
-      .map((n) => ({ ingredientId: n.ingredientId, grams: round1(n.grams) }));
+    const firmUses = uses.filter((_, i) => !need[i].vague);
     const { grams, ...urgency } = urgencyOf(firmUses, stock, grade);
     urgentGrams.push(grams);
     return {
