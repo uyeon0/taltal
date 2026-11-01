@@ -137,7 +137,8 @@ type Leftover = { ingredientId: string; startGrams: number; leftGrams: number };
 ### 재료 차감
 
 - 레시피의 `grams`에 `servings`를 곱해 사용량을 구한다. 차감은 고른 레시피들의 사용량 합으로 판단한다.
-- 가진 재료는 가진 양까지만 쓴다. 합이 재고를 넘는 묶음은 고르지 않고, 가진 재료를 장보기에 넣지 않는다.
+- 가진 재료는 가진 양까지만 쓴다. 고명이 아닌 분량의 합이 재고를 넘는 묶음은 고르지 않고, 가진 재료를 장보기에 넣지 않는다.
+- 예외는 고명이다. 가진 재료를 고명("약간")으로 가진 양보다 많이 쓰면, 모자란 만큼을 `shoppingList`에 `optional: true`로 넣는다. 조금 가진 사람이 아예 없는 사람보다 불리하지 않게 하려는 것이다. 이 재료는 고명으로 쓰는 요리의 `toBuy`에만 들어간다.
 - 없는 재료는 `shoppingList`에 넣는다.
 - 양념은 차감하지 않고 `leftovers`와 `leftoverRatio`에서 뺀다.
 
@@ -153,7 +154,7 @@ type Leftover = { ingredientId: string; startGrams: number; leftGrams: number };
 
 ### 후보 고르기
 
-`filterCandidates`는 가진 재료를 고명이 아닌 분량으로 하나 이상 쓰고, 가진 재료를 가진 양 안에서 쓰고, 혼자서도 `maxPurchases`가지를 넘게 사지 않는 레시피만 남긴다. 사야 할 g이 적은 순서로 정렬하고, 같으면 사는 재료 수가 적은 순서, 그다음 가진 재료를 많이 쓰는 순서로 정렬한다. 사지 않아도 되는 레시피가 앞에 오므로 `maxPurchases: 0`에도 같은 후보를 쓸 수 있다.
+`filterCandidates`는 가진 재료를 고명이 아닌 분량으로 하나 이상 쓰고, 가진 재료를 고명이 아닌 분량은 가진 양 안에서 쓰고, 혼자서도 `maxPurchases`가지를 넘게 사지 않는 레시피만 남긴다. 사야 할 g이 적은 순서로 정렬하고, 같으면 사는 재료 수가 적은 순서, 그다음 가진 재료를 많이 쓰는 순서로 정렬한다. 사지 않아도 되는 레시피가 앞에 오므로 `maxPurchases: 0`에도 같은 후보를 쓸 수 있다.
 
 ### 요리 순서
 
