@@ -78,12 +78,10 @@ function toResult(
   servings: number,
   ingredients: Ingredient[]
 ): Result {
-  const options = { meals: requested, servings };
-
   const total = new Map<string, number>();
   const firm = new Set<string>(); // "약간"이 아닌 분량으로 한 번이라도 쓰는 재료
   for (const r of best) {
-    for (const n of needs(r, options.servings)) {
+    for (const n of needs(r, servings)) {
       total.set(n.ingredientId, (total.get(n.ingredientId) ?? 0) + n.grams);
       if (!n.vague) firm.add(n.ingredientId);
     }
@@ -98,7 +96,7 @@ function toResult(
   const special = new Set(ingredients.filter((i) => i.pantry === '특수').map((i) => i.id));
   const urgentGrams: number[] = [];
   const meals: Meal[] = best.map((r) => {
-    const uses = needs(r, options.servings).map((n) => ({ ingredientId: n.ingredientId, grams: round1(n.grams) }));
+    const uses = needs(r, servings).map((n) => ({ ingredientId: n.ingredientId, grams: round1(n.grams) }));
     const { grams, ...urgency } = urgencyOf(uses, stock, grade);
     urgentGrams.push(grams);
     return {
@@ -106,26 +104,26 @@ function toResult(
       name: r.name,
       uses,
       toBuy: uses.filter((u) => toBuy.has(u.ingredientId)).map((u) => u.ingredientId),
-      pantryNeeded: r.ingredients.filter((i) => special.has(i.ingredientId)).map((i) => i.ingredientId),
+      pantryNeeded: [...new Set(r.ingredients.map((i) => i.ingredientId).filter((id) => special.has(id)))],
       ...urgency,
       day: 0
     };
   });
   assignDays(meals, urgentGrams);
 
+  const leftOf = (id: string, g: number) => Math.max(0, g - (total.get(id) ?? 0));
   const leftovers: Leftover[] = [...stock].map(([id, g]) => ({
     ingredientId: id,
     startGrams: round1(g),
-    leftGrams: round1(Math.max(0, g - (total.get(id) ?? 0)))
+    leftGrams: round1(leftOf(id, g))
   }));
   // 비율과 점수는 반올림하지 않은 g으로 구한다
-  const leftOf = (id: string, g: number) => Math.max(0, g - (total.get(id) ?? 0));
   const start = [...stock.values()].reduce((a, b) => a + b, 0);
   const remain = [...stock].reduce((a, [id, g]) => a + leftOf(id, g), 0);
   const leftoverScore = [...stock].reduce((a, [id, g]) => a + ((weight.get(id) ?? 1) * leftOf(id, g)) / g, 0);
 
   return {
-    status: meals.length === 0 ? 'empty' : meals.length < options.meals ? 'partial' : 'ok',
+    status: meals.length === 0 ? 'empty' : meals.length < requested ? 'partial' : 'ok',
     meals,
     shoppingList,
     leftovers,
