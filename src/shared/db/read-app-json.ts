@@ -30,7 +30,7 @@ export function assertAppData(file: string): void {
   if (!existsSync(/*turbopackIgnore: true*/ appDataPath(file))) throw new MissingAppDataError(file);
 }
 
+/** 파일이 있는지는 부르는 쪽이 assertAppData로 먼저 확인한다. 'use cache' 함수 안에서 부르기 때문이다 */
 export async function readAppJson<T>(file: string): Promise<T> {
-  assertAppData(file);
   return JSON.parse(await readFile(/*turbopackIgnore: true*/ appDataPath(file), 'utf-8')) as T;
 }
