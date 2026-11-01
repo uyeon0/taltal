@@ -1,6 +1,6 @@
 # 데이터 계약
 
-앱이 읽는 데이터의 형태, 서버 API, 추천 함수, 처리 규칙을 정한다. 코드의 타입은 `src/logic/types.ts`에 있고, 이 문서와 같게 유지한다.
+앱이 읽는 데이터의 형태, 서버 API, 추천 함수, 처리 규칙을 정한다. 코드의 위치는 `docs/architecture.md`를 따르고, 코드의 타입은 이 문서와 같게 유지한다.
 
 ## 데이터 전제
 
@@ -12,7 +12,7 @@
 | `recipes.json` | 추천에 쓰는 레시피와 1인분 재료 g |
 | `recipe-steps.json` | 레시피별 요약과 조리 과정 |
 
-서버는 `data/app/`에서 파일을 읽는다. `APP_DATA_DIR` 환경 변수를 지정하면 그 폴더에서 읽는다. 파일이 없으면 `src/data/fake.ts`의 가짜 데이터를 쓴다.
+서버는 `data/app/`에서 파일을 읽는다. `APP_DATA_DIR` 환경 변수를 지정하면 그 폴더에서 읽는다. 파일이 없으면 `entities/ingredient`, `entities/recipe`에 둔 가짜 데이터를 쓴다.
 
 입력할 수 있는 재료의 g 값은 모두 AI 추정치다(`gramsSource: "AI 추정"`). 그래서 환산한 양은 정확한 값처럼 표시하지 않는다.
 
@@ -83,7 +83,7 @@ type RecipeDetail = {
 
 ## 추천 함수
 
-`src/logic/recommend.ts`에 있다. 후보 고르기는 서버에서, 묶음 고르기는 브라우저에서 실행한다.
+`features/find-meals`에 있다. 후보 고르기는 서버에서, 묶음 고르기는 브라우저에서 실행한다.
 
 ```ts
 // 서버: 묶음 탐색에 넣을 후보를 최대 30개 고른다
@@ -166,4 +166,4 @@ type Leftover = { ingredientId: string; startGrams: number; leftGrams: number };
 
 ## 양 표기
 
-g을 화면 수량으로 바꿀 때는 `src/lib/amount-format.ts`의 `formatAmount`를 쓴다. 규칙은 `docs/design.md`의 "잔량·수량 표기 규칙"을 따른다.
+g을 화면 수량으로 바꿀 때는 `entities/ingredient`의 `formatAmount`를 쓴다. 규칙은 `docs/design.md`의 "잔량·수량 표기 규칙"을 따른다.

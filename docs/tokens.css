@@ -1,5 +1,5 @@
 /* 디자인 토큰. 기준 문서는 docs/design.md다.
-   앱에 적용할 때 이 파일 내용을 src/app/globals.css로 옮긴다. 폰트는 next/font/local을 쓴다. */
+   앱에 적용할 때 이 파일 내용을 src/_app/styles의 전역 CSS로 옮긴다. 폰트는 next/font/local을 쓴다. */
 
 :root {
   /* shadcn 테마 변수 */
