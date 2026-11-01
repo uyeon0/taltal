@@ -12,7 +12,7 @@
 | `recipes.json` | 추천에 쓰는 레시피와 1인분 재료 g |
 | `recipe-steps.json` | 레시피별 요약과 조리 과정 |
 
-서버는 `data/app/`에서 파일을 읽는다. `APP_DATA_DIR` 환경 변수를 지정하면 그 폴더에서 읽는다. 파일이 없으면 API가 500 오류를 돌려준다.
+서버는 `data/app/`에서 파일을 읽는다. 로컬과 테스트에서는 `APP_DATA_DIR` 환경 변수로 다른 폴더를 지정할 수 있다. 배포 번들에는 `data/app/`만 들어가므로 프로덕션에서는 쓰지 않는다. 파일이 없으면 API가 500 오류를 돌려준다.
 
 입력할 수 있는 재료의 g 값은 모두 AI 추정치다(`gramsSource: "AI 추정"`). 그래서 환산한 양은 정확한 값처럼 표시하지 않는다.
 
@@ -79,7 +79,7 @@ type RecipeDetail = {
 | `POST /api/candidates` | `{ inventory: Stock[], servings: number }` | `{ candidates: Recipe[] }` | 형식이 틀리면 400, 앱 데이터가 없거나 서버 오류면 500 |
 | `GET /api/recipes/[id]` | 없음 | `RecipeDetail` | 번호가 숫자로만 되어 있지 않으면 400, 레시피가 없으면 404, 앱 데이터가 없거나 서버 오류면 500 |
 
-`servings`는 1 이상 10 이하의 정수만 받는다. `inventory`는 200개까지, `ingredientId`는 50자까지 받는다. 화면은 1~4를 보낸다. 실패 응답의 본문은 `{ error: string }`이다.
+`servings`는 1 이상 10 이하의 정수만 받는다. `inventory`는 200개까지, `ingredientId`는 50자까지, 본문은 32KB까지 받는다. 화면은 1~4를 보낸다. 실패 응답의 본문은 `{ error: string }`이다.
 
 ## 추천 함수
 
