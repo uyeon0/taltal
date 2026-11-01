@@ -3,7 +3,7 @@
 import type { Ingredient, Stock } from '@/entities/ingredient';
 import type { Recipe } from '@/entities/recipe';
 
-import { recommend } from './recommend';
+import { recommendEach } from './recommend';
 import type { Result } from './types';
 
 // 요리 가짓수는 사용자가 고르지 않고 3·4·5가지를 모두 계산해 비교해 보여 준다
@@ -41,12 +41,13 @@ export function findMealOptions(
   servings: number,
   data: { candidates: Recipe[]; ingredients: Ingredient[] }
 ): Record<Mode, Comparison> {
-  const byMode = (mode: Mode) =>
-    compare(
-      DISH_COUNTS.map((dishes) => ({
-        dishes,
-        result: recommend(inventory, { meals: dishes, servings, maxPurchases: MAX_PURCHASES_BY_MODE[mode] }, data)
-      }))
+  const byMode = (mode: Mode) => {
+    const results = recommendEach(
+      inventory,
+      { meals: DISH_COUNTS, servings, maxPurchases: MAX_PURCHASES_BY_MODE[mode] },
+      data
     );
+    return compare(DISH_COUNTS.map((dishes, i) => ({ dishes, result: results[i] })));
+  };
   return { noBuy: byMode('noBuy'), buy: byMode('buy') };
 }

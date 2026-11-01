@@ -41,15 +41,44 @@ export function recommend(
   options: { meals: number; servings: number; maxPurchases?: number },
   data: { candidates: Recipe[]; ingredients: Ingredient[] }
 ): Result {
+  return recommendEach(inventory, { ...options, meals: [options.meals] }, data)[0];
+}
+
+/**
+ * 같은 재고와 후보로 여러 가짓수를 한 번에 계산한다. 결과는 meals 순서대로 돌려준다.
+ * 가짓수별 탐색 결과를 재사용하므로, 5가지가 안 돼 4가지로 줄여 찾을 때 4가지 탐색을 다시 하지 않는다.
+ */
+export function recommendEach(
+  inventory: Stock[],
+  options: { meals: number[]; servings: number; maxPurchases?: number },
+  data: { candidates: Recipe[]; ingredients: Ingredient[] }
+): Result[] {
   const stock = toStock(inventory);
-  const recipes = data.candidates;
   const maxPurchases = options.maxPurchases ?? MAX_PURCHASES;
   const weight = new Map(data.ingredients.map((i) => [i.id, PERISH_WEIGHT[i.perishability ?? ''] ?? 1]));
+  const searched = new Map<number, Recipe[]>();
+  const search = (k: number) => {
+    if (!searched.has(k))
+      searched.set(k, searchBest(data.candidates, stock, k, options.servings, maxPurchases, weight));
+    return searched.get(k)!;
+  };
+  return options.meals.map((meals) => {
+    let best: Recipe[] = [];
+    for (let k = Math.min(meals, data.candidates.length); k > 0 && best.length === 0; k--) best = search(k);
+    return toResult(best, meals, stock, weight, options.servings, data.ingredients);
+  });
+}
 
-  let best: Recipe[] = [];
-  for (let k = Math.min(options.meals, recipes.length); k > 0 && best.length === 0; k--) {
-    best = searchBest(recipes, stock, k, options.servings, maxPurchases, weight);
-  }
+/** 고른 레시피로 결과를 만든다 */
+function toResult(
+  best: Recipe[],
+  requested: number,
+  stock: Map<string, number>,
+  weight: Map<string, number>,
+  servings: number,
+  ingredients: Ingredient[]
+): Result {
+  const options = { meals: requested, servings };
 
   const total = new Map<string, number>();
   const firm = new Set<string>(); // "약간"이 아닌 분량으로 한 번이라도 쓰는 재료
@@ -65,21 +94,24 @@ export function recommend(
     .map(([id, g]) => ({ ingredientId: id, grams: round1(g), optional: !firm.has(id) }));
   const toBuy = new Set(shoppingList.map((s) => s.ingredientId));
 
-  const grade = new Map(data.ingredients.map((i) => [i.id, i.perishability ?? null]));
-  const special = new Set(data.ingredients.filter((i) => i.pantry === '특수').map((i) => i.id));
+  const grade = new Map(ingredients.map((i) => [i.id, i.perishability ?? null]));
+  const special = new Set(ingredients.filter((i) => i.pantry === '특수').map((i) => i.id));
+  const urgentGrams: number[] = [];
   const meals: Meal[] = best.map((r) => {
     const uses = needs(r, options.servings).map((n) => ({ ingredientId: n.ingredientId, grams: round1(n.grams) }));
+    const { grams, ...urgency } = urgencyOf(uses, stock, grade);
+    urgentGrams.push(grams);
     return {
       recipeId: r.id,
       name: r.name,
       uses,
       toBuy: uses.filter((u) => toBuy.has(u.ingredientId)).map((u) => u.ingredientId),
       pantryNeeded: r.ingredients.filter((i) => special.has(i.ingredientId)).map((i) => i.ingredientId),
-      ...urgencyOf(uses, stock, grade),
+      ...urgency,
       day: 0
     };
   });
-  assignDays(meals);
+  assignDays(meals, urgentGrams);
 
   const leftovers: Leftover[] = [...stock].map(([id, g]) => ({
     ingredientId: id,
@@ -104,20 +136,20 @@ export function recommend(
 
 /**
  * 요리가 쓰는 가진 재료 중 가장 빨리 상하는 등급과 그 등급의 재료를 돌려준다.
- * 산 재료는 사 온 뒤 쓰므로 상하는 순서를 따질 때 세지 않는다. 같은 등급의 g 합은 assignDays가 동점을 가를 때 쓴다.
+ * 산 재료는 사 온 뒤 쓰므로 상하는 순서를 따질 때 세지 않는다. grams는 그 등급 재료의 g 합으로, assignDays가 동점을 가를 때 쓴다.
  */
 function urgencyOf(
   uses: { ingredientId: string; grams: number }[],
   stock: Map<string, number>,
   grade: Map<string, Ingredient['perishability']>
-): Pick<Meal, 'urgency' | 'urgentIngredients'> & { urgentGrams: number } {
+): Pick<Meal, 'urgency' | 'urgentIngredients'> & { grams: number } {
   const owned = uses.filter((u) => stock.has(u.ingredientId) && URGENCY_RANK[grade.get(u.ingredientId) ?? '']);
   const top = Math.max(0, ...owned.map((u) => URGENCY_RANK[grade.get(u.ingredientId)!]));
   const hit = owned.filter((u) => URGENCY_RANK[grade.get(u.ingredientId)!] === top);
   return {
     urgency: top === 0 ? null : (grade.get(hit[0].ingredientId) as Meal['urgency']),
     urgentIngredients: hit.map((u) => u.ingredientId),
-    urgentGrams: hit.reduce((s, u) => s + u.grams, 0)
+    grams: hit.reduce((s, u) => s + u.grams, 0)
   };
 }
 
@@ -125,18 +157,11 @@ function urgencyOf(
  * 가장 빨리 상하는 등급이 높은 요리부터 1, 2, 3… 순서로 day를 붙인다. 같은 등급이면 그 등급 재료를 쓰는 g이 많은 요리가 먼저,
  * 그래도 같으면 meals 순서를 따른다. meals 배열은 정렬하지 않고 day만 붙인다.
  */
-function assignDays(meals: (Meal & { urgentGrams?: number })[]) {
-  const key = (m: Meal & { urgentGrams?: number }) => [URGENCY_RANK[m.urgency ?? ''] ?? 0, m.urgentGrams ?? 0];
-  const order = meals
-    .map((_, i) => i)
-    .sort((a, b) => {
-      const [ra, ga] = key(meals[a]);
-      const [rb, gb] = key(meals[b]);
-      return rb - ra || gb - ga || a - b;
-    });
+function assignDays(meals: Meal[], urgentGrams: number[]) {
+  const rank = (i: number) => URGENCY_RANK[meals[i].urgency ?? ''] ?? 0;
+  const order = meals.map((_, i) => i).sort((a, b) => rank(b) - rank(a) || urgentGrams[b] - urgentGrams[a] || a - b);
   order.forEach((i, n) => {
     meals[i].day = n + 1;
-    delete meals[i].urgentGrams;
   });
 }
 
@@ -189,11 +214,12 @@ function searchBest(
     }
   };
 
-  const dfs = (from: number) => {
+  // buyGrams는 부른 쪽이 방금 check()로 구한 값이다
+  const dfs = (from: number, buyGrams: number) => {
     if (chosen.length === k) {
       let left = 0;
       for (const [id, g] of stock) left += ((weight.get(id) ?? 1) * Math.max(0, g - (used.get(id) ?? 0))) / g;
-      const s = { left, buyGrams: check()!.buyGrams };
+      const s = { left, buyGrams };
       if (!bestScore || better(s, bestScore)) {
         bestScore = s;
         best = [...chosen];
@@ -204,11 +230,12 @@ function searchBest(
       add(i, 1);
       chosen.push(i);
       // 쓰는 양과 사는 가짓수는 레시피를 더할수록 줄지 않으므로, 넘으면 더 볼 필요가 없다
-      if (check()) dfs(i + 1);
+      const ok = check();
+      if (ok) dfs(i + 1, ok.buyGrams);
       chosen.pop();
       add(i, -1);
     }
   };
-  dfs(0);
+  dfs(0, 0);
   return best.map((i) => recipes[i]);
 }
