@@ -79,7 +79,7 @@ type RecipeDetail = {
 | `POST /api/candidates` | `{ inventory: Stock[], servings: number }` | `{ candidates: Recipe[] }` | 형식이 틀리면 400, 앱 데이터가 없거나 서버 오류면 500 |
 | `GET /api/recipes/[id]` | 없음 | `RecipeDetail` | 번호가 숫자로만 되어 있지 않으면 400, 레시피가 없으면 404, 앱 데이터가 없거나 서버 오류면 500 |
 
-`servings`는 1 이상 10 이하의 정수만 받는다. 화면은 1~4를 보낸다. 실패 응답의 본문은 `{ error: string }`이다.
+`servings`는 1 이상 10 이하의 정수만 받는다. `inventory`는 200개까지, `ingredientId`는 50자까지 받는다. 화면은 1~4를 보낸다. 실패 응답의 본문은 `{ error: string }`이다.
 
 ## 추천 함수
 

@@ -8,12 +8,23 @@ import { serverError } from './server-error';
 
 type Body = { inventory: Stock[]; servings: number };
 
+// 화면이 보내는 양보다 넉넉한 상한. 지나치게 큰 요청을 처리하지 않으려는 것이다
+const MAX_INVENTORY = 200;
+const MAX_ID_LENGTH = 50;
+
 function isBody(x: unknown): x is Body {
   if (typeof x !== 'object' || x === null) return false;
   const b = x as Body;
   return (
     Array.isArray(b.inventory) &&
-    b.inventory.every((s) => typeof s?.ingredientId === 'string' && Number.isFinite(s?.grams) && s.grams >= 0) &&
+    b.inventory.length <= MAX_INVENTORY &&
+    b.inventory.every(
+      (s) =>
+        typeof s?.ingredientId === 'string' &&
+        s.ingredientId.length <= MAX_ID_LENGTH &&
+        Number.isFinite(s?.grams) &&
+        s.grams >= 0
+    ) &&
     Number.isInteger(b.servings) &&
     b.servings >= 1 &&
     b.servings <= 10
