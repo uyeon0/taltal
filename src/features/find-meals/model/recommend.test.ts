@@ -251,3 +251,37 @@ dataTest('기준 묶음 결과 출력', () => {
     console.log(`  남는 양: ${r.leftovers.map((l) => `${l.ingredientId} ${l.leftGrams}/${l.startGrams}g`).join(', ')}`);
   }
 });
+
+test('남는 비율과 점수는 반올림하기 전 g으로 구한다', () => {
+  // 재료마다 0.04g씩 남으면 leftGrams는 0으로 반올림되지만 남은 것은 있다
+  const ing = (id: string): Ingredient => ({
+    id,
+    aliases: [],
+    pantry: null,
+    unitGrams: { g: 1 },
+    inputUnits: ['g'],
+    gramsSource: null,
+    perishability: '보통'
+  });
+  const ids = ['가', '나', '다'];
+  const rec: Recipe = {
+    id: 1,
+    name: '요리',
+    type: '국',
+    cookingTime: '10분',
+    level: '쉬움',
+    servingsOriginal: 1,
+    ingredients: ids.map((ingredientId) => ({
+      ingredientId,
+      grams: 0.96,
+      vague: false,
+      amountText: '',
+      role: '주재료'
+    }))
+  };
+  const stock = ids.map((ingredientId) => ({ ingredientId, grams: 1 }));
+  const r = recommend(stock, { meals: 1, servings: 1 }, { candidates: [rec], ingredients: ids.map(ing) });
+  for (const l of r.leftovers) assert.equal(l.leftGrams, 0);
+  assert.ok(r.leftoverRatio > 0, `${r.leftoverRatio}`);
+  assert.ok(r.leftoverScore > 0);
+});

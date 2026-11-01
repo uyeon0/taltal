@@ -17,8 +17,9 @@ export type Mode = 'noBuy' | 'buy';
 const MAX_PURCHASES_BY_MODE: Record<Mode, number | undefined> = { noBuy: 0, buy: undefined };
 
 /**
- * 가짓수별 결과 중 보여 줄 것을 고른다. 요리를 더 해도 남는 비율이 줄지 않는 결과는 숨긴다.
+ * 가짓수별 결과 중 보여 줄 것을 고른다. 요리를 더 해도 남는 양 점수가 줄지 않는 결과는 숨긴다.
  * 구매 3가지 한도 때문에 가짓수를 늘리면 덜 쓰는 묶음이 나올 수 있어서다.
+ * 탐색과 같은 점수(leftoverScore)로 비교한다. g 비율로 비교하면 빨리 상하는 채소를 다 쓰는 묶음이 숨겨질 수 있다.
  * 남은 결과는 가짓수가 늘수록 덜 남으므로 마지막 것이 가장 덜 남는다.
  */
 export function compare(results: Option[]): Comparison {
@@ -27,7 +28,8 @@ export function compare(results: Option[]): Comparison {
     if (o.result.status === 'empty') continue;
     const prev = options.at(-1);
     // 5가지를 요청해도 4가지만 찾으면 4가지 결과와 같으므로 뺀다
-    if (prev && (prev.dishes >= o.result.meals.length || prev.result.leftoverRatio <= o.result.leftoverRatio)) continue;
+    if (prev && (prev.dishes >= o.result.meals.length || prev.result.leftoverScore <= o.result.leftoverScore + 1e-6))
+      continue;
     options.push({ dishes: o.result.meals.length, result: o.result });
   }
   return { options, best: options.length - 1 };

@@ -10,17 +10,18 @@ import { compare, findMealOptions, type Option } from './compare';
 import { filterCandidates } from './filter-candidates.server';
 import type { Result } from './types';
 
-// meals에는 개수만 필요하므로 빈 객체로 채운다
-const result = (status: Result['status'], meals: number, leftoverRatio: number): Result => ({
+// meals에는 개수만 필요하므로 빈 객체로 채운다. 비교는 leftoverScore로 한다
+const result = (status: Result['status'], meals: number, leftoverScore: number): Result => ({
   status,
   meals: Array.from({ length: meals }, () => ({}) as Result['meals'][number]),
   shoppingList: [],
   leftovers: [],
-  leftoverRatio
+  leftoverRatio: 0,
+  leftoverScore
 });
 const option = (dishes: number, r: Result): Option => ({ dishes, result: r });
 
-test('가짓수가 늘수록 남는 비율이 줄면 모두 남기고, 마지막 것을 처음 고른다', () => {
+test('가짓수가 늘수록 남는 양 점수가 줄면 모두 남기고, 마지막 것을 처음 고른다', () => {
   const c = compare([
     option(3, result('ok', 3, 0.5)),
     option(4, result('ok', 4, 0.4)),
@@ -33,7 +34,17 @@ test('가짓수가 늘수록 남는 비율이 줄면 모두 남기고, 마지막
   assert.equal(c.best, 2);
 });
 
-test('가짓수가 더 많은데 남는 비율이 줄지 않는 결과는 뺀다', () => {
+test('g 비율이 아니라 남는 양 점수로 비교한다', () => {
+  // 4가지가 g 비율로는 더 남아도(무거운 재료가 남음) 점수가 낮으면(빨리 상하는 재료를 다 씀) 남긴다
+  const three = { ...result('ok', 3, 1.2), leftoverRatio: 0.3 };
+  const four = { ...result('ok', 4, 0.8), leftoverRatio: 0.4 };
+  assert.deepEqual(
+    compare([option(3, three), option(4, four)]).options.map((o) => o.dishes),
+    [3, 4]
+  );
+});
+
+test('가짓수가 더 많은데 남는 양 점수가 줄지 않는 결과는 뺀다', () => {
   const c = compare([
     option(3, result('ok', 3, 0.5)),
     option(4, result('ok', 4, 0.5)),

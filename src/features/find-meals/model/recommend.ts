@@ -86,15 +86,19 @@ export function recommend(
     startGrams: round1(g),
     leftGrams: round1(Math.max(0, g - (total.get(id) ?? 0)))
   }));
+  // 비율과 점수는 반올림하지 않은 g으로 구한다
+  const leftOf = (id: string, g: number) => Math.max(0, g - (total.get(id) ?? 0));
   const start = [...stock.values()].reduce((a, b) => a + b, 0);
-  const remain = leftovers.reduce((a, l) => a + l.leftGrams, 0);
+  const remain = [...stock].reduce((a, [id, g]) => a + leftOf(id, g), 0);
+  const leftoverScore = [...stock].reduce((a, [id, g]) => a + ((weight.get(id) ?? 1) * leftOf(id, g)) / g, 0);
 
   return {
     status: meals.length === 0 ? 'empty' : meals.length < options.meals ? 'partial' : 'ok',
     meals,
     shoppingList,
     leftovers,
-    leftoverRatio: start === 0 ? 0 : Math.round((remain / start) * 1000) / 1000
+    leftoverRatio: start === 0 ? 0 : Math.round((remain / start) * 1000) / 1000,
+    leftoverScore
   };
 }
 

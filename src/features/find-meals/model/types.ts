@@ -19,5 +19,6 @@ export type Result = {
   // 조합 전체에서 모자라는 양. optional은 "약간"으로만 쓰는 재료라 없어도 되는 것
   shoppingList: { ingredientId: string; grams: number; optional: boolean }[];
   leftovers: Leftover[];
-  leftoverRatio: number;
+  leftoverRatio: number; // 남은 g 합 / 처음 g 합. 0~1. 화면에 쓰지 않는다
+  leftoverScore: number; // 묶음을 고를 때 쓰는 남는 양 점수. 재료마다 남은 비율에 보관 등급 가중치를 곱해 더한 값. 작을수록 덜 남는다
 };
