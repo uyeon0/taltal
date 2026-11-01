@@ -1,0 +1,844 @@
+<!-- 이 시안의 문구와 상세 기능은 모두 임시입니다. 구현 기준은 docs/requirements/, docs/copy.md입니다. -->
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>공통 재료 입력 · 스타일 검토</title>
+  <!--
+  기본 양념 12개는 시안용 예시입니다. 기본 접힘, 안내 옆 버튼으로 본문에서 펼칩니다.
+  실제 앱은 ingredients.json에서 pantry가 "기본"인 항목을 조회하며 목록을 하드코딩하지 않습니다.
+
+  구현 기준: docs/requirements/와 docs/design.md. 이 시안은 배치 참고 자료다.
+
+    폼 UI/UX 구현 참고용 독립 실행 시안
+    작성일: 2026-10-31
+
+    UI/UX 라이팅은 시안용 임의 문구입니다.
+    제목, 안내, 버튼, 오류 메시지 등 모든 문구는 확정된 서비스 문구가 아니며,
+    실제 서비스 적용 전에 별도로 검토하고 확정해야 합니다.
+
+    - 재료 이미지는 단순한 div/span 자리표시자입니다. 이미지 파일과 Base64 이미지는 없습니다.
+    - 이 스타일 검토본은 SUIT와 낭만있구미체를 CDN으로 불러옵니다.
+    - OCR은 고정 예시 초안입니다. 실제 이미지 업로드와 문자 인식을 수행하지 않습니다.
+    - 레시피 추천, 서버 저장, 로그인, 영구 저장은 연결하지 않았습니다.
+    - 재료·단위 환산값·빠른 수량 선택지는 동작 설명용 예시 데이터입니다.
+
+    입력 흐름:
+      빈 목록 → 직접 선택 또는 OCR 예시 → 보유량 확인 → 입력 완료
+
+    유지할 동작:
+      보유량은 필수 / 한 번에 한 재료만 펼침 / 빠른 선택 후 다음 재료로 이동
+      기존 재료와 OCR 초안이 중복되면 기존 보유량 유지
+  -->
+  <style>
+/* Standalone prototype styles. Product tokens are defined separately. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px 16px;
+  background: #f5f5f5;
+  font-family: system-ui, "Malgun Gothic", sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+button, input, select {
+  font: inherit;
+}
+
+button:not(:disabled), summary {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 2px solid #222;
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 0;
+    background: #fff;
+  }
+
+  #simple-fridge .sf-stage {
+    padding: 0;
+  }
+
+  #simple-fridge .sf-phone {
+    max-width: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+}
+
+#simple-fridge {
+  font-family:system-ui,'Malgun Gothic',sans-serif;
+  color-scheme:light;
+  --sf-bg:#fff;
+  --sf-text:#222;
+  --sf-sub:#666;
+  --sf-line:#dedede;
+  --sf-soft:#f4f4f4;
+  color:var(--sf-text);
+}
+
+#simple-fridge * {
+  box-sizing:border-box;
+}
+
+#simple-fridge .sf-stage {
+  display:flex;
+  justify-content:center;
+  padding:20px 0 30px;
+}
+
+#simple-fridge .sf-phone {
+  background:var(--sf-bg);
+  width:100%;
+  max-width:410px;
+  border:1px solid var(--sf-line);
+  border-radius:14px;
+  overflow:hidden;
+}
+
+#simple-fridge .sf-header {
+  padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid var(--sf-line);
+  gap:10px;
+  font-size:12px;
+  color:var(--sf-sub);
+}
+
+#simple-fridge .sf-body {
+  padding:26px 20px;
+  min-height:440px;
+}
+
+#simple-fridge h2 {
+  font-size:24px;
+  line-height:1.45;
+  letter-spacing:-.04em;
+  margin:0 0 10px;
+  font-weight:650;
+}
+
+#simple-fridge p {
+  font-size:13px;
+  line-height:1.8;
+  margin:8px 0 20px;
+  color:var(--sf-sub);
+}
+
+#simple-fridge button,#simple-fridge input,#simple-fridge select {
+  font:inherit;
+  max-width:100%;
+  color:inherit;
+}
+
+#simple-fridge button {
+  min-height:44px;
+  border:1px solid var(--sf-line);
+  padding:11px 13px;
+  background:var(--sf-bg);
+  border-radius:7px;
+  font-size:14px;
+  line-height:1.5;
+}
+
+#simple-fridge button:disabled {
+  opacity:.45;
+}
+
+#simple-fridge .sf-primary {
+  background:var(--sf-text);
+  color:#fff;
+  border-color:var(--sf-text);
+}
+
+#simple-fridge .sf-row {
+  border-bottom:1px solid var(--sf-line);
+}
+
+#simple-fridge .sf-rowbutton {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  border:0;
+  border-radius:0;
+  padding:18px 0;
+  text-align:left;
+  font-size:16px;
+}
+
+#simple-fridge .sf-value {
+  font-size:14px;
+  font-variant-numeric:tabular-nums;
+}
+
+#simple-fridge .sf-pending {
+  color:var(--sf-sub);
+  font-size:12px;
+}
+
+#simple-fridge .sf-editor {
+  padding:0 0 17px;
+}
+
+#simple-fridge .sf-editor p {
+  font-size:12px;
+  margin:0 0 12px;
+}
+
+#simple-fridge .sf-presets {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+}
+
+#simple-fridge .sf-presets button {
+  padding:10px 3px;
+  font-size:13px;
+}
+
+#simple-fridge .sf-presets button[aria-pressed=true] {
+  background:var(--sf-text);
+  color:#fff;
+  border-color:var(--sf-text);
+}
+
+#simple-fridge .sf-quiet {
+  border:0;
+  background:transparent;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  padding-left:0;
+  font-size:12px;
+}
+
+#simple-fridge .sf-custom {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 76px;
+  gap:8px;
+  margin:14px 0 8px;
+}
+
+#simple-fridge input,#simple-fridge select {
+  background:#fff;
+  border:1px solid #aaa;
+  border-radius:6px;
+  min-height:44px;
+  padding:8px;
+  font-size:16px;
+  min-width:0;
+  width:100%;
+}
+
+#simple-fridge label {
+  font-size:12px;
+  line-height:1.8;
+}
+
+#simple-fridge .sf-full {
+  width:100%;
+  margin-top:12px;
+}
+
+#simple-fridge .sf-foot {
+  padding:14px 20px;
+  border-top:1px solid var(--sf-line);
+}
+
+#simple-fridge .sf-foot button {
+  width:100%;
+}
+
+#simple-fridge .sf-foot small {
+  display:block;
+  text-align:center;
+  color:var(--sf-sub);
+  font-size:11px;
+  line-height:1.8;
+  margin-bottom:9px;
+}
+
+#simple-fridge .sf-tools {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:20px;
+}
+
+#simple-fridge .sf-tools button {
+  font-size:13px;
+}
+
+#simple-fridge .sf-info {
+  background:var(--sf-soft);
+  padding:12px;
+  font-size:12px;
+  line-height:1.8;
+  margin:16px 0;
+}
+
+#simple-fridge .sf-info p {
+  margin:0;
+  font-size:12px;
+}
+
+#simple-fridge .sf-original {
+  white-space:pre-line;
+}
+
+#simple-fridge details {
+  font-size:12px;
+  line-height:1.8;
+}
+
+#simple-fridge summary {
+  min-height:44px;
+  padding:12px 0;
+}
+
+#simple-fridge .sf-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:16px;
+}
+
+#simple-fridge .sf-grid button {
+  padding:12px 4px;
+  min-height:58px;
+}
+
+#simple-fridge .sf-grid button[aria-pressed=true] {
+  background:var(--sf-text);
+  color:#fff;
+  border-color:var(--sf-text);
+}
+
+#simple-fridge .sf-error {
+  font-size:13px;
+  background:var(--sf-soft);
+  border-left:3px solid #333;
+  padding:10px 12px;
+  margin-top:12px;
+  line-height:1.6;
+}
+
+#simple-fridge .sf-demo {
+  border-top:1px solid var(--sf-line);
+  padding:4px 20px;
+}
+
+#simple-fridge .sf-demo button {
+  font-size:11px;
+}
+
+#simple-fridge [hidden] {
+  display:none!important;
+}
+
+@media(max-width:360px) {
+  #simple-fridge .sf-body {
+    padding:22px 14px;
+  }
+
+  #simple-fridge .sf-header,#simple-fridge .sf-foot {
+    padding-left:14px;
+    padding-right:14px;
+  }
+
+  #simple-fridge .sf-presets {
+    gap:4px;
+  }
+
+  #simple-fridge .sf-presets button {
+    font-size:12px;
+  }
+
+}
+
+#simple-fridge .sf-start {
+  display:grid;
+  gap:12px;
+  margin-top:30px;
+}
+
+#simple-fridge .sf-route {
+  width:100%;
+  padding:20px;
+  text-align:left;
+  min-height:96px;
+}
+
+#simple-fridge .sf-route strong {
+  display:block;
+  font-size:16px;
+  font-weight:600;
+}
+
+#simple-fridge .sf-route span {
+  display:block;
+  font-size:12px;
+  color:var(--sf-sub);
+  margin-top:8px;
+  line-height:1.6;
+}
+
+#simple-fridge .sf-startnote {
+  margin-top:28px;
+  font-size:12px;
+}
+
+#simple-fridge .sf-thumb {
+  display:inline-block;
+  flex-shrink:0;
+  width:42px;
+  height:42px;
+  border-radius:8px;
+  background-color:#fff;
+  vertical-align:middle;
+}
+
+#simple-fridge .sf-identity {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+
+#simple-fridge .sf-grid {
+  gap:10px;
+}
+
+#simple-fridge .sf-grid button {
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:9px;
+  padding:10px 4px 12px;
+  min-height:118px;
+  font-size:13px;
+}
+
+#simple-fridge .sf-grid button .sf-thumb {
+  width:74px;
+  height:74px;
+  border-radius:9px;
+}
+
+#simple-fridge .sf-grid button .sf-tick {
+  position:absolute;
+  top:5px;
+  right:6px;
+  background:#222;
+  color:#fff;
+  border-radius:50%;
+  width:20px;
+  height:20px;
+  font-size:12px;
+  display:grid;
+  place-items:center;
+}
+
+#simple-fridge .sf-rowbutton {
+  padding:13px 0;
+}
+
+@media(max-width:360px) {
+  #simple-fridge .sf-grid button .sf-thumb {
+    width:64px;
+    height:64px;
+  }
+
+  #simple-fridge .sf-grid button {
+    min-height:110px;
+  }
+
+  #simple-fridge .sf-thumb {
+    width:36px;
+    height:36px;
+  }
+
+  #simple-fridge .sf-identity {
+    gap:8px;
+  }
+
+}
+
+#simple-fridge .sf-thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f2f2;
+  color: #777;
+  border: 1px dashed #ccc;
+  font-size: 11px;
+}
+
+#simple-fridge .sf-inline-servings{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0;font-size:16px}
+#simple-fridge .sf-inline-servings select{padding:9px 16px;border:1px solid #aaa;border-radius:7px;background:#fff;font:inherit}
+
+/* 보조 정보는 본문에서 펼치며 고정 하단 영역을 확장하지 않습니다. */
+.pantry-guide{margin:20px 0;font-size:13px;color:#555}
+.pantry-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 10px}
+.pantry-heading button{min-height:44px;padding:8px 2px;border:0;background:transparent;color:#333;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.pantry-guide ul{list-style:none;padding:12px 0 0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;font-size:14px;color:#333}
+.pantry-guide ul[hidden]{display:none}
+.pantry-guide li{overflow-wrap:anywhere}
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/SUIT.css">
+<style>
+@font-face{font-family:Gumi;src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-1@1.0/GumiRomanceTTF.woff2') format('woff2');font-weight:400;font-display:swap}
+body{background:#e9e9e4;padding:24px 12px}
+#simple-fridge{font-family:SUIT,sans-serif;--sf-bg:#FAFAF7;--sf-text:#20211E;--sf-sub:#5F625A;--sf-line:#CFD1C9;--sf-soft:#FAFAF7;font-size:16px;line-height:1.6}
+#simple-fridge .sf-phone{max-width:410px;border:1px solid #20211E;border-radius:20px;box-shadow:0 12px 40px #20211e0d}
+#simple-fridge .sf-header{color:#20211E;background:#FA8835;border-bottom:1px solid #20211E;font-size:14px;padding:16px 20px}
+#simple-fridge .sf-body{padding:24px 20px;min-height:0}
+#simple-fridge h2{font-family:Gumi,SUIT,sans-serif;font-size:30px;font-weight:400;line-height:1.35;letter-spacing:0;margin:0 0 12px;font-synthesis:none}
+#simple-fridge p{font-size:16px;line-height:1.6;color:#20211E}
+#simple-fridge button{font-size:16px;font-weight:600;border-color:#20211E;border-radius:9px;transition:background-color .16s,color .16s,transform .16s}
+#simple-fridge .sf-primary{background:#FA8835;color:#20211E;border:1px solid #20211E;min-height:54px}
+#simple-fridge button:not(:disabled):active{transform:translateY(1px);background:#234386;color:white}
+@media(hover:hover){#simple-fridge button:not(:disabled):hover{background:#234386;color:white}}
+#simple-fridge button:focus-visible,#simple-fridge input:focus-visible,#simple-fridge select:focus-visible{outline:3px solid #234386;outline-offset:3px}
+#simple-fridge .sf-row{border:1px solid #20211E;border-radius:10px;margin:12px 0;overflow:hidden}
+#simple-fridge .sf-rowbutton{padding:16px 12px;border:0;border-radius:0;font-size:16px}
+#simple-fridge .sf-rowbutton[aria-expanded=true]{background:#FA8835}
+#simple-fridge .sf-value{font-size:20px;font-weight:600;white-space:nowrap}
+#simple-fridge .sf-pending{font-size:14px;color:#20211E;font-weight:500}
+#simple-fridge .sf-editor{padding:16px 12px;animation:unfold .18s ease-out}
+#simple-fridge .sf-editor p{font-size:14px;color:#5F625A}
+#simple-fridge .sf-presets{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#simple-fridge .sf-presets button{font-size:16px;padding:10px 6px}
+#simple-fridge .sf-presets button[aria-pressed=true],#simple-fridge .sf-grid button[aria-pressed=true]{background:#FA8835;color:#20211E}
+#simple-fridge .sf-quiet{font-size:14px;font-weight:500;color:#5F625A}
+#simple-fridge label{font-size:16px;font-weight:600}
+#simple-fridge input,#simple-fridge select{font-size:16px;border:1px solid #20211E;background:#FAFAF7;min-height:48px}
+#simple-fridge .sf-foot{padding:20px;border-top:1px solid #20211E}
+#simple-fridge .sf-foot small{font-size:14px;text-align:left;line-height:1.6;margin-bottom:16px}
+#simple-fridge .sf-tools button{font-size:16px;width:100%;border-style:dashed}
+#simple-fridge .sf-info,#simple-fridge details{font-size:16px}
+#simple-fridge .sf-info{border:1px solid #20211E;border-left:4px solid #234386;border-radius:8px}
+#simple-fridge .sf-error{font-size:16px;background:#FAFAF7;border:1px solid #20211E;border-left:4px solid #B3362D}
+#simple-fridge .sf-grid button{font-size:16px;min-height:76px}
+#simple-fridge .sf-thumb{display:none}
+#simple-fridge .sf-demo{margin-top:20px;border-top:1px dashed #CFD1C9}
+#simple-fridge .sf-demo button{font-size:14px}
+#simple-fridge .sf-start{gap:12px}
+#simple-fridge .sf-route{padding:20px 16px;text-align:left;border:1px solid #20211E}
+#simple-fridge .sf-route:first-child{background:#FA8835}
+#simple-fridge .sf-route strong{font-size:20px;font-weight:700}
+#simple-fridge .sf-route span{font-size:14px;color:inherit;line-height:1.6;margin-top:6px}
+#simple-fridge .sf-startnote{font-size:14px;color:#5F625A;margin:20px 0}
+#simple-fridge .pantry-guide{border-top:1px solid #CFD1C9;margin-top:24px;padding-top:16px;font-size:14px}
+#simple-fridge .pantry-heading{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+#simple-fridge .pantry-heading button{font-size:14px}
+#simple-fridge .sf-welcome{display:grid;grid-template-columns:minmax(0,1fr) 96px;align-items:center;gap:8px;margin-bottom:12px}
+#simple-fridge .sf-welcome h2{margin:0;font-size:30px;text-wrap:balance}
+#simple-fridge .sf-mascot{display:block;width:96px;height:96px;object-fit:contain}
+@media(max-width:360px){#simple-fridge .sf-welcome{grid-template-columns:minmax(0,1fr) 88px}#simple-fridge .sf-mascot{width:88px;height:88px}}
+#simple-fridge .sf-inline-servings{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+#simple-fridge .sf-inline-servings select{width:100px}
+.prototype-note{max-width:410px;margin:0 auto 8px;font:14px/1.6 SUIT,sans-serif;color:#5F625A}
+@keyframes unfold{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){#simple-fridge *{animation:none!important;transition:none!important}}
+@media(max-width:480px){body{padding:0;background:#FAFAF7}.prototype-note{padding:10px 20px;margin:0}#simple-fridge .sf-stage{padding:0}#simple-fridge .sf-phone{border:0;border-radius:0;box-shadow:none}}
+</style>
+<style>
+/* Reference lock: Yellowbird's bold color planes and ink outlines;
+   existing input wireframe owns behavior. Geometry below is exploratory. */
+#simple-fridge .sf-phone{box-shadow:none}
+#simple-fridge .sf-header{border-bottom:1px solid #20211E;background:#FAFAF7;color:#20211E}
+#simple-fridge .sf-entry{padding:0}
+#simple-fridge .sf-brand-hero{position:relative;background:#FA8835;padding:24px 20px 28px;border-bottom:2px solid #20211E;min-height:316px;isolation:isolate}
+#simple-fridge .sf-eyebrow{font-size:14px;font-weight:600;margin:0 0 16px;letter-spacing:.04em}
+#simple-fridge .sf-brand-hero h2{font-size:36px;line-height:1.22;position:relative;z-index:1;margin:0;letter-spacing:-.015em;max-width:245px}
+#simple-fridge .sf-entry-mascot{position:absolute;width:176px;height:176px;object-fit:contain;right:4px;bottom:12px;z-index:-1;transform:rotate(6deg)}
+#simple-fridge .sf-hero-copy{font-size:16px;line-height:1.6;margin:28px 0 0;max-width:180px}
+#simple-fridge .sf-entry-work{padding:24px 20px 8px}
+#simple-fridge .sf-entry-label{font-size:16px;font-weight:600;margin:0 0 14px}
+#simple-fridge .sf-entry-primary{width:100%;display:flex;justify-content:space-between;align-items:center;padding:15px 18px;background:#FA8835;color:#20211E;border:2px solid #20211E;border-radius:10px;min-height:60px;font-size:20px;font-weight:700}
+#simple-fridge .sf-entry-primary span:last-child{font-size:26px;line-height:1}
+#simple-fridge .sf-entry-help{font-size:14px;line-height:1.6;color:#5F625A;margin:10px 0 14px}
+#simple-fridge .sf-entry-ocr{width:100%;display:flex;justify-content:space-between;align-items:center;border:0;border-radius:0;border-bottom:1px solid #CFD1C9;background:transparent;text-align:left;padding:14px 0;font-size:16px;font-weight:600}
+#simple-fridge .sf-entry-work .pantry-guide{margin-top:20px;padding-top:0;border-top:0}
+#simple-fridge .sf-entry-work .pantry-heading{align-items:center;justify-content:space-between;gap:0}
+#simple-fridge .sf-entry-work .pantry-heading>span{max-width:195px}
+#simple-fridge .sf-entry-work .pantry-heading button{border:0;text-decoration:underline;padding:8px 0;min-height:44px;background:transparent}
+@media(max-width:360px){#simple-fridge .sf-brand-hero h2{font-size:34px}#simple-fridge .sf-entry-mascot{width:154px;height:154px;right:0;bottom:22px}#simple-fridge .sf-hero-copy{max-width:162px}#simple-fridge .sf-brand-hero{min-height:310px}}
+</style></head>
+<body><p class="prototype-note">공통 입력 · 스타일 검토용 / 배치·문구 미확정</p>
+  <!-- UI text below and generated by JavaScript is provisional copy. -->
+<div id="simple-fridge" aria-label="공통 재료 입력 스타일 검토 시안">
+ <div class="sf-stage"><article class="sf-phone"><header class="sf-header"><span>냉장고 재료</span><span>오늘의 요리 준비</span></header><div id="sf-content"></div><div class="sf-demo"><button type="button" data-act="reset" class="sf-quiet cursor-interaction">처음 상태로</button></div><div id="sf-live" class="sr-only" aria-live="polite"></div></article></div>
+</div>
+  <noscript>이 시안을 사용하려면 브라우저의 JavaScript를 켜 주세요.</noscript>
+  <script>
+"use strict";
+// Implementation reference only: provisional UI copy and sample data.
+{
+    // DOM bindings and example ingredient catalog
+    const root = document.getElementById('simple-fridge'), content = root.querySelector('#sf-content'), live = root.querySelector('#sf-live');
+    const catalog = [
+        { id: 'tofu', name: '두부', units: { '모': 300, g: 1 }, presets: [['반 모', .5, '모'], ['1모', 1, '모'], ['2모', 2, '모']] },
+        { id: 'egg', name: '계란', units: { '개': 50, g: 1 }, presets: [['2개', 2, '개'], ['4개', 4, '개'], ['10개', 10, '개']] },
+        { id: 'scallion', name: '대파', units: { '단': 800, g: 1 }, presets: [['반 단', .5, '단'], ['1단', 1, '단'], ['2단', 2, '단']] },
+        { id: 'onion', name: '양파', units: { '개': 200, g: 1 }, presets: [['반 개', .5, '개'], ['1개', 1, '개'], ['2개', 2, '개']] },
+        { id: 'zucchini', name: '애호박', units: { '개': 300, g: 1 }, presets: [['반 개', .5, '개'], ['1개', 1, '개'], ['2개', 2, '개']] },
+        { id: 'carrot', name: '당근', units: { '개': 200, g: 1 }, presets: [['반 개', .5, '개'], ['1개', 1, '개'], ['2개', 2, '개']] },
+        { id: 'beef', name: '쇠고기', units: { g: 1 }, presets: [['100g', 100, 'g'], ['200g', 200, 'g'], ['300g', 300, 'g']] },
+        { id: 'kimchi', name: '김치', units: { g: 1 }, presets: [['100g', 100, 'g'], ['200g', 200, 'g'], ['300g', 300, 'g']] },
+        { id: 'sprouts', name: '콩나물', units: { '봉지': 300, g: 1 }, presets: [['반 봉지', .5, '봉지'], ['1봉지', 1, '봉지'], ['2봉지', 2, '봉지']] }
+    ];
+    const food = id => catalog.find(f => f.id === id), num = n => Number(n) > 0 && Number(n) < .001 ? Number(n).toLocaleString('ko-KR', {maximumSignificantDigits:3}) : Number(Number(n).toFixed(3)).toLocaleString('ko-KR');
+    const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    // Start empty. Only user-selected or explicitly imported items enter the list.
+    const makeRows = () => [];
+    const s = { page: new URLSearchParams(location.search).get('start') === 'pick' ? 'pick' : 'list', rows: makeRows(), open: null, custom: false, draft: '', draftUnit: '모', error: '', servings: 2, query: '', pending: [], ocr: false };
+    const incomplete = () => s.rows.filter(r => !r.confirmed || !Number.isFinite(Number(r.qty)) || Number(r.qty) <= 0);
+    function thumb(id) {
+        // Decorative placeholder only. Replace this element with the ingredient image later.
+        return '<span class="sf-thumb" aria-hidden="true">이미지</span>';
+    }
+    function button(text, act, css = '') { return `<button type="button" data-act="${act}" class="cursor-interaction ${css}">${text}</button>`; }
+    function footer(text, act, disabled = false) { return `<footer class="sf-foot"><button type="button" data-act="${act}" class="sf-primary cursor-interaction" ${disabled ? 'disabled' : ''}>${text}</button></footer>`; }
+    function notify(t) { live.textContent = t; }
+    // One-tap quantity confirmation advances to the next unconfirmed ingredient.
+    function finishQty(id, qty, unit) { const r = s.rows.find(x => x.id === id); r.qty = qty; r.unit = unit; r.confirmed = true; s.open = incomplete()[0]?.id || null; s.custom = false; s.error = ''; render(); notify(food(id).name + ' ' + num(qty) + unit + ' 확인'); }
+    function openRow(id) { s.open = s.open === id ? null : id; s.custom = false; s.error = ''; render(); }
+    function editor(r) { const f = food(r.id); return `<div class="sf-editor"><p>${r.source === 'ocr' ? '이미지에서 읽은 양이 현재 보유량과 맞나요?' : '지금 남아 있는 양을 선택해 주세요.'}</p><div class="sf-presets">${f.presets.map(([label, q, u], i) => `<button type="button" data-preset="${i}" data-id="${r.id}" aria-pressed="${r.confirmed && r.qty === q && r.unit === u}" class="cursor-interaction">${label}</button>`).join('')}${button('직접 입력', 'custom')}</div>${r.source === 'ocr' && r.qty !== null && !r.confirmed ? button(num(r.qty) + r.unit + ' 맞아요', 'accept-row', 'sf-full') : ''}${s.custom ? `<div class="sf-custom"><label>보유량<input type="text" inputmode="decimal" value="${esc(s.draft)}" id="sf-amount" aria-label="${f.name} 직접 보유량 입력"></label><label>단위<select id="sf-unit">${Object.keys(f.units).map(u => `<option ${u === s.draftUnit ? 'selected' : ''}>${u}</option>`).join('')}</select></label></div>${button('이 양으로 확인', 'save-custom', 'sf-primary sf-full')}` : ''}${s.error ? `<div role="alert" class="sf-error">${s.error}</div>` : ''}<div>${button('목록에서 빼기', 'remove', 'sf-quiet')}</div></div>`; }
+    // Views: empty list, ingredient picker, OCR source, quantity list, servings, done.
+
+// 시안용 기본 양념 예시. 제품에서는 ingredients.json의 pantry === "기본"을 사용합니다.
+const pantryExamples = ['간장', '고추장', '고춧가루', '된장', '설탕', '소금', '식용유', '식초', '쌀', '참기름', '통깨', '후춧가루'];
+function pantryGuide() {
+  return `<section class="pantry-guide" aria-label="기본 양념 안내"><div class="pantry-heading"><span>기본 양념은 있다고 보고 계산해요.</span><button type="button" data-pantry-toggle aria-expanded="false" aria-controls="pantry-list">12개 보기 ⌄</button></div><ul id="pantry-list" hidden>${pantryExamples.map(name=>`<li>${name}</li>`).join('')}</ul></section>`;
+}
+function render() {
+        if (s.page === 'pick') {
+            renderPicker();
+            return;
+        }
+        if (s.page === 'ocr-source') {
+            renderOcrSource();
+            return;
+        }
+        if (s.page === 'list' && !s.rows.length) {
+            content.innerHTML = `<main class="sf-entry"><section class="sf-brand-hero" aria-labelledby="entry-title"><p class="sf-eyebrow">오늘의 요리 준비</p><h2 id="entry-title">냉장고에<br>뭐가 있나요?</h2><img class="sf-entry-mascot" src="squirrel-v2.png" width="176" height="176" alt="" decoding="async"><p class="sf-hero-copy">남아 있는 재료가<br>맛있는 한 끼가 되도록.</p></section><section class="sf-entry-work" aria-label="재료 입력 시작"><p class="sf-entry-label">가진 재료부터 담아볼까요?</p><button type="button" data-act="pick" class="sf-entry-primary cursor-interaction"><span>직접 고르기</span><span aria-hidden="true">↗</span></button><p class="sf-entry-help">여러 개 골라 담고, 남은 양만 알려 주세요.</p><button type="button" data-act="ocr-source" class="sf-entry-ocr cursor-interaction"><span>영수증으로 가져오기</span><span aria-hidden="true">→</span></button>${pantryGuide()}</section></main>`;
+            return;
+        }
+        if (s.page === 'done') {
+            content.innerHTML = `<main class="sf-body"><h2>보유량을 모두 확인했어요</h2><p>${s.rows.length}개 재료 · 각 요리 ${s.servings}인분</p>${s.rows.map(r => `<div class="sf-rowbutton"><span class="sf-identity">${thumb(r.id)}<span>${food(r.id).name}</span></span><strong class="sf-value">${num(r.qty)}${r.unit}</strong></div>`).join('')}<div class="sf-info">입력 흐름 확인용 시안이에요.<br>실제 저장·레시피 추천은 실행하지 않았어요.</div>${button('보유량 다시 수정', 'list', 'sf-quiet')}</main>`;
+            return;
+        }
+        const todo = incomplete(), read = s.rows.filter(r => r.source === 'ocr' && r.qty !== null && !r.confirmed);
+        content.innerHTML = `<main class="sf-body"><h2>남은 양만 알려 주세요</h2><p>${todo.length ? todo.length + '개 재료의 양을 확인하면 끝나요.' : '모든 재료의 양을 확인했어요.'}</p>${s.ocr ? `<details><summary class="cursor-interaction">OCR 예시 원문 보기</summary><div class="sf-info sf-original">두부 300G
+계란 4입
+대파 / 수량 읽기 실패
+
+실제 OCR이 아닌 동작용 예시</div></details>${read.length ? button('읽힌 양 ' + read.length + '개는 맞아요', 'accept-read', 'sf-full') : ''}<p>구매 당시 양이에요. 지금 남은 양으로 고쳐 주세요.</p>` : ''}${s.rows.map(r => `<section class="sf-row"><button type="button" data-open="${r.id}" class="sf-rowbutton cursor-interaction" aria-expanded="${s.open === r.id}" aria-label="${food(r.id).name} 보유량 ${r.confirmed ? num(r.qty) + r.unit : '확인 필요'}"><span class="sf-identity">${thumb(r.id)}<span>${food(r.id).name}</span></span><span class="sf-value ${!r.confirmed ? 'sf-pending' : ''}">${r.confirmed ? num(r.qty) + r.unit : r.qty !== null ? num(r.qty) + r.unit + ' · 확인 필요' : '양 선택'}　${s.open === r.id ? '⌃' : '›'}</span></button>${s.open === r.id ? editor(r) : ''}</section>`).join('') || '<p>재료를 추가해 주세요.</p>'}<div class="sf-tools">${button('+ 재료 추가', 'pick')}</div>${pantryGuide()}</main><footer class="sf-foot"><small>${todo.length ? '보유량을 선택하면 다음 재료가 자동으로 열려요.' : '재료와 인분을 확인하고 조합을 찾아보세요.'}</small><label class="sf-inline-servings">각 요리 분량<select id="sf-servings">${[1,2,3,4].map(n=>`<option value="${n}" ${n===s.servings?'selected':''}>${n}인분</option>`).join('')}</select></label><button type="button" data-act="continue" class="sf-primary cursor-interaction" ${!s.rows.length ? 'disabled' : ''}>${todo.length ? '남은 ' + todo.length + '개 양 확인하기' : '이 재료로 조합 찾기'}</button></footer>${button('영수증으로 재료 더 가져오기 · 예시', 'ocr-source', 'sf-quiet sf-full')}`;
+    }
+    // OCR is a fixed demo. Existing quantities are preserved when imports overlap.
+    function renderOcrSource() {
+        content.innerHTML = `<main class="sf-body">${button('← 재료 목록', 'list', 'sf-quiet')}<h2>영수증에서 재료 가져오기</h2><p>읽어 온 재료와 양을 초안에서 검토한 뒤 목록에 반영해요.</p><div class="sf-info">이 색·서체 시안은 직접 입력 경로를 체험할 수 있어요. OCR 상세 흐름은 별도 승인 와이어프레임에서 확인해 주세요.</div></main>`;
+    }
+    function renderPicker() {
+        content.innerHTML = `<main class="sf-body">${button('← 목록으로', 'list', 'sf-quiet')}<h2>재료를 골라 주세요</h2><p>재료를 골라 담은 뒤 보유량을 확인해요.</p><label class="sr-only" for="sf-search">재료 검색</label><input type="search" id="sf-search" value="${esc(s.query)}" placeholder="재료 이름 검색"><div class="sf-grid" id="sf-options"></div></main>${footer(s.pending.length + '개 재료 담기', 'commit-pick', !s.pending.length)}`;
+        renderOptions();
+    }
+    function renderOptions() {
+        const box = content.querySelector('#sf-options');
+        if (!box)
+            return;
+        const found = catalog.filter(f => f.name.includes(s.query.trim()));
+        box.innerHTML = found.map(f => { const added = s.rows.some(r => r.id === f.id); return `<button type="button" data-pick="${f.id}" class="cursor-interaction" aria-pressed="${s.pending.includes(f.id)}" ${added ? 'disabled' : ''}>${thumb(f.id)}<span>${f.name}${added ? ' · 담김' : ''}</span>${s.pending.includes(f.id) ? '<span class="sf-tick" aria-hidden="true">✓</span>' : ''}</button>`; }).join('') || '<p>찾는 재료가 없어요.</p>';
+        const done = content.querySelector('[data-act="commit-pick"]');
+        if (done) {
+            done.textContent = s.pending.length + '개 재료 담기';
+            done.disabled = !s.pending.length;
+        }
+    }
+    // Event delegation: all changes are local to this document.
+    root.addEventListener('input', e => { if (e.target.id === 'sf-search') {
+        s.query = e.target.value;
+        renderOptions();
+    } if (e.target.id === 'sf-amount') {
+        s.draft = e.target.value;
+    } });
+    root.addEventListener('change', e => {
+        if(e.target.id==='sf-servings'){s.servings=Number(e.target.value);return;} if (e.target.id === 'sf-unit') {
+        const f = food(s.open), v = Number(s.draft);
+        if (s.draft !== '' && Number.isFinite(v))
+            s.draft = Number((v * f.units[s.draftUnit] / f.units[e.target.value]).toFixed(3));
+        s.draftUnit = e.target.value;
+        render();
+    } });
+    root.addEventListener('click', e => {
+        const b = e.target.closest('button');
+        if (!b || b.disabled)
+            return;
+        const d = b.dataset;
+        if (d.open) {
+            openRow(d.open);
+            return;
+        }
+        if (d.preset !== undefined) {
+            const f = food(d.id), p = f.presets[Number(d.preset)];
+            finishQty(d.id, p[1], p[2]);
+            return;
+        }
+        if (d.pick) {
+            s.pending = s.pending.includes(d.pick) ? s.pending.filter(id => id !== d.pick) : [...s.pending, d.pick];
+            renderOptions();
+            return;
+        }
+
+        const a = d.act;
+        if (a === 'custom') {
+            const r = s.rows.find(x => x.id === s.open);
+            s.custom = !s.custom;
+            s.draft = r.qty ?? '';
+            s.draftUnit = r.unit;
+            s.error = '';
+            render();
+        }
+        else if (a === 'save-custom') {
+            const v = Number(String(s.draft).replace(',', '.'));
+            if (!Number.isFinite(v) || v <= 0 || v > 100000) {
+                s.error = '0보다 크고 100,000 이하인 양을 입력해 주세요.';
+                render();
+            }
+            else
+                finishQty(s.open, v, s.draftUnit);
+        }
+        else if (a === 'accept-row') {
+            const r = s.rows.find(x => x.id === s.open);
+            if (r.qty > 0)
+                finishQty(r.id, r.qty, r.unit);
+        }
+        else if (a === 'accept-read') {
+            s.rows.filter(r => r.source === 'ocr' && r.qty !== null).forEach(r => r.confirmed = true);
+            s.open = incomplete()[0]?.id || null;
+            s.custom = false;
+            render();
+        }
+        else if (a === 'remove') {
+            s.rows = s.rows.filter(r => r.id !== s.open);
+            s.open = incomplete()[0]?.id || null;
+            s.custom = false;
+            render();
+        }
+        else if (a === 'continue') {
+            const todo = incomplete();
+            if (todo.length) {
+                s.open = todo[0].id;
+                s.custom = false;
+                render();
+                notify('먼저 ' + food(s.open).name + ' 양을 선택해 주세요');
+            }
+            else if (s.rows.length) {
+                s.page = 'done';
+                render();
+            }
+        }
+        else if (a === 'pick') {
+            s.page = 'pick';
+            s.query = '';
+            s.pending = [];
+            render();
+        }
+        else if (a === 'commit-pick') {
+            for (const id of s.pending)
+                if (!s.rows.some(r => r.id === id))
+                    s.rows.push({ id, qty: null, unit: Object.keys(food(id).units)[0], confirmed: false, source: 'manual' });
+            s.page = 'list';
+            s.open = incomplete()[0]?.id || null;
+            s.custom = false;
+            s.pending = [];
+            render();
+        }
+        else if (a === 'list') {
+            s.page = 'list';
+            s.custom = false;
+            s.pending = [];
+            render();
+        }
+
+        else if (a === 'ocr-source') {
+            s.page = 'ocr-source';
+            s.custom = false;
+            s.error = '';
+            render();
+        }
+        else if (a === 'load-ocr') {
+            s.ocr = true;
+            const imported = [{ id: 'tofu', qty: 300, unit: 'g', confirmed: false, source: 'ocr' }, { id: 'egg', qty: 4, unit: '개', confirmed: false, source: 'ocr' }, { id: 'scallion', qty: null, unit: '단', confirmed: false, source: 'ocr' }];
+            for (const row of imported)
+                if (!s.rows.some(existing => existing.id === row.id))
+                    s.rows.push(row);
+            s.page = 'list';
+            s.open = null;
+            s.custom = false;
+            s.error = '';
+            render();
+            notify('영수증 예시에서 새 재료를 가져왔어요');
+        }
+        else if (a === 'reset') {
+            s.rows = makeRows();
+            s.open = null;
+            s.page = 'list';
+            s.custom = false;
+            s.error = '';
+            s.servings = 2;
+            s.ocr = false;
+            s.pending = [];
+            s.query = '';
+            render();
+        }
+    });
+    render();
+}
+
+document.addEventListener('click', event => {
+  const button = event.target.closest('[data-pantry-toggle]');
+  if (!button) return;
+  const list = document.getElementById('pantry-list');
+  const expanded = button.getAttribute('aria-expanded') !== 'true';
+  button.setAttribute('aria-expanded', String(expanded));
+  button.textContent = expanded ? '목록 접기 ⌃' : '12개 보기 ⌄';
+  list.hidden = !expanded;
+});
+</script>
+</body>
+</html>
