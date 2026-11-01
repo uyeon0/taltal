@@ -19,3 +19,9 @@ test('형식이 틀리거나 너무 큰 요청은 400이다', async () => {
   ];
   for (const [name, body] of cases) assert.equal((await call(body)).status, 400, name);
 });
+
+test('본문이 32KB를 넘으면 JSON을 읽지 않고 400이다', async () => {
+  const body = JSON.stringify({ inventory: [], servings: 2, padding: 'x'.repeat(40 * 1024) });
+  const res = await POST(new Request('http://localhost/api/candidates', { method: 'POST', body }));
+  assert.equal(res.status, 400);
+});

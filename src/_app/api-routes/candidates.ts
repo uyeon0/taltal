@@ -4,6 +4,7 @@ import type { Stock } from '@/entities/ingredient';
 import { getRecipes } from '@/entities/recipe/index.server';
 import { filterCandidates } from '@/features/find-meals/index.server';
 
+import { readJsonBody } from './read-json-body';
 import { serverError } from './server-error';
 
 type Body = { inventory: Stock[]; servings: number };
@@ -11,6 +12,8 @@ type Body = { inventory: Stock[]; servings: number };
 // 화면이 보내는 양보다 넉넉한 상한. 지나치게 큰 요청을 처리하지 않으려는 것이다
 const MAX_INVENTORY = 200;
 const MAX_ID_LENGTH = 50;
+// 재료 200개를 담아도 넉넉한 본문 크기
+const MAX_BODY_BYTES = 32 * 1024;
 
 function isBody(x: unknown): x is Body {
   if (typeof x !== 'object' || x === null) return false;
@@ -32,7 +35,7 @@ function isBody(x: unknown): x is Body {
 }
 
 export async function POST(request: Request) {
-  const body: unknown = await request.json().catch(() => null);
+  const body = await readJsonBody(request, MAX_BODY_BYTES);
   if (!isBody(body)) return Response.json({ error: '잘못된 요청입니다.' }, { status: 400 });
 
   try {
