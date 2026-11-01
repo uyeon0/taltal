@@ -18,7 +18,7 @@ const MAX_PURCHASES_BY_MODE: Record<Mode, number | undefined> = { noBuy: 0, buy:
 
 /**
  * 가짓수별 결과 중 보여 줄 것을 고른다. 요리를 더 해도 남는 비율이 줄지 않는 결과는 숨긴다.
- * 구매 3가지 한도 때문에 가짓수를 늘리면 덜 쓰는 묶음이 나올 수 있어서다 (레인 A, 10/29).
+ * 구매 3가지 한도 때문에 가짓수를 늘리면 덜 쓰는 묶음이 나올 수 있어서다.
  * 남은 결과는 가짓수가 늘수록 덜 남으므로 마지막 것이 가장 덜 남는다.
  */
 export function compare(results: Option[]): Comparison {

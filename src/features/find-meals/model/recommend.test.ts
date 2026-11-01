@@ -1,6 +1,5 @@
 // 실행: npm test
-// 실제 데이터는 공개 저장소에 없다. 비공개 저장소 camp-project-1-data의 app/*.json을 data/app/에 복사해 두거나,
-// APP_DATA_DIR로 그 폴더를 넘긴다.
+// 실제 데이터(data/app/, 또는 APP_DATA_DIR)로 도는 테스트는 데이터가 없으면 건너뛴다.
 
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
@@ -182,7 +181,7 @@ dataTest('특수 양념은 pantryNeeded에만 들어간다', () => {
 
 const rank = (g: string | null) => ({ '빨리 상함': 3, 보통: 2, '오래 감': 1 })[g ?? ''] ?? 0;
 
-dataTest('day는 1부터 요리 수까지 겹치지 않게 붙고, 더 빨리 상하는 재료를 쓰는 요리가 먼저다 (PROJ1-120)', () => {
+dataTest('day는 1부터 요리 수까지 겹치지 않게 붙고, 더 빨리 상하는 재료를 쓰는 요리가 먼저다', () => {
   for (const meals of [3, 5]) {
     const r = run(basket, meals);
     assert.deepEqual(
@@ -243,7 +242,7 @@ dataTest('기준 묶음 결과 출력', () => {
     console.log(`\n[${meals}가지 요리, 2인분] status=${r.status}, 남는 비율=${r.leftoverRatio}`);
     for (const m of [...r.meals].sort((a, b) => a.day - b.day))
       console.log(
-        `  ${m.day}일째 ${m.name}(${m.urgency ?? '-'}: ${m.urgentIngredients.join(', ')}): ${m.uses.map((u) => `${u.ingredientId} ${u.grams}g`).join(', ')}${m.toBuy.length ? ` (살 것: ${m.toBuy.join(', ')})` : ''}`
+        `  ${m.day}번째 ${m.name}(${m.urgency ?? '-'}: ${m.urgentIngredients.join(', ')}): ${m.uses.map((u) => `${u.ingredientId} ${u.grams}g`).join(', ')}${m.toBuy.length ? ` (살 것: ${m.toBuy.join(', ')})` : ''}`
       );
     console.log(
       `  장보기: ${r.shoppingList.map((s) => `${s.ingredientId} ${s.grams}g${s.optional ? '(있으면 좋음)' : ''}`).join(', ') || '없음'}`

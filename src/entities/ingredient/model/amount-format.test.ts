@@ -1,6 +1,6 @@
 // 실행: npm test
-// 규칙 표는 src/lib/amount-format.ts 머리말과 기록 저장소 DESIGN.md "재료 배분 표현"을 따른다.
-// 마지막 묶음만 실제 데이터(data/app/ingredients.json)를 쓴다. 없으면 APP_DATA_DIR로 넘긴다.
+// 규칙 표는 amount-format.ts 머리말과 docs/design.md "잔량·수량 표기 규칙"을 따른다.
+// 마지막 묶음만 실제 데이터(data/app/ingredients.json, 또는 APP_DATA_DIR)를 쓰고, 데이터가 없으면 건너뛴다.
 
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
@@ -8,14 +8,14 @@ import path from 'node:path';
 import { test } from 'vitest';
 
 import { amountsReconcile, describeAmount, formatAmount } from './amount-format';
-import type { Ingredient } from './types';
+import type { Ingredient, InputUnit } from './types';
 
-const make = (id: string, unitGrams: Record<string, number>): Ingredient => ({
+const make = (id: string, unitGrams: Partial<Record<InputUnit, number>>): Ingredient => ({
   id,
   aliases: [],
   pantry: null,
   unitGrams: { ...unitGrams, g: 1 },
-  inputUnits: [...Object.keys(unitGrams), 'g'],
+  inputUnits: [...(Object.keys(unitGrams) as InputUnit[]), 'g'],
   gramsSource: null
 });
 const onion = make('양파', { 개: 200 });
@@ -153,7 +153,7 @@ dataTest('실제 재료 전체: 양수가 0으로 보이지 않는다', () => {
 dataTest('실제 재료 전체: 정확한 값은 g으로 되돌렸을 때 오차 허용 범위 안이다', () => {
   for (const ing of ingredients.filter((i) => i.inputUnits.length > 0)) {
     for (const unit of ing.inputUnits) {
-      const per = ing.unitGrams[unit];
+      const per = ing.unitGrams[unit]!;
       for (const frac of [0.25, 1 / 3, 0.5, 2 / 3, 0.75, 1, 1.25, 2.5]) {
         const g = round1(per * frac);
         const view = describeAmount(ing, g, unit);

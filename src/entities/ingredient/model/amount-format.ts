@@ -1,12 +1,12 @@
-// 재료 양 표시 규칙 (PROJ1-123). 요약·배분 상세·요리 카드·장보기에서 같은 함수를 쓴다.
-// 규칙의 원본은 기록 저장소 DESIGN.md "재료 배분 표현"과 DESIGN-HANDOFF.md다.
+// 재료 양 표시 규칙. 요약·배분 상세·요리 카드·장보기에서 같은 함수를 쓴다.
+// 규칙의 원본은 docs/design.md "잔량·수량 표기 규칙"이다.
 //
 // - 분수(½ ⅓ ⅔ ¼ ¾)는 환산 오차 안에서 정확히 맞을 때만 쓴다. 예: 50g, 개 200g → ¼개
 // - 분수가 아니어도 소수 한 자리로 정확히 맞으면 그대로(0.2개), 아니면 "약 0.4개"
 // - 0이 아닌 양이 0.1 단위 아래면 "0.1개 미만(10g)". "0개"는 실제 0일 때만 쓴다
 // - 이 함수는 표시 문자열만 만든다. 막대 비율·다 썼는지 판정은 g 내부값으로 한다
 
-import type { Ingredient } from './types';
+import type { Ingredient, InputUnit } from './types';
 
 /** 양이 0이라고 볼 g 아래 값. 0이 아닌 값은 아무리 작아도 양수로 다룬다 */
 const ZERO_G = 1e-6;
@@ -42,7 +42,7 @@ const trim = (n: number) => String(round1(n));
 const gramsText = (grams: number) => (round1(grams) < TINY_UNIT ? '0.1g 미만' : `${trim(grams)}g`);
 
 /** g 값을 입력 단위로 바꿔 표시 문구와 종류를 돌려준다 */
-export function describeAmount(ingredient: Ingredient, grams: number, unit: string): AmountView {
+export function describeAmount(ingredient: Ingredient, grams: number, unit: InputUnit): AmountView {
   const per = unit === 'g' ? 1 : (ingredient.unitGrams[unit] ?? 0);
   // 환산 근거가 없는 단위는 g으로 보여 준다
   const label = per > 0 ? unit : 'g';
@@ -82,7 +82,7 @@ export function describeAmount(ingredient: Ingredient, grams: number, unit: stri
 export function formatAmount(
   ingredient: Ingredient,
   grams: number,
-  unit: string,
+  unit: InputUnit,
   options: { withGrams?: boolean } = {}
 ): string {
   const view = describeAmount(ingredient, grams, unit);
@@ -98,7 +98,7 @@ export function formatAmount(
  */
 export function amountsReconcile(
   ingredient: Ingredient,
-  unit: string,
+  unit: InputUnit,
   partsGrams: number[],
   totalGrams: number
 ): boolean {
