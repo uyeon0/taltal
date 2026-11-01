@@ -39,12 +39,10 @@
 | `entities/recipe/model/` | `src/logic/types.ts` 일부, `src/server/data.ts`의 `RecipeDetail` | `Recipe`, `RecipeIngredient`, `RecipeDetail` |
 | `entities/recipe/api/` | `src/server/data.ts`, `src/data/fake.ts` 일부 | 레시피와 상세 읽기(서버 전용), 상세 요청 함수(브라우저), 가짜 레시피 |
 | `shared/db/` | `src/server/data.ts` 일부 | `APP_DATA_DIR` 또는 `data/app/`에서 JSON을 읽는 함수. 도메인 타입을 쓰지 않는다 |
-| `shared/ui/` | `src/components/ui/` | shadcn 컴포넌트 |
-| `shared/lib/utils.ts` | `src/lib/utils.ts` | `cn` |
 
 - 슬라이스마다 `index.ts`로 공개 API를 내보낸다. 서버 전용 읽기 함수는 `index.server.ts`로 내보내고 파일 첫 줄에 `import "server-only"`를 둔다.
 - `src/lib/amount.ts`의 `inUnit`, `shoppingAmount`, `num`, `defaultQty`는 가져오지 않는다.
-- `components.json`의 별칭을 `@/shared/ui`, `@/shared/lib/utils`로 바꾼다.
+- shadcn 컴포넌트(`src/components/ui/`)와 `src/lib/utils.ts`는 옮기지 않는다. 앱 공통 기반 작업에서 디자인 기준에 맞게 고치면서 `shared/ui`로 옮긴다. `components.json`은 전역 CSS 경로만 고친다.
 - `next.config.ts`의 `outputFileTracingIncludes`와 `.gitignore`의 `/data/app/`를 가져온다.
 
 ## 코드 수정
@@ -71,7 +69,7 @@
 ### 테스트
 
 - `node --test`를 Vitest로 바꾼다. `tsconfig`의 `@/` 별칭을 읽도록 설정한다.
-- 기존 테스트 두 파일은 `node:test`, `node:assert`를 Vitest의 `test`, `expect`로 바꾸는 것 말고는 고치지 않는다. 새 위치의 코드 옆으로 옮긴다.
+- 기존 테스트 두 파일은 `node:test`의 `test`를 Vitest의 `test`로 바꾸고 import 경로를 고치는 것 말고는 고치지 않는다. `node:assert`는 Vitest에서도 동작하므로 단언문은 그대로 둔다. 새 위치의 코드 옆으로 옮긴다.
 - 테스트를 더한다.
   - 3·4·5가지 비교: 가짓수가 늘어도 남는 비율이 줄지 않는 결과를 빼는지, `partial`을 어떻게 남기는지
   - 실제 데이터의 모든 재료에서 `inputUnits`가 `INPUT_UNITS` 안에 있고 `unitGrams`의 키와 같은지
@@ -113,7 +111,7 @@
 2. 폴더 이동과 로직 이전
 3. 타입 좁히기와 주석 정리
 4. 가짜 데이터 보강과 테스트 추가
-5. 기존 코드 전체 포맷
+5. 기존 코드 전체 포맷. 커밋할 때 husky가 바뀐 파일을 포맷하므로, 남는 파일만 정리한다. shadcn 컴포넌트는 포맷하지 않는다
 
 ## 완료 기준
 
