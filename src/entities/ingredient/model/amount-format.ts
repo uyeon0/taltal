@@ -56,8 +56,8 @@ export function describeAmount(ingredient: Ingredient, grams: number, unit: Inpu
   if (!(grams > ZERO_G)) return { text: `0${label}`, kind: 'zero', value: 0 };
 
   if (label === 'g') {
-    if (grams < TINY_GRAMS) return { text: '0.1g 미만', kind: 'tiny', value: null };
-    return { text: `${trim(grams)}g`, kind: 'exact', value: round1(grams) };
+    const text = gramsText(grams);
+    return grams < TINY_GRAMS ? { text, kind: 'tiny', value: null } : { text, kind: 'exact', value: round1(grams) };
   }
 
   const q = grams / perG;
