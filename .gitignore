@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 실제 앱 데이터. 배포할 때 비공개 데이터 저장소에서 받는다
+/data/app/

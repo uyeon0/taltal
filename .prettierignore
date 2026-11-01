@@ -1,0 +1,5 @@
+docs/
+*.md
+data/
+.next/
+package-lock.json
