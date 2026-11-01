@@ -13,7 +13,8 @@ const dataFile = appDataPath('recipes.json');
 const recipes: Recipe[] = existsSync(dataFile) ? JSON.parse(readFileSync(dataFile, 'utf-8')) : [];
 
 test.skipIf(recipes.length === 0)('한 레시피에는 같은 재료가 한 줄만 있다', () => {
-  // 후보 고르기는 재료 줄마다 재고와 비교하므로, 같은 재료가 두 줄이면 합을 보지 못한다
+  // 데이터 계약의 약속이다. 추천 계산은 같은 재료가 두 줄이어도 합쳐서 처리하지만,
+  // 화면은 재료마다 원문 분량(amountText) 한 줄을 보여 주므로 한 줄로 합쳐 와야 한다
   for (const r of recipes) {
     const ids = r.ingredients.map((i) => i.ingredientId);
     assert.equal(new Set(ids).size, ids.length, `${r.id} ${r.name}`);
