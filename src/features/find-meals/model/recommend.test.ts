@@ -285,3 +285,47 @@ test('남는 비율과 점수는 반올림하기 전 g으로 구한다', () => {
   assert.ok(r.leftoverRatio > 0, `${r.leftoverRatio}`);
   assert.ok(r.leftoverScore > 0);
 });
+
+test('고명으로만 쓰는 재료는 요리 순서와 이유에 넣지 않는다', () => {
+  const ing = (id: string, perishability: Ingredient['perishability']): Ingredient => ({
+    id,
+    aliases: [],
+    pantry: null,
+    unitGrams: { g: 1 },
+    inputUnits: ['g'],
+    gramsSource: null,
+    perishability
+  });
+  const rec = (id: number, lines: [string, number, boolean][]): Recipe => ({
+    id,
+    name: `요리${id}`,
+    type: '국',
+    cookingTime: '10분',
+    level: '쉬움',
+    servingsOriginal: 1,
+    ingredients: lines.map(([ingredientId, grams, vague]) => ({
+      ingredientId,
+      grams,
+      vague,
+      amountText: '',
+      role: '주재료'
+    }))
+  });
+  // 요리1은 상추를 고명 1g으로만, 요리2는 두부를 200g 쓴다
+  const data = {
+    ingredients: [ing('상추', '빨리 상함'), ing('감자', '오래 감'), ing('두부', '보통')],
+    candidates: [
+      rec(1, [
+        ['상추', 1, true],
+        ['감자', 100, false]
+      ]),
+      rec(2, [['두부', 200, false]])
+    ]
+  };
+  const stock = ['상추', '감자', '두부'].map((ingredientId) => ({ ingredientId, grams: 1000 }));
+  const r = recommend(stock, { meals: 2, servings: 1 }, data);
+  const meal = (id: number) => r.meals.find((m) => m.recipeId === id)!;
+  assert.equal(meal(2).day, 1);
+  assert.equal(meal(1).urgency, '오래 감');
+  assert.deepEqual(meal(1).urgentIngredients, ['감자']);
+});
