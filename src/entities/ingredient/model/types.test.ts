@@ -2,13 +2,14 @@
 
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import path from 'node:path';
 import { test } from 'vitest';
+
+import { appDataPath } from '@/shared/db';
 
 import { INPUT_UNITS, type Ingredient } from './types';
 
-const dataDir = process.env.APP_DATA_DIR ?? path.join(process.cwd(), 'data', 'app');
-const dataFile = path.join(dataDir, 'ingredients.json');
+// 앱과 같은 경로에서 실제 데이터를 찾는다
+const dataFile = appDataPath('ingredients.json');
 const real: Ingredient[] = existsSync(dataFile) ? JSON.parse(readFileSync(dataFile, 'utf-8')) : [];
 
 const allowed = new Set<string>(INPUT_UNITS);

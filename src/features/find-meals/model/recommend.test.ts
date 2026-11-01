@@ -3,8 +3,9 @@
 
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import path from 'node:path';
 import { test } from 'vitest';
+
+import { appDataPath } from '@/shared/db';
 
 import type { Ingredient, Stock } from '@/entities/ingredient';
 import type { Recipe } from '@/entities/recipe';
@@ -13,11 +14,9 @@ import { filterCandidates } from './filter-candidates.server';
 import { MAX_PURCHASES } from './inventory';
 import { PERISH_WEIGHT, recommend } from './recommend';
 
-const dataDir = process.env.APP_DATA_DIR ?? path.join(process.cwd(), 'data', 'app');
-// 실제 데이터가 없으면 데이터로 도는 테스트는 건너뛴다
-const hasData = existsSync(path.join(dataDir, 'recipes.json'));
-const load = <T>(name: string, empty: T): T =>
-  hasData ? JSON.parse(readFileSync(path.join(dataDir, name), 'utf-8')) : empty;
+// 앱과 같은 경로에서 실제 데이터를 찾는다. 없으면 데이터로 도는 테스트는 건너뛴다
+const hasData = existsSync(appDataPath('recipes.json'));
+const load = <T>(name: string, empty: T): T => (hasData ? JSON.parse(readFileSync(appDataPath(name), 'utf-8')) : empty);
 const recipes = load<Recipe[]>('recipes.json', []);
 const ingredients = load<Ingredient[]>('ingredients.json', []);
 const dataTest = test.skipIf(!hasData);

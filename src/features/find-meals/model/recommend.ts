@@ -4,6 +4,8 @@
 import type { Ingredient, Stock } from '@/entities/ingredient';
 import type { Recipe } from '@/entities/recipe';
 
+import { round1 } from '@/shared/lib/number';
+
 import { EPS, MAX_PURCHASES, needs, toStock } from './inventory';
 import type { Leftover, Meal, Result } from './types';
 
@@ -13,8 +15,6 @@ export const PERISH_WEIGHT: Record<string, number> = { '빨리 상함': 3, 보�
 
 // 며칠 순서에서 등급을 견주는 값. 클수록 먼저 쓴다.
 const URGENCY_RANK: Record<string, number> = { '빨리 상함': 3, 보통: 2, '오래 감': 1 };
-
-const round1 = (n: number) => Math.round(n * 10) / 10;
 
 type Score = { left: number; buyGrams: number };
 

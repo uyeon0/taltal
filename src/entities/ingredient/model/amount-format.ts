@@ -6,6 +6,8 @@
 // - 0이 아닌 양이 0.1 단위 아래면 "0.1개 미만(10g)". "0개"는 실제 0일 때만 쓴다
 // - 이 함수는 표시 문자열만 만든다. 막대 비율·다 썼는지 판정은 g 내부값으로 한다
 
+import { round1 } from '@/shared/lib/number';
+
 import type { Ingredient, InputUnit } from './types';
 
 /** 양이 0이라고 볼 g 아래 값. 0이 아닌 값은 아무리 작아도 양수로 다룬다 */
@@ -35,7 +37,6 @@ export type AmountView = {
   value: number | null;
 };
 
-const round1 = (n: number) => Math.round(n * 10) / 10;
 /** 1 → "1", 1.5 → "1.5" */
 const trim = (n: number) => String(round1(n));
 

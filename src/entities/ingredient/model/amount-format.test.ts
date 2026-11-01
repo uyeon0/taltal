@@ -4,8 +4,9 @@
 
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import path from 'node:path';
 import { test } from 'vitest';
+
+import { appDataPath } from '@/shared/db';
 
 import { amountsReconcile, describeAmount, formatAmount } from './amount-format';
 import type { Ingredient, InputUnit } from './types';
@@ -132,8 +133,8 @@ test('분수 단위 한 칸씩 올라가는 값은 어느 단위에서도 0으�
 });
 
 // 실제 데이터의 모든 입력 단위에서 작은 양수가 0으로 나오지 않고 분수가 정확히 g으로 돌아오는지 본다
-const dataDir = process.env.APP_DATA_DIR ?? path.join(process.cwd(), 'data', 'app');
-const dataFile = path.join(dataDir, 'ingredients.json');
+// 앱과 같은 경로에서 실제 데이터를 찾는다
+const dataFile = appDataPath('ingredients.json');
 const ingredients: Ingredient[] = existsSync(dataFile) ? JSON.parse(readFileSync(dataFile, 'utf-8')) : [];
 // 실제 데이터가 없으면 데이터로 도는 테스트는 건너뛴다
 const dataTest = test.skipIf(ingredients.length === 0);
