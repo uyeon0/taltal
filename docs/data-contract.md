@@ -79,7 +79,7 @@ type RecipeDetail = {
 | `POST /api/candidates` | `{ inventory: Stock[], servings: number }` | `{ candidates: Recipe[] }` | 형식이 틀리면 400, 앱 데이터가 없거나 서버 오류면 500 |
 | `GET /api/recipes/[id]` | 없음 | `RecipeDetail` | 번호가 숫자로만 되어 있지 않으면 400, 레시피가 없으면 404, 앱 데이터가 없거나 서버 오류면 500 |
 
-`servings`는 1 이상 10 이하의 정수만 받는다. `inventory`는 200개까지, `ingredientId`는 50자까지, 본문은 32KB까지 받는다. 화면은 1~4를 보낸다. 실패 응답의 본문은 `{ error: string }`이다.
+`servings`는 1 이상 10 이하의 정수만 받는다. `inventory`는 200개까지, `ingredientId`는 50자까지, 재료 하나의 `grams`는 0 이상 10,000,000 이하, 본문은 32KB까지 받는다. 화면은 1~4를 보낸다. 실패 응답의 본문은 `{ error: string }`이다.
 
 ## 추천 함수
 
@@ -157,7 +157,7 @@ type Leftover = { ingredientId: string; startGrams: number; leftGrams: number };
 
 ### 요리 순서
 
-- 가진 재료 중 가장 빨리 상하는 등급이 높은 요리가 먼저다. 등급이 같으면 그 등급 재료를 쓰는 g이 많은 요리가, 그래도 같으면 `meals` 순서가 먼저다.
+- 가진 재료 중 가장 빨리 상하는 등급이 높은 요리가 먼저다. 고명("약간")으로만 쓰는 재료는 세지 않는다. 등급이 같으면 그 등급 재료를 쓰는 g이 많은 요리가, 그래도 같으면 `meals` 순서가 먼저다.
 - 산 재료는 사 온 뒤에 쓰므로 등급을 따질 때 세지 않는다.
 - 가진 재료의 등급이 없으면 `urgency`는 `null`이고 맨 뒤로 간다.
 - `recommend`는 `meals` 배열 순서를 바꾸지 않는다. 화면이 `day`로 정렬한다. 순서는 묶음을 고르는 규칙에 영향을 주지 않는다.
