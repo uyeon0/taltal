@@ -77,7 +77,7 @@ type RecipeDetail = {
 | 요청 | 본문 | 성공 응답 | 실패 |
 | --- | --- | --- | --- |
 | `POST /api/candidates` | `{ inventory: Stock[], servings: number }` | `{ candidates: Recipe[] }` | 형식이 틀리면 400, 앱 데이터가 없거나 서버 오류면 500 |
-| `GET /api/recipes/[id]` | 없음 | `RecipeDetail` | 번호가 틀리면 400, 레시피가 없으면 404, 앱 데이터가 없거나 서버 오류면 500 |
+| `GET /api/recipes/[id]` | 없음 | `RecipeDetail` | 번호가 숫자로만 되어 있지 않으면 400, 레시피가 없으면 404, 앱 데이터가 없거나 서버 오류면 500 |
 
 `servings`는 1 이상 10 이하의 정수만 받는다. 화면은 1~4를 보낸다. 실패 응답의 본문은 `{ error: string }`이다.
 
@@ -104,6 +104,7 @@ type Result = {
   shoppingList: { ingredientId: string; grams: number; optional: boolean }[]; // 묶음 전체에서 모자라는 양
   leftovers: Leftover[];
   leftoverRatio: number;  // 남은 g 합 / 처음 g 합. 0~1
+  leftoverScore: number;  // 남는 양 점수. 묶음 고르기와 3·4·5가지 비교에 쓴다. 작을수록 덜 남는다
 };
 
 type Meal = {
@@ -144,14 +145,15 @@ type Leftover = { ingredientId: string; startGrams: number; leftGrams: number };
 
 - `meals`개짜리 묶음을 모두 살펴 남는 양 점수가 가장 낮은 묶음을 고른다. 점수가 같으면 사는 g이 적은 묶음을 고른다.
 - 남는 양 점수는 재료마다 남은 비율에 보관 등급 가중치를 곱해 더한 값이다. 가중치는 빨리 상함 3, 보통 1.5, 오래 감 1이다. g 합으로 세면 무거운 재료만 줄이고 가벼운 채소를 남기는 묶음이 뽑히기 때문이다.
-- `leftoverRatio`는 점수와 다른 값이다. 빨리 상하는 채소를 쓰는 대신 무거운 재료가 남아 `leftoverRatio`가 높게 나올 수 있다.
-- 묶음 하나에서 사는 재료는 `maxPurchases`가지 이하이고, 각 레시피는 가진 재료를 하나 이상 쓴다. 냉장고가 비어 있을 때 전부 사서 만드는 묶음이 나오지 않게 하려는 규칙이다.
+- 결과의 `leftoverScore`가 이 점수다. `leftoverRatio`는 점수와 다른 값이다. 빨리 상하는 채소를 쓰는 대신 무거운 재료가 남아 `leftoverRatio`가 높게 나올 수 있다.
+- 비율과 점수는 반올림하기 전 g으로 구한다. `leftovers`의 g은 소수 한 자리로 반올림한 값이다.
+- 묶음 하나에서 사는 재료는 `maxPurchases`가지 이하이고, 각 레시피는 가진 재료를 고명이 아닌 분량으로 하나 이상 쓴다. 냉장고가 비어 있을 때 전부 사서 만드는 묶음이 나오지 않게 하려는 규칙이다.
 - 고명은 없어도 되는 재료라 사는 재료 수에 세지 않고, 모자라면 `optional: true`로 넣는다.
 - `meals`개를 만들 수 없으면 하나씩 줄여 다시 찾고 `status`를 `partial`로 둔다.
 
 ### 후보 고르기
 
-`filterCandidates`는 가진 재료를 하나 이상 쓰고, 가진 재료를 가진 양 안에서 쓰고, 혼자서도 `maxPurchases`가지를 넘게 사지 않는 레시피만 남긴다. 사야 할 g이 적은 순서로 정렬하고, 같으면 사는 재료 수가 적은 순서, 그다음 가진 재료를 많이 쓰는 순서로 정렬한다. 사지 않아도 되는 레시피가 앞에 오므로 `maxPurchases: 0`에도 같은 후보를 쓸 수 있다.
+`filterCandidates`는 가진 재료를 고명이 아닌 분량으로 하나 이상 쓰고, 가진 재료를 가진 양 안에서 쓰고, 혼자서도 `maxPurchases`가지를 넘게 사지 않는 레시피만 남긴다. 사야 할 g이 적은 순서로 정렬하고, 같으면 사는 재료 수가 적은 순서, 그다음 가진 재료를 많이 쓰는 순서로 정렬한다. 사지 않아도 되는 레시피가 앞에 오므로 `maxPurchases: 0`에도 같은 후보를 쓸 수 있다.
 
 ### 요리 순서
 
@@ -162,7 +164,7 @@ type Leftover = { ingredientId: string; startGrams: number; leftGrams: number };
 
 ### 3·4·5가지 비교
 
-가짓수를 늘려도 남는 비율이 오를 수 있다. 가진 재료를 대부분 쓴 뒤 요리를 더 넣으면 구매 한도 안에서 만들 수 있는 레시피가 부족해 덜 쓰는 묶음으로 바뀌기 때문이다. 화면은 가짓수가 더 많은데 남는 비율이 줄지 않는 결과를 보여 주지 않는다.
+가짓수를 늘려도 남는 양 점수가 오를 수 있다. 가진 재료를 대부분 쓴 뒤 요리를 더 넣으면 구매 한도 안에서 만들 수 있는 레시피가 부족해 덜 쓰는 묶음으로 바뀌기 때문이다. 화면은 가짓수가 더 많은데 남는 양 점수(`leftoverScore`)가 줄지 않는 결과를 보여 주지 않는다. `leftoverRatio`로 비교하지 않는 이유는 빨리 상하는 채소를 다 쓰는 묶음이 g 비율로는 더 남아 보여 숨겨질 수 있어서다.
 
 ## 양 표기
 
