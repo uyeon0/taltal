@@ -12,10 +12,21 @@ export const EPS = 1e-9;
 
 export type Need = { ingredientId: string; grams: number; vague: boolean };
 
+/**
+ * 레시피가 쓰는 재료와 양(servings를 곱한 g). 양념(grams가 null)은 뺀다.
+ * 같은 재료가 여러 줄이면 g을 합친다. 모든 줄이 "약간"일 때만 고명(vague)으로 본다.
+ * 데이터는 같은 재료를 한 줄로 합쳐 오지만, 계산이 그 약속에만 기대지 않게 여기서도 합친다.
+ */
 export function needs(recipe: Recipe, servings: number): Need[] {
-  return recipe.ingredients.flatMap((i) =>
-    i.grams === null ? [] : [{ ingredientId: i.ingredientId, grams: i.grams * servings, vague: i.vague }]
-  );
+  const merged = new Map<string, Need>();
+  for (const i of recipe.ingredients) {
+    if (i.grams === null) continue;
+    const prev = merged.get(i.ingredientId);
+    const grams = i.grams * servings;
+    if (prev) merged.set(i.ingredientId, { ...prev, grams: prev.grams + grams, vague: prev.vague && i.vague });
+    else merged.set(i.ingredientId, { ingredientId: i.ingredientId, grams, vague: i.vague });
+  }
+  return [...merged.values()];
 }
 
 export function toStock(inventory: Stock[]): Map<string, number> {

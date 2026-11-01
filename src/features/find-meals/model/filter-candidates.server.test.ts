@@ -35,3 +35,13 @@ test('가진 재료를 고명으로만 쓰는 레시피는 후보가 아니다',
   const ids = filterCandidates([garnishOnly, mainUse], [{ ingredientId: '대파', grams: 800 }], 1).map((r) => r.id);
   assert.deepEqual(ids, [2]);
 });
+
+test('같은 재료가 여러 줄이면 합으로 재고와 비교한다', () => {
+  // 대파 60g + 50g = 110g. 가진 대파 100g을 넘으므로 후보가 아니다
+  const twice = recipe(3, [
+    ['대파', 60, false],
+    ['대파', 50, false]
+  ]);
+  assert.deepEqual(filterCandidates([twice], [{ ingredientId: '대파', grams: 100 }], 1), []);
+  assert.equal(filterCandidates([twice], [{ ingredientId: '대파', grams: 110 }], 1).length, 1);
+});
