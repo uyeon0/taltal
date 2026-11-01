@@ -9,7 +9,9 @@ import { test } from 'vitest';
 import type { Ingredient, Stock } from '@/entities/ingredient';
 import type { Recipe } from '@/entities/recipe';
 
-import { MAX_PURCHASES, PERISH_WEIGHT, filterCandidates, recommend } from './recommend';
+import { filterCandidates } from './filter-candidates.server';
+import { MAX_PURCHASES } from './inventory';
+import { PERISH_WEIGHT, recommend } from './recommend';
 
 const dataDir = process.env.APP_DATA_DIR ?? path.join(process.cwd(), 'data', 'app');
 // 실제 데이터가 없으면 데이터로 도는 테스트는 건너뛴다

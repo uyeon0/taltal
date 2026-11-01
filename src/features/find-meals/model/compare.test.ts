@@ -7,7 +7,7 @@ import type { Stock } from '@/entities/ingredient';
 
 import { fakeBaskets, fakeIngredients, fakeRecipes } from './__fixtures__/fake-data';
 import { compare, findMealOptions, type Option } from './compare';
-import { filterCandidates } from './recommend';
+import { filterCandidates } from './filter-candidates.server';
 import type { Result } from './types';
 
 // meals에는 개수만 필요하므로 빈 객체로 채운다

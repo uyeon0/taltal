@@ -2,7 +2,7 @@
 
 import type { Stock } from '@/entities/ingredient';
 import { getRecipes } from '@/entities/recipe/index.server';
-import { filterCandidates } from '@/features/find-meals';
+import { filterCandidates } from '@/features/find-meals/index.server';
 
 import { serverError } from './server-error';
 

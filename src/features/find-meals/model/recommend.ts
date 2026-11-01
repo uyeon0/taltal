@@ -1,16 +1,11 @@
 // 가진 재료로 요리 조합을 고른다. 코드의 meals는 화면의 "N가지 요리"다.
-// filterCandidates는 서버에서, recommend는 브라우저에서 쓴다 (docs/overview.md 기술 구조).
+// 브라우저에서 쓴다. 후보는 서버의 filterCandidates(filter-candidates.server.ts)가 고른다.
 
 import type { Ingredient, Stock } from '@/entities/ingredient';
 import type { Recipe } from '@/entities/recipe';
 
+import { EPS, MAX_PURCHASES, needs, toStock } from './inventory';
 import type { Leftover, Meal, Result } from './types';
-
-// 조합 탐색에 넣을 후보 수 상한. C(30, 5) = 142,506가지라 브라우저에서 바로 끝난다.
-export const MAX_CANDIDATES = 30;
-// 조합 하나에서 새로 사는 재료 가짓수의 기본 상한. 빈 냉장고로 "전부 사서 5가지"가 나오지 않게 한다.
-// "약간"으로만 쓰는 재료(고명)는 세지 않는다. 0을 주면 "사지 않고 만들 수 있는 요리"가 된다.
-export const MAX_PURCHASES = 3;
 
 // 남는 양 점수에서 재료 보관 등급별 가중치. 빨리 상하는 재료가 남을수록 점수가 나빠진다.
 // 값 자체에는 근거가 없고, 테스트 바구니로 비교해 정했다.
@@ -20,48 +15,6 @@ export const PERISH_WEIGHT: Record<string, number> = { '빨리 상함': 3, 보�
 const URGENCY_RANK: Record<string, number> = { '빨리 상함': 3, 보통: 2, '오래 감': 1 };
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
-const EPS = 1e-9;
-
-type Need = { ingredientId: string; grams: number; vague: boolean };
-
-function needs(recipe: Recipe, servings: number): Need[] {
-  return recipe.ingredients.flatMap((i) =>
-    i.grams === null ? [] : [{ ingredientId: i.ingredientId, grams: i.grams * servings, vague: i.vague }]
-  );
-}
-
-function toStock(inventory: Stock[]): Map<string, number> {
-  const stock = new Map<string, number>();
-  for (const s of inventory) if (s.grams > 0) stock.set(s.ingredientId, (stock.get(s.ingredientId) ?? 0) + s.grams);
-  return stock;
-}
-
-/**
- * 조합 탐색에 넣을 후보를 고른다.
- * 가진 재료를 하나 이상 쓰고, 가진 재료는 가진 양 안에서만 쓰고, 혼자서도 maxPurchases가지 넘게 사지 않아도 되는 레시피만 남긴다.
- * 사야 할 g이 적은 레시피, 그다음 가진 재료를 많이 쓰는 레시피 순으로 MAX_CANDIDATES개까지 돌려준다.
- * 사지 않아도 되는 레시피가 앞에 오므로, 같은 후보로 recommend의 maxPurchases: 0도 쓸 수 있다.
- */
-export function filterCandidates(
-  recipes: Recipe[],
-  inventory: Stock[],
-  servings: number,
-  maxPurchases = MAX_PURCHASES
-): Recipe[] {
-  const stock = toStock(inventory);
-  const ranked = recipes.flatMap((r) => {
-    const need = needs(r, servings);
-    if (need.some((n) => stock.has(n.ingredientId) && n.grams > stock.get(n.ingredientId)! + EPS)) return [];
-    const lack = need.filter((n) => !n.vague && !stock.has(n.ingredientId));
-    const uses = need.filter((n) => stock.has(n.ingredientId));
-    if (uses.length === 0 || lack.length > maxPurchases) return [];
-    const share = uses.reduce((s, n) => s + n.grams / stock.get(n.ingredientId)!, 0);
-    const buyGrams = lack.reduce((s, n) => s + n.grams, 0);
-    return [{ r, buys: lack.length, buyGrams, share }];
-  });
-  ranked.sort((a, b) => a.buyGrams - b.buyGrams || a.buys - b.buys || b.share - a.share);
-  return ranked.slice(0, MAX_CANDIDATES).map((x) => x.r);
-}
 
 type Score = { left: number; buyGrams: number };
 
