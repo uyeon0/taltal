@@ -5,8 +5,10 @@ import { getRecipeDetail } from '@/entities/recipe/index.server';
 import { serverError } from './server-error';
 
 export async function GET(_request: Request, ctx: RouteContext<'/api/recipes/[id]'>) {
-  const id = Number((await ctx.params).id);
-  if (!Number.isInteger(id)) return Response.json({ error: '잘못된 레시피 번호입니다.' }, { status: 400 });
+  const raw = (await ctx.params).id;
+  // 0x10, 1e1, 12.0처럼 숫자로 읽히는 다른 표기는 받지 않는다
+  const id = /^\d+$/.test(raw) ? Number(raw) : NaN;
+  if (!Number.isSafeInteger(id)) return Response.json({ error: '잘못된 레시피 번호입니다.' }, { status: 400 });
 
   try {
     const detail = await getRecipeDetail(id);

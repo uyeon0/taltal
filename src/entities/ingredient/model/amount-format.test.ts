@@ -164,3 +164,9 @@ dataTest('실제 재료 전체: 정확한 값은 g으로 되돌렸을 때 오차
     }
   }
 });
+
+test('g 표기는 단위와 상관없이 같은 기준으로 0.1g 미만을 판단한다', () => {
+  // 0.06g은 반올림하면 0.1g이지만 0.1g보다 적다
+  assert.equal(formatAmount(beef, 0.06, 'g'), '0.1g 미만');
+  assert.equal(formatAmount(onion, 0.06, '개'), '0.1개 미만(0.1g 미만)');
+});
