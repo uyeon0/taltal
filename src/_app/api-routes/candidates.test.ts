@@ -25,3 +25,8 @@ test('본문이 32KB를 넘으면 JSON을 읽지 않고 400이다', async () => 
   const res = await POST(new Request('http://localhost/api/candidates', { method: 'POST', body }));
   assert.equal(res.status, 400);
 });
+
+test('재료 하나의 g이 상한을 넘으면 400이다', async () => {
+  const res = await call({ inventory: [{ ingredientId: '대파', grams: 1e308 }], servings: 2 });
+  assert.equal(res.status, 400);
+});
