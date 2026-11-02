@@ -36,6 +36,21 @@ export function compare(results: Result[]): Comparison {
   return { options, best: options.length - 1 };
 }
 
+const bestOf = (comparison: Comparison) => comparison.options[comparison.best]?.result;
+
+/**
+ * 사지 않는 묶음을 볼 때 조금 사는 묶음을 제안할지.
+ * 조금 사는 쪽의 가장 덜 남는 결과가 고명이 아닌 재료를 하나 이상 사고, 사지 않는 쪽보다 덜 남을 때만 제안한다.
+ * 누르면 달라지는 게 없거나 더 남는 묶음을 제안하지 않으려는 것이다.
+ */
+export function shouldSuggestBuy(noBuy: Comparison, buy: Comparison): boolean {
+  const without = bestOf(noBuy);
+  const withBuy = bestOf(buy);
+  if (!without || !withBuy) return false;
+  if (!withBuy.shoppingList.some((item) => !item.optional)) return false;
+  return withBuy.leftoverScore < without.leftoverScore - 1e-6;
+}
+
 /** 같은 후보로 두 묶음을 3·4·5가지씩 계산해 비교 결과를 돌려준다 */
 export function findMealOptions(
   inventory: Stock[],

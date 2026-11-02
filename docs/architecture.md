@@ -83,7 +83,7 @@ _app → _pages → widgets → features → entities → shared
 | 슬라이스 | 담는 것 |
 | --- | --- |
 | `build-inventory` | 재료 고르기, 양 정하기, 인분 고르기. 추천에 넣을 입력을 만드는 동작과 입력 상태 저장소(zustand 스토어 `useInventory`). 재료 입력 화면이 쓰는 재료 목록은 `index.server.ts`로 내보낸다 |
-| `find-meals` | 요리 찾기 요청, `filterCandidates`, `recommend`, 3·4·5가지 비교, 결과 타입(`Result`, `Meal`, `Leftover`) |
+| `find-meals` | 요리 찾기 요청, `filterCandidates`, `recommend`, 3·4·5가지 비교, 결과 타입(`Result`, `Meal`, `Leftover`). 브라우저의 묶음 계산은 화면 입력을 멈추지 않게 Web Worker에서 돌린다 |
 
 - `find-meals`는 사지 않는 묶음과 조금 사는 묶음을 함께 돌려준다. 어느 쪽을 보여 줄지는 결과 화면이 정한다.
 - `build-inventory`와 `find-meals`는 서로 import하지 않는다. 입력을 결과로 넘기는 일은 `_pages`가 맡는다. 결과 화면은 `build-inventory`의 `useInventory`로 입력을 읽어 `find-meals`에 넘긴다.

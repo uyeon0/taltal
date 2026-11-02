@@ -87,7 +87,10 @@ export const copy = {
     order: (order: number) => `${order}번째 요리`,
     // urgency가 "빨리 상함"일 때만 보여 준다. 재료가 여럿이면 쉼표로 이은 문자열을 넘긴다
     orderReason: (ingredients: string) => `빨리 상하는 ${ingredients}부터 써요`,
-    toBuy: (ingredient: string, amount: string) => `따로 사야 해요: ${ingredient} ${amount}`,
+    // 레시피의 cookingTime이 "20분"처럼 오므로 앞에 붙인다
+    cookingTime: (time: string) => `조리 ${time}`,
+    // 재료와 양을 "청고추 2개 (20g)"처럼 쓰고, 여럿이면 쉼표로 이은 문자열을 넘긴다
+    toBuy: (ingredients: string) => `따로 사야 해요: ${ingredients}`,
     optional: (ingredients: string) => `있으면 좋음: ${ingredients}`,
     specialSeasoning: (seasonings: string) => `필요한 양념: ${seasonings}`
   },
