@@ -8,7 +8,8 @@ import { AppProviders } from '../providers/app-providers';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
-  title: SITE.name,
+  // 화면이 제목을 정하면 "화면 제목 · 탈탈"이 되고, 정하지 않은 시작 홈은 서비스 이름만 쓴다
+  title: { default: SITE.name, template: `%s · ${SITE.name}` },
   description: SITE.description,
   openGraph: {
     title: SITE.name,
