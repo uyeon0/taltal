@@ -92,12 +92,14 @@
 
 ### 폰트 파일
 
-두 서체 모두 CDN 없이 셀프 호스팅하고 `next/font/local`로 불러온다.
+두 서체 모두 CDN 없이 셀프 호스팅하고 `next/font/local`로 불러온다. 서버에서 그리는 레시피 이미지는 woff2와 가변 글꼴의 굵기를 읽지 못하므로 `src/_app/fonts/image/`의 공식 OTF를 따로 쓴다.
 
 | 서체 | 파일 | 이용 조건 |
 | --- | --- | --- |
 | SUIT | `SUIT-Variable.woff2` (100~900) | SIL OFL 1.1. `LICENSE-SUIT.txt`를 함께 둔다. 파일을 수정하면 SUIT 이름을 쓸 수 없으므로 서브셋을 만들지 않는다 |
 | 낭만있구미체 | `GumiRomance-Regular.woff2` (400) | 무료, 상업 이용 가능. 유료 판매와 왜곡 변형 금지. `NOTICE-GumiRomance.md`를 함께 둔다 |
+| SUIT (이미지) | `image/SUIT-Regular.otf`, `SUIT-Medium.otf`, `SUIT-SemiBold.otf`, `SUIT-Bold.otf` (400~700) | 공식 릴리스 v2.0.5의 `SUIT-otf.zip`에서 받은 그대로다. 조건은 SUIT와 같다 |
+| 낭만있구미체 (이미지) | `image/GumiRomance-Regular.otf` (400) | 구미시 공식 `낭만있구미체.zip`의 `Gumi Romance.otf`를 이름만 바꿔 둔 것이다. 조건은 낭만있구미체와 같다 |
 
 ## 공간과 형태
 
