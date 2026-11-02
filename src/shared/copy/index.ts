@@ -1,5 +1,8 @@
 // 화면 문구. 기준은 docs/copy.md다. 화면 코드에 문구를 직접 쓰지 않고 여기서 가져온다.
-// 재료 이름 뒤에 받침에 따라 달라지는 조사를 붙이지 않는다.
+// 재료 이름 뒤에 받침에 따라 달라지는 조사를 붙이지 않는다. 양념 검색 안내만 예외다.
+import { topicParticle } from '@/shared/lib/korean';
+
+const joinWithTopic = (names: string[]) => `${names.join(', ')}${topicParticle(names[names.length - 1])}`;
 
 export const copy = {
   service: {
@@ -51,7 +54,12 @@ export const copy = {
     addDisabledReason: '재료를 고르면 담을 수 있어요.',
     // 따옴표가 있어 조사를 "는"으로 고정한다
     noResult: (query: string) => `"${query}"는 목록에 없어요. 다른 이름으로 찾아보세요.`,
-    clearSearch: '검색어 지우기'
+    clearSearch: '검색어 지우기',
+    // 양념 이름은 표준명이고 여럿이면 쉼표로 잇는다. 은/는은 마지막 이름의 받침에 맞춘다
+    basicSeasoning: (names: string[]) =>
+      `${joinWithTopic(names)} 기본 양념이라 넣지 않아도 돼요. 있다고 보고 계산해요.`,
+    specialSeasoning: (names: string[]) =>
+      `${joinWithTopic(names)} 양념이라 넣지 않아도 돼요. 요리에 필요하면 ‘필요한 양념’으로 알려 드려요.`
   },
 
   ingredients: {

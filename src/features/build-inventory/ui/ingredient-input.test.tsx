@@ -24,6 +24,22 @@ const onion = make('양파', { 개: 200 });
 const tofu = make('두부', { 모: 300 });
 const egg = make('계란', { 개: 50 }, ['달걀']);
 const INGREDIENTS = [onion, tofu, egg];
+const seasoning = (id: string, pantry: '기본' | '특수', aliases: string[] = []): Ingredient => ({
+  id,
+  aliases,
+  pantry,
+  unitGrams: {},
+  inputUnits: [],
+  gramsSource: null
+});
+const SEASONINGS = [
+  seasoning('간장', '기본', ['[불고기양념] 간장', '조림간장']),
+  seasoning('마늘', '특수', ['다진마늘', '다진 마늘']),
+  seasoning('버터', '특수'),
+  seasoning('고추장', '기본'),
+  seasoning('고추씨', '기본'),
+  seasoning('고추기름', '특수')
+];
 
 const store = () => useInventory.getState();
 
@@ -46,6 +62,7 @@ function PickerHarness({ onAdded = () => {} }: { onAdded?: (ids: string[]) => vo
         open={open}
         onOpenChange={setOpen}
         ingredients={INGREDIENTS}
+        seasonings={SEASONINGS}
         onAdded={(ids) => {
           onAdded(ids);
           setOpen(false);
@@ -109,6 +126,47 @@ test('검색 결과가 없으면 안내와 검색어 지우기를 보여 준다'
   fireEvent.click(screen.getByRole('button', { name: '검색어 지우기' }));
   assert.equal((search as HTMLInputElement).value, '');
   assert.ok(tile('양파'));
+});
+
+test('기본 양념을 검색하면 "목록에 없어요" 대신 기본 안내를 보여 준다', () => {
+  render(<PickerHarness />);
+  fireEvent.change(screen.getByRole('searchbox'), { target: { value: '조림' } });
+  assert.equal(screen.getByRole('status').textContent, '간장은 기본 양념이라 넣지 않아도 돼요. 있다고 보고 계산해요.');
+  assert.equal(screen.queryByText(/목록에 없어요/), null);
+  assert.equal(screen.queryByRole('button', { name: '검색어 지우기' }), null);
+});
+
+test('특수 양념은 검색어가 아니라 표준명으로 안내하고 조사를 받침에 맞춘다', () => {
+  render(<PickerHarness />);
+  const search = screen.getByRole('searchbox');
+  const notice = '요리에 필요하면 ‘필요한 양념’으로 알려 드려요.';
+  fireEvent.change(search, { target: { value: '다진마늘' } });
+  assert.equal(screen.getByRole('status').textContent, `마늘은 양념이라 넣지 않아도 돼요. ${notice}`);
+  fireEvent.change(search, { target: { value: '버터' } });
+  assert.equal(screen.getByRole('status').textContent, `버터는 양념이라 넣지 않아도 돼요. ${notice}`);
+});
+
+test('양념이 여럿 맞으면 종류별로 한 문장씩 보여 준다', () => {
+  render(<PickerHarness />);
+  fireEvent.change(screen.getByRole('searchbox'), { target: { value: '고추' } });
+  const lines = Array.from(screen.getByRole('status').querySelectorAll('p'), (p) => p.textContent);
+  assert.deepEqual(lines, [
+    '고추장, 고추씨는 기본 양념이라 넣지 않아도 돼요. 있다고 보고 계산해요.',
+    '고추기름은 양념이라 넣지 않아도 돼요. 요리에 필요하면 ‘필요한 양념’으로 알려 드려요.'
+  ]);
+});
+
+test('일반 재료가 함께 맞으면 재료만 보이고 양념 안내는 없다', () => {
+  render(<PickerHarness />);
+  fireEvent.change(screen.getByRole('searchbox'), { target: { value: '양파' } });
+  assert.ok(tile('양파'));
+  assert.equal(screen.queryByRole('status'), null);
+});
+
+test('양념 별칭의 요리 이름만 맞으면 목록에 없다고 안내한다', () => {
+  render(<PickerHarness />);
+  fireEvent.change(screen.getByRole('searchbox'), { target: { value: '불고기' } });
+  screen.getByText('"불고기"는 목록에 없어요. 다른 이름으로 찾아보세요.');
 });
 
 function renderEditor(ingredient: Ingredient, onAmountSet: (id: string) => void = () => {}) {
