@@ -55,7 +55,7 @@
 | 출력 | 내용 |
 | --- | --- |
 | `public/images/ingredients/<file>` | `delivery-manifest.json`의 `assets` 32개를 256px로 줄인 PNG. 이름은 manifest의 `file`을 쓴다 |
-| `public/images/mascot/<식별자>.png` | design.md 표의 다섯 파일을 640px로 줄인 PNG. 이름은 `default`, `discovery`, `thinking`, `meal`, `retry` |
+| `public/images/mascot/<식별자>.png` | design.md 표의 여섯 파일을 640px로 줄인 PNG. 이름은 `default`, `discovery`, `thinking`, `meal`, `retry`, `question` |
 | `public/brand/favicon.png`, `public/brand/apple-icon.png` | `squirrel-v2.png`를 64px, 180px로 줄인 PNG. 로고가 오면 바꾼다 |
 | `src/entities/ingredient/model/ingredient-images.ts` | manifest의 `ingredients`에서 만든 재료 ID → 경로 객체(`INGREDIENT_IMAGES`)와 대체 그림 경로(`INGREDIENT_FALLBACK_IMAGE`). 키가 재료 ID라서 shared가 아니라 entities에 둔다 |
 
