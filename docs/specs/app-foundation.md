@@ -119,7 +119,7 @@ vaul `Drawer`로 만든다.
 - 시트 뒤는 `--scrim`(Ink 50%)으로 덮는다. 위쪽 라운딩 20px, 안쪽 16px, 높이는 화면의 90%까지이고, 열기와 닫기는 320ms `--easing-sheet`다.
 - 시트 본문은 `overflow-y: auto`와 `overscroll-behavior: contain`으로 본문 스크롤과 섞이지 않게 한다.
 - 제목은 `Drawer.Title`, 닫기 버튼은 Ghost로 둔다. Esc로 닫힌다.
-- 가상 키보드가 열려도 입력칸과 주 행동이 보이게, 주 행동을 시트 아래에 고정하고 `visualViewport` 높이에 맞춘다. vaul의 `repositionInputs`로 충분한지 실제 기기에서 확인하고, 모자라면 직접 맞춘다.
+- 가상 키보드가 열려도 입력칸과 주 행동이 보이게, 주 행동을 시트 아래에 고정하고 `visualViewport`에 맞춘다. vaul의 `repositionInputs`는 끈다. 시트 위쪽 여백을 남긴 채 높이만 줄여서, Android에서 검색칸에 포커스하면 재료 격자가 거의 보이지 않았기 때문이다. 대신 `shared/lib/use-visual-viewport.ts`로 키보드가 가린 높이만큼 시트를 올리고, 시트 안 입력칸에 포커스가 있는 동안에는 시트의 최대 높이를 보이는 높이 전체로 늘린다.
 - 앱 열과 같은 폭(최대 448px)으로 가운데 둔다. `html`의 `scrollbar-gutter: stable`이 스크롤바 자리를 늘 비워 두므로, 시트가 열릴 때 Radix가 `body`에 넣는 오른쪽 여백을 0으로 덮는다. 덮지 않으면 시트를 열 때 앱 열이 왼쪽으로 밀린다.
 - vaul은 기본으로 열 때 포커스를 옮기지 않으므로 `autoFocus`를 켠다. 키보드로 열면 포커스가 시트 안에서 시작한다.
 - vaul이 넣는 0.5s 전환은 전역 CSS에서 `--duration-sheet`로 덮는다. 끌어 놓을 때 vaul이 inline으로 넣는 전환도 덮어야 해서 `!important`를 쓴다.
