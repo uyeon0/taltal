@@ -82,7 +82,7 @@ export function IntroCarousel() {
                 <div className="relative min-h-0 w-full flex-1">
                   <Card data-slot="intro-preview" aria-hidden className="surface-default h-full" />
                   {/* 영역의 오른쪽 아래 모서리에 걸친다. 그림의 투명 여백만 슬라이드 밖으로 나가서 꼬리와 몸이 잘리지 않는다 */}
-                  <Mascot pose={pose} size={120} className="absolute -right-16 -bottom-3 -scale-x-100" />
+                  <Mascot pose={pose} size={120} className="absolute -right-12 -bottom-3 -scale-x-100" />
                 </div>
               </div>
             ))}
