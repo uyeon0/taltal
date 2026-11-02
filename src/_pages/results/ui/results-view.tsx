@@ -107,7 +107,8 @@ export function ResultsView({ search, ingredients, units, servings }: ResultsVie
             </TabsTrigger>
           ))}
         </TabsList>
-        <TabsContent value={String(option.dishes)} className="flex flex-col gap-6">
+        {/* 패널 안에 누를 수 있는 버튼이 있어 패널 자체는 Tab 정지점이 아니다 */}
+        <TabsContent value={String(option.dishes)} tabIndex={-1} className="flex flex-col gap-6">
           <ResultSummary
             result={result}
             ingredients={ingredientMap}

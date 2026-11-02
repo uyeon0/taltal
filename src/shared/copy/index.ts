@@ -6,9 +6,16 @@ export const copy = {
     name: '탈탈'
   },
 
+  // 브라우저 탭의 제목. 서비스 이름은 루트 레이아웃의 title.template이 붙인다
+  pageTitle: {
+    intro: '서비스 소개',
+    ingredients: '재료와 양 넣기',
+    results: '추천 결과'
+  },
+
   intro: {
     title: '이 재료들을\n어떻게 다 먹지?',
-    description: '산 재료를 나눠 쓰는 요리 3~5가지를 알려 드려요.',
+    description: '산 재료를 탈탈 털어 나눠 쓰는 요리 3~5가지를 알려 드려요.',
     // 소개의 세 미리 보기가 이어 쓰는 가상 예시. 첫 재료(두부)를 요리 세 가지에 나눠 쓴다
     exampleIngredients: [
       { name: '두부', amount: '300g' },
