@@ -220,3 +220,11 @@ test('숨겼다 다시 보이면 이전 결과 없이 계산 중부터 시작해
   next.resolve(search(comparison(result('바뀜', 150)), none));
   await screen.findByText('바뀜1');
 });
+
+test('가짓수 탭 패널은 Tab 정지점이 아니다', async () => {
+  searchMeals.mockResolvedValue(search(comparison(result('패널', 150)), none));
+  render(<ResultsScreen ingredients={INGREDIENTS} />);
+
+  await screen.findByText('패널1');
+  assert.equal(screen.getByRole('tabpanel').getAttribute('tabindex'), '-1');
+});
