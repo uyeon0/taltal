@@ -54,7 +54,7 @@ export const copy = {
     pantryCollapse: '목록 접기',
     servings: '한 번에 몇 인분씩 만들까요?',
     servingsOption: (servings: number) => `${servings}인분`,
-    receiptComingSoon: '영수증으로 넣기 · 준비 중',
+    // 영수증으로 넣기는 뺐다. 공통 기반 확인 화면(foundation-preview)이 아직 쓰므로 그 화면이 지워지면 함께 지운다
     receiptComingSoonGuide: '영수증으로 넣기는 준비 중이에요. 지금은 재료를 직접 골라 주세요.',
     findMeals: '요리 찾기',
     findMealsDisabledReason: '재료를 담으면 요리를 찾을 수 있어요.',

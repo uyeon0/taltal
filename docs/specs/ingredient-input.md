@@ -14,7 +14,7 @@
 | 인분 기본값 | 요구사항 문서대로 2인분이다. `INITIAL_INVENTORY.servings`를 2로 바꾼다 |
 | 비활성 이유 문구 | 요리 찾기: "재료를 담으면 요리를 찾을 수 있어요." 담기: "재료를 고르면 담을 수 있어요." `docs/copy.md`와 `shared/copy`에 더한다 |
 | g 상한 | 직접 입력한 수량을 g으로 바꾼 값이 10,000,000g을 넘어도 수량 오류를 보여 준다. 서버 API가 재료 하나에 10,000,000g까지만 받기 때문이다. 오류 문구는 바꾸지 않는다 |
-| 준비 중 표시 | 시작 홈 작업(세션 B)이 공통 컴포넌트를 만든다. 이 화면에는 그 컴포넌트가 머지된 뒤 붙인다. 그 전까지 자리만 비워 둔다 |
+| 영수증으로 넣기 | 기능을 빼기로 했다. 준비 중 표시도 두지 않는다 |
 | 재료 카드 선택 | 체크로만 구분한다. 선은 고르기 전후 모두 3px Ink, 면은 Light다 |
 
 ## 슬라이스와 파일
@@ -60,7 +60,7 @@ type PickableIngredients = {
 1. `AppHeader`(`backHref="/"`)
 2. 제목 "재료와 양을 알려 주세요". `font-display`, 고정 문구라 낭만있구미체로 쓴다. 지원 글자 목록에 모두 있다
 3. 담은 재료 목록(`widgets/ingredient-list`). 비어 있으면 `Mascot pose="discovery"`와 빈 목록 제목, 설명
-4. "재료 추가" Secondary 버튼(`data-sheet-opener="ingredient-picker"`)과 준비 중 표시 자리
+4. "재료 추가" Secondary 버튼(`data-sheet-opener="ingredient-picker"`)
 5. 기본 양념 안내와 접힌 목록
 6. 인분 선택(`ServingsPicker`)
 7. 화면 아래 고정 주 행동
@@ -262,7 +262,6 @@ function toStocks(items: InventoryItem[], ingredients: Ingredient[]): Stock[];
 
 ## 하지 않는 것
 
-- 준비 중 표시 컴포넌트. 세션 B가 만든 뒤 붙인다.
 - 계산 중 화면과 `/results`. 추천 결과 작업이 만든다.
 - 목록에 없는 재료를 직접 적어 넣는 기능, 사진·영수증 입력.
 

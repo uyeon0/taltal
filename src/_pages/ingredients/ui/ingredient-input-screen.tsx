@@ -144,7 +144,6 @@ export function IngredientInputScreen({ pickable, pantryBasics }: IngredientInpu
             <Plus aria-hidden="true" />
             {copy.ingredients.addIngredient}
           </Button>
-          {/* 영수증으로 넣기 준비 중 표시는 시작 홈 작업이 만드는 공통 컴포넌트가 머지되면 여기에 둔다 */}
         </div>
 
         <PantryBasics names={pantryBasics} />
