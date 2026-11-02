@@ -45,19 +45,22 @@ export function recipeImageFileName(name: string): string {
 const isDomError = (error: unknown, name: string) => error instanceof DOMException && error.name === name;
 
 /**
- * 터치 기기(휴대폰, 태블릿)인지. 브라우저 이름이 아니라 주 입력 수단으로 본다.
- * PC의 공유 창(Windows 등)에는 파일로 저장하는 항목이 없어서, 공유 시트는 터치 기기에서만 연다
+ * 아이폰, 아이패드인지. iOS는 내려받은 이미지를 사진 앱이 아니라 파일 앱에 두므로, 사진 앱에 저장하려면
+ * 공유 시트의 "이미지 저장"을 거쳐야 한다. 안드로이드와 PC는 바로 내려받는 편이 빠르다.
+ * 아이패드는 맥으로 알리므로 터치되는 맥도 아이패드로 본다
  */
-const isTouchDevice = () => typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+const isAppleMobile = () =>
+  /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+  (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
 /**
- * 터치 기기에서 파일 공유를 지원하면 공유 시트를 열고, 아니면 내려받는다.
+ * 아이폰, 아이패드에서 파일 공유를 지원하면 공유 시트를 열고, 아니면 내려받는다.
  * 사용자가 공유 시트를 닫으면(AbortError) 조용히 끝낸다. 서버 응답을 기다리는 사이 사용자 동작으로 인정받는 시간이
  * 지나 공유가 막히면(NotAllowedError) 내려받기로 넘어간다.
  */
 export async function saveImage(blob: Blob, fileName: string): Promise<void> {
   const file = new File([blob], fileName, { type: 'image/png' });
-  if (isTouchDevice() && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+  if (isAppleMobile() && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file] });
       return;
