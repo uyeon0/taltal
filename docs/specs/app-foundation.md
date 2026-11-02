@@ -55,7 +55,7 @@
 | 출력 | 내용 |
 | --- | --- |
 | `public/images/ingredients/<file>` | `delivery-manifest.json`의 `assets` 32개를 256px로 줄인 PNG. 이름은 manifest의 `file`을 쓴다 |
-| `public/images/mascot/<식별자>.png` | design.md 표의 다섯 파일을 640px로 줄인 PNG. 이름은 `default`, `discovery`, `thinking`, `meal`, `retry` |
+| `public/images/mascot/<식별자>.png` | design.md 표의 여섯 파일을 640px로 줄인 PNG. 이름은 `default`, `discovery`, `thinking`, `meal`, `retry`, `question` |
 | `public/brand/favicon.png`, `public/brand/apple-icon.png` | `squirrel-v2.png`를 64px, 180px로 줄인 PNG. 로고가 오면 바꾼다 |
 | `src/entities/ingredient/model/ingredient-images.ts` | manifest의 `ingredients`에서 만든 재료 ID → 경로 객체(`INGREDIENT_IMAGES`)와 대체 그림 경로(`INGREDIENT_FALLBACK_IMAGE`). 키가 재료 ID라서 shared가 아니라 entities에 둔다 |
 
@@ -230,18 +230,6 @@ PROJ1-121에서 확인한 것은 다음과 같다. Microsoft Learn 문서로 확
 - `withMinDuration`, `markVisited`, 입력 상태 함수의 단위 테스트를 둔다.
 - 컴포넌트 테스트를 위해 `@testing-library/react`와 `jsdom`을 더한다. 기존 테스트는 node 환경을 유지하고, 새 컴포넌트 테스트만 파일 첫 줄 주석으로 jsdom을 쓴다.
 
-## 확인용 화면
-
-화면 작업 전에 공통 컴포넌트를 눈으로 확인할 곳이 필요하다. 머리글, 버튼 세 종류와 로딩, 상태 메시지 네 개, 시트 열기, 다람쥐와 재료 그림, 낭만있구미체 제목을 보여 주는 임시 화면을 `_pages/home/ui/foundation-preview.tsx`에 두고 `/`에서 보여 준다. 루트 `app/`은 내보내기만 하므로 화면 코드는 `_pages`에 둔다. 시작 홈 작업에서 이 화면을 지운다. `/`는 방문 쿠키가 없으면 `/intro`로 가므로 확인할 때는 쿠키를 먼저 넣는다. 브라우저로 다음을 확인한다.
-
-- 360px, 390px, 1280px 폭에서 앱 열과 좌우 선
-- 동작 줄이기에서 시트와 색 변화가 0ms이고 스피너가 멈추는지
-- 키보드만으로 시트를 열고 닫고, 포커스가 여는 버튼으로 돌아오고 포커스 표시가 보이는지
-- 시트 안 스크롤이 본문으로 넘어가지 않고, 닫은 뒤 본문 스크롤 위치가 그대로인지
-- 낭만있구미체 제목에 빈 글자가 없는지
-
-가상 키보드는 실제 휴대폰에서 확인해야 해서 이번 작업에서는 데스크톱 기기 흉내로만 확인하고, 실제 기기 확인은 전체 점검으로 넘긴다.
-
 ## 커밋 순서
 
 커밋할 때 husky가 타입 검사를 돌리므로, 커밋마다 그 시점의 파일만으로 타입 검사가 통과하도록 의존 순서대로 나눈다.
@@ -253,7 +241,7 @@ PROJ1-121에서 확인한 것은 다음과 같다. Microsoft Learn 문서로 확
 5. 입력 상태 저장소
 6. 첫 방문 proxy
 7. 폰트, 루트 레이아웃, 메타데이터, Clarity
-8. 확인용 화면과 디자인 값 검사 테스트. 옛 임시 화면이 사라져야 테스트가 통과한다
+8. 디자인 값 검사 테스트
 9. 문서 반영
 
 ## 완료 기준

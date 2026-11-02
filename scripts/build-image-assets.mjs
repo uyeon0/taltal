@@ -19,7 +19,8 @@ const MASCOT_FILES = {
   discovery: 'squirrel-discovery-v1.png',
   thinking: 'squirrel-thinking-v3.png',
   meal: 'squirrel-meal-v1.png',
-  retry: 'squirrel-retry-straight-v4.png'
+  retry: 'squirrel-retry-straight-v4.png',
+  question: 'question-mark-v1.png'
 };
 
 const recordDir = process.argv[2];

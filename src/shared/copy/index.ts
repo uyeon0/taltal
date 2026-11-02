@@ -7,23 +7,26 @@ export const copy = {
   },
 
   intro: {
-    title: '이걸로 며칠 어떻게 다 먹지?',
+    title: '이 재료들을\n어떻게 다 먹지?',
     description: '산 재료를 나눠 쓰는 요리 3~5가지를 알려 드려요.',
     exampleLabel: '가상 예시',
     exampleIngredient: '두부 300g',
     exampleMeals: '두부조림 150g · 두부찌개 100g · 두부전 30g',
     exampleLeftover: '20g 남아요',
     start: '내 재료로 시작하기',
-    startDescription: '다음 화면에서 재료와 양을 넣어요.',
-    steps: ['가진 재료와 양을 넣어요.', '나눠 쓸 요리 3~5가지를 확인해요.', '어디에 얼마나 쓰고 남는지 봐요.']
+    steps: ['가진 재료와 양을 넣어요.', '재료를 나눠 쓸 요리를 확인해요.', '어디에 얼마나 쓰고 남는지 봐요.'],
+    stepLabel: (step: number) => `${step}단계`,
+    carouselLabel: '서비스 소개',
+    slideLabel: (current: number, total: number) => `${total}장 중 ${current}번째`,
+    prev: '이전',
+    next: '다음',
+    goToSlide: (slide: number) => `${slide}번째 장으로 이동`
   },
 
   home: {
-    title: '냉장고에 뭐가 있나요?',
-    guide: '가진 재료부터 담아 볼까요?',
-    pickDirectly: '직접 고르기',
-    pickDirectlyDescription: '여러 개 골라 담고, 가진 양만 알려 주세요.',
-    receiptComingSoon: '영수증으로 넣기 · 준비 중'
+    title: '냉장고에\n뭐가 있나요?',
+    guide: '가진 재료부터 담아 주세요.',
+    pickDirectly: '직접 고르기'
   },
 
   ingredientSheet: {
