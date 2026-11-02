@@ -16,17 +16,17 @@ export const copy = {
     start: '내 재료로 시작하기',
     steps: ['가진 재료와 양을 넣어요.', '재료를 나눠 쓸 요리를 확인해요.', '어디에 얼마나 쓰고 남는지 봐요.'],
     stepLabel: (step: number) => `${step}단계`,
-    carouselLabel: '서비스 소개',
-    slideLabel: (current: number, total: number) => `${total}장 중 ${current}번째`,
-    prev: '이전',
-    next: '다음',
-    goToSlide: (slide: number) => `${slide}번째 장으로 이동`
+    carouselLabel: '서비스 소개'
   },
 
   home: {
     title: '냉장고에\n뭐가 있나요?',
     guide: '가진 재료부터 담아 주세요.',
-    pickDirectly: '직접 고르기'
+    pickDirectly: '직접 고르기',
+    sampleTitle: '이렇게 나눠 쓸 수 있어요',
+    sampleCarouselLabel: '예시 요리 묶음',
+    // 재료 이름을 쉼표로 이은 문자열을 받는다
+    toBuy: (ingredients: string) => `따로 사요: ${ingredients}`
   },
 
   ingredientSheet: {
@@ -130,6 +130,10 @@ export const copy = {
   // 아이콘만 있는 버튼의 이름. 화면 읽기 프로그램이 읽는다
   common: {
     back: '뒤로',
-    closeSheet: '닫기'
+    closeSheet: '닫기',
+    prev: '이전',
+    next: '다음',
+    goToSlide: (slide: number) => `${slide}번째 장으로 이동`,
+    slideLabel: (current: number, total: number) => `${total}장 중 ${current}번째`
   }
 } as const;
