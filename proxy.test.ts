@@ -24,3 +24,8 @@ test('방문 쿠키가 있으면 통과시킨다', () => {
 test('시작 홈 주소에서만 동작한다', () => {
   assert.equal(config.matcher, '/');
 });
+
+test('첫 방문을 보낼 때 쿼리를 그대로 넘긴다', () => {
+  const response = proxy(new NextRequest('https://example.com/?utm_source=slack'));
+  assert.equal(response.headers.get('location'), 'https://example.com/intro?utm_source=slack');
+});
