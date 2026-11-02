@@ -35,7 +35,7 @@ export function RootLayout({ children }: { children: ReactNode }) {
           바텀시트는 body 아래 포털로 그려지므로 앱 열이 아니라 body에 단다 */}
       <body data-clarity-unmask="true">
         <div className="app-frame">
-          <div className="app-column">
+          <div className="app-column surface-brand">
             <AppProviders>{children}</AppProviders>
           </div>
         </div>

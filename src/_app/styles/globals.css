@@ -325,7 +325,8 @@
   width: 100%;
   max-width: var(--app-max-width);
   min-height: 100dvh;
-  background-color: var(--neutral-light);
+  /* 화면 배경은 주황이다. 루트 레이아웃이 surface-brand를 함께 붙인다. 바텀시트는 body 아래 포털이라 Light로 남는다 */
+  background-color: var(--brand-primary);
 }
 .app-column::before,
 .app-column::after {

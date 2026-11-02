@@ -10,6 +10,7 @@ import type { Ingredient, InputUnit } from '@/entities/ingredient';
 import { copy } from '@/shared/copy';
 import { useSheetRoute } from '@/shared/lib/use-sheet-route';
 import { Button } from '@/shared/ui/button';
+import { Card } from '@/shared/ui/card';
 import { Mascot } from '@/shared/ui/mascot';
 import { StatusMessage } from '@/shared/ui/status-message';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
@@ -127,12 +128,13 @@ export function ResultsView({ search, ingredients, units, servings }: ResultsVie
       </Tabs>
 
       {suggestBuy ? (
-        <section className="flex flex-col gap-3 rounded-xl border border-foreground bg-card p-(--card-padding)">
+        // Light 카드 안이라 주요 버튼이 Primary 면이다
+        <Card>
           <h2 className="text-xl font-semibold">{copy.purchaseMode.suggestTitle}</h2>
           <Button className="w-full" onClick={() => switchMode('buy')}>
             {copy.purchaseMode.suggestButton}
           </Button>
-        </section>
+        </Card>
       ) : null}
 
       <p className="text-xs text-muted-foreground">{copy.results.estimateNotice}</p>
