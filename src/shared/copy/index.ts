@@ -26,8 +26,7 @@ export const copy = {
   home: {
     title: '냉장고에\n뭐가 있나요?',
     guide: '가진 재료부터 담아 주세요.',
-    pickDirectly: '직접 고르기',
-    receiptComingSoon: '영수증으로 넣기 · 준비 중'
+    pickDirectly: '직접 고르기'
   },
 
   ingredientSheet: {

@@ -42,13 +42,6 @@ export function HomePage() {
             <ArrowRight aria-hidden />
           </Link>
         </div>
-
-        <div
-          aria-disabled="true"
-          className="flex min-h-(--control-height) cursor-not-allowed items-center rounded-lg border border-(--disabled-border) bg-(--disabled-background) px-4 py-2 text-(--disabled-foreground)"
-        >
-          {home.receiptComingSoon}
-        </div>
       </section>
     </main>
   );
