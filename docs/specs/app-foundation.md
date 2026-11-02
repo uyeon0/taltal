@@ -174,7 +174,7 @@ type InventoryState = { items: InventoryItem[]; servings: number };
 - 스토어 훅 `useInventory`를 공개 API로 내보낸다. 상태를 바꾸는 함수는 `addItems`, `setAmount`, `removeItem`, `setServings`, `reset`이다. 재료 입력 화면 작업에서 필요한 함수를 더할 수 있다.
 - 상태는 브라우저 메모리에만 둔다. 새로고침하면 초기화된다.
 - zustand 문서는 Next.js에서 요청마다 스토어를 만들라고 권한다. 서버에서 값을 바꾸면 요청 사이에 섞이기 때문이다. 이 앱은 서버가 처음 상태를 그리기만 하고 값은 브라우저에서만 바꾸므로 스토어 하나로 둔다.
-- 인분 기본값은 이번 스펙에서 정하지 않는다. requirements에 없어서 재료 입력 화면 작업에서 정한다. 그때까지는 `1`로 둔다.
+- 인분 기본값은 2다.
 - 공급자가 필요 없다. `src/_app/providers/`의 `AppProviders`는 앱 안 기록 세기(`useAppHistoryTracker`)만 단다.
 
 ## 첫 방문

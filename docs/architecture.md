@@ -82,7 +82,7 @@ _app → _pages → widgets → features → entities → shared
 
 | 슬라이스 | 담는 것 |
 | --- | --- |
-| `build-inventory` | 재료 고르기, 양 정하기, 인분 고르기. 추천에 넣을 입력을 만드는 동작과 입력 상태 저장소(zustand 스토어 `useInventory`) |
+| `build-inventory` | 재료 고르기, 양 정하기, 인분 고르기. 추천에 넣을 입력을 만드는 동작과 입력 상태 저장소(zustand 스토어 `useInventory`). 재료 입력 화면이 쓰는 재료 목록은 `index.server.ts`로 내보낸다 |
 | `find-meals` | 요리 찾기 요청, `filterCandidates`, `recommend`, 3·4·5가지 비교, 결과 타입(`Result`, `Meal`, `Leftover`) |
 
 - `find-meals`는 사지 않는 묶음과 조금 사는 묶음을 함께 돌려준다. 어느 쪽을 보여 줄지는 결과 화면이 정한다.
