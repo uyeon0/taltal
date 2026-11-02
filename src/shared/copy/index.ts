@@ -122,6 +122,13 @@ export const copy = {
 
   recipeSheet: {
     ingredientsTitle: '이 요리에 쓰는 재료',
+    ownedTitle: '가진 재료',
+    toBuyTitle: '따로 사야 해요',
+    // 따로 사야 해요 무리 안에서 고명 이름 옆에 붙인다
+    optional: '있으면 좋음',
+    seasoningsTitle: '양념',
+    // 양념 소제목 뒤에 " · "로 붙인다. 양념은 g이 없어 인분에 맞춰 바꾸지 못한다
+    seasoningsBasis: (servings: number) => `원문 ${servings}인분 기준`,
     originalAmounts: '원문 분량 보기',
     originalServings: (servings: number) => `원문은 ${servings}인분 기준이에요.`,
     stepsTitle: '만드는 법',

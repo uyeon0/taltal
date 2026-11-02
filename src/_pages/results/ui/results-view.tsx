@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { MealList } from '@/widgets/meal-list';
+import { RECIPE_DETAIL_SHEET, RecipeDetailSheet } from '@/widgets/recipe-detail-sheet';
 import { ResultSummary } from '@/widgets/result-summary';
 import { USAGE_SHEET, UsageSheet } from '@/widgets/usage-sheet';
 import { USED_UP_GRAMS, shouldSuggestBuy, type MealSearch, type Mode } from '@/features/find-meals';
@@ -12,7 +13,6 @@ import { Button } from '@/shared/ui/button';
 import { Mascot } from '@/shared/ui/mascot';
 import { StatusMessage } from '@/shared/ui/status-message';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
-import { RECIPE_DETAIL_SHEET } from '../model/sheets';
 
 type ResultsViewProps = {
   search: MealSearch;
@@ -43,8 +43,8 @@ export function ResultsView({ search, ingredients, units, servings }: ResultsVie
 
   const usageSheet = useSheetRoute(USAGE_SHEET);
   const recipeSheet = useSheetRoute(RECIPE_DETAIL_SHEET);
-  // 연 요리. 세션 E가 레시피 상세 시트를 끼울 때 이 값으로 지금 결과의 요리와 후보 레시피를 찾는다
-  const [, setRecipeId] = useState<number | null>(null);
+  // 연 요리. 지금 결과의 요리와 후보 레시피를 이 값으로 찾는다
+  const [recipeId, setRecipeId] = useState<number | null>(null);
 
   const ingredientMap = useMemo(() => new Map(ingredients.map((i) => [i.id, i])), [ingredients]);
   const recipeMap = useMemo(() => new Map(search.candidates.map((r) => [r.id, r])), [search.candidates]);
@@ -142,6 +142,15 @@ export function ResultsView({ search, ingredients, units, servings }: ResultsVie
         onOpenChange={usageSheet.onOpenChange}
         result={result}
         ingredients={ingredientMap}
+        units={units}
+      />
+      <RecipeDetailSheet
+        open={recipeSheet.open}
+        onOpenChange={recipeSheet.onOpenChange}
+        meal={result.meals.find((meal) => meal.recipeId === recipeId) ?? null}
+        recipe={recipeId === null ? null : (recipeMap.get(recipeId) ?? null)}
+        shoppingList={result.shoppingList}
+        ingredients={ingredients}
         units={units}
       />
     </main>
