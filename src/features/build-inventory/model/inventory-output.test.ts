@@ -10,7 +10,7 @@ import type { Recipe } from '@/entities/recipe';
 import { appDataPath } from '@/shared/db';
 
 import { orderPickable } from './pickable';
-import { matchesQuery } from './search';
+import { findSeasonings, matchesQuery } from './search';
 import { isInventoryReady, toStocks } from './to-stocks';
 
 const make = (id: string, extra: Partial<Ingredient> = {}): Ingredient => ({
@@ -52,6 +52,33 @@ test('격자는 레시피에 많이 나오는 순서, 같으면 가나다순이�
     ['양파', '당근', '감자']
   );
   assert.deepEqual(pantryBasics, ['소금']);
+});
+
+test('양념은 pantry가 null이 아닌 재료이고 데이터 순서를 지킨다', () => {
+  const { seasonings } = orderPickable(
+    [make('양파'), make('소금', { pantry: '기본' }), make('굴소스', { pantry: '특수' })],
+    []
+  );
+  assert.deepEqual(
+    seasonings.map((i) => i.id),
+    ['소금', '굴소스']
+  );
+});
+
+test('양념 검색은 종류별로 id를 돌려주고 별칭의 대괄호 앞부분은 찾지 않는다', () => {
+  const { seasonings } = orderPickable(
+    [
+      make('간장', { pantry: '기본', aliases: ['[불고기양념] 간장', '조림간장'] }),
+      make('마늘', { pantry: '특수', aliases: ['다진 마늘', '다진마늘'] }),
+      make('다진고추', { pantry: '특수', aliases: ['다진마늘고추'] })
+    ],
+    []
+  );
+  assert.deepEqual(findSeasonings(seasonings, '간장'), { basic: ['간장'], special: [] });
+  assert.deepEqual(findSeasonings(seasonings, '다진마늘'), { basic: [], special: ['마늘', '다진고추'] });
+  assert.deepEqual(findSeasonings(seasonings, '불고기'), { basic: [], special: [] });
+  assert.deepEqual(findSeasonings(seasonings, '불고기양념 간장'), { basic: [], special: [] });
+  assert.deepEqual(findSeasonings(seasonings, '   '), { basic: [], special: [] });
 });
 
 test('결과 화면에 넘기는 g은 고른 단위로 환산하고 담은 순서를 지킨다', () => {

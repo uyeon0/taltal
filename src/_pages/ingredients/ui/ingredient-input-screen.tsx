@@ -24,6 +24,7 @@ import { PantryBasics } from './pantry-basics';
 type IngredientInputScreenProps = {
   pickable: Ingredient[];
   pantryBasics: string[];
+  seasonings: Ingredient[];
 };
 
 /** 다음 그림 뒤에 포커스를 옮길 곳 */
@@ -31,7 +32,7 @@ type FocusTarget = { kind: 'title' | 'row'; ingredientId: string } | { kind: 'ad
 
 const firstIncomplete = (items: InventoryItem[]) => items.find((item) => item.amount === null)?.ingredientId ?? null;
 
-export function IngredientInputScreen({ pickable, pantryBasics }: IngredientInputScreenProps) {
+export function IngredientInputScreen({ pickable, pantryBasics, seasonings }: IngredientInputScreenProps) {
   const router = useRouter();
   const items = useInventory((state) => state.items);
   const sheet = useSheetRoute(INGREDIENT_PICKER_SHEET);
@@ -177,6 +178,7 @@ export function IngredientInputScreen({ pickable, pantryBasics }: IngredientInpu
         open={sheet.open}
         onOpenChange={sheet.onOpenChange}
         ingredients={pickable}
+        seasonings={seasonings}
         onAdded={(ids) => {
           sheet.closeSheet();
           if (ids.length === 0) return;

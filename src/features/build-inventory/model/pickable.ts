@@ -6,6 +6,8 @@ export type PickableIngredients = {
   pickable: Ingredient[];
   /** 있다고 보고 계산하는 기본 양념 이름. 가나다순 */
   pantryBasics: string[];
+  /** 양념(pantry가 "기본"이나 "특수"). 시트에서 양념을 검색했을 때 안내하려고 둔다. 데이터 순서 */
+  seasonings: Ingredient[];
 };
 
 const byName = (a: string, b: string) => a.localeCompare(b, 'ko');
@@ -28,6 +30,7 @@ export function orderPickable(ingredients: Ingredient[], recipes: Recipe[]): Pic
     pantryBasics: ingredients
       .filter((ingredient) => ingredient.pantry === '기본')
       .map((ingredient) => ingredient.id)
-      .sort(byName)
+      .sort(byName),
+    seasonings: ingredients.filter((ingredient) => ingredient.pantry !== null)
   };
 }

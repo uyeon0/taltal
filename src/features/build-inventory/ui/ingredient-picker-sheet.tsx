@@ -8,7 +8,7 @@ import { BottomSheet } from '@/shared/ui/bottom-sheet';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { useInventory } from '../model/inventory-store';
-import { matchesQuery } from '../model/search';
+import { findSeasonings, matchesQuery } from '../model/search';
 
 type IngredientPickerSheetProps = {
   /** 열고 닫는 상태. 화면이 useSheetRoute(INGREDIENT_PICKER_SHEET)로 갖는다 */
@@ -16,6 +16,8 @@ type IngredientPickerSheetProps = {
   onOpenChange: (open: boolean) => void;
   /** 고를 수 있는 재료. 보여 줄 순서대로 */
   ingredients: Ingredient[];
+  /** 양념. 목록에는 없지만 검색하면 안내한다 */
+  seasonings: Ingredient[];
   /** 담은 뒤. 넘긴 id는 고른 순서다. 화면이 시트를 닫고 첫 재료를 펼친다 */
   onAdded: (ingredientIds: string[]) => void;
 };
@@ -24,7 +26,13 @@ type IngredientPickerSheetProps = {
  * 재료를 여러 개 골라 한 번에 담는다. 고르기만 하거나 닫으면 담은 재료 목록은 바뀌지 않는다.
  * 검색으로 가려진 재료도 고른 상태를 유지한다.
  */
-export function IngredientPickerSheet({ open, onOpenChange, ingredients, onAdded }: IngredientPickerSheetProps) {
+export function IngredientPickerSheet({
+  open,
+  onOpenChange,
+  ingredients,
+  seasonings,
+  onAdded
+}: IngredientPickerSheetProps) {
   const items = useInventory((state) => state.items);
   const addItems = useInventory((state) => state.addItems);
   const [query, setQuery] = useState('');
@@ -44,6 +52,10 @@ export function IngredientPickerSheet({ open, onOpenChange, ingredients, onAdded
 
   const added = new Set(items.map((item) => item.ingredientId));
   const shown = ingredients.filter((ingredient) => matchesQuery(ingredient, query));
+
+  // 재료가 하나라도 맞으면 안내하지 않는다
+  const found = shown.length === 0 ? findSeasonings(seasonings, query) : null;
+  const seasoningMatch = found && (found.basic.length > 0 || found.special.length > 0) ? found : null;
 
   const toggle = (id: string) =>
     setSelected((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
@@ -95,7 +107,16 @@ export function IngredientPickerSheet({ open, onOpenChange, ingredients, onAdded
           onChange={(event) => setQuery(event.target.value)}
         />
 
-        {shown.length === 0 ? (
+        {seasoningMatch ? (
+          <div role="status" className="flex flex-col gap-2 py-4">
+            {seasoningMatch.basic.length > 0 ? (
+              <p>{copy.ingredientSheet.basicSeasoning(seasoningMatch.basic)}</p>
+            ) : null}
+            {seasoningMatch.special.length > 0 ? (
+              <p>{copy.ingredientSheet.specialSeasoning(seasoningMatch.special)}</p>
+            ) : null}
+          </div>
+        ) : shown.length === 0 ? (
           <div className="flex flex-col items-start gap-3 py-4">
             <p>{copy.ingredientSheet.noResult(query.trim())}</p>
             <Button variant="secondary" onClick={clearSearch}>
