@@ -46,3 +46,17 @@ test('재료를 빼고, 인분을 바꾸고, 처음으로 되돌린다', () => {
   store().reset();
   assert.deepEqual({ items: store().items, servings: store().servings }, INITIAL_INVENTORY);
 });
+
+test('한 번에 넘긴 목록 안의 중복도 하나만 담는다', () => {
+  store().addItems([
+    { ingredientId: '두부', unit: '모' },
+    { ingredientId: '두부', unit: 'g' }
+  ]);
+  assert.deepEqual(
+    store().items.map((item) => [item.ingredientId, item.unit]),
+    [
+      ['양파', '개'],
+      ['두부', '모']
+    ]
+  );
+});
