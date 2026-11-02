@@ -15,7 +15,7 @@ export function canGoBackInApp(): boolean {
 /** 화면 이동을 세는 훅. 앱 전체에서 한 번만 단다 */
 export function useAppHistoryTracker() {
   const pathname = usePathname();
-  const firstRef = useRef(true);
+  const previousRef = useRef<string | null>(null);
 
   useEffect(() => {
     const onPopState = () => {
@@ -26,10 +26,10 @@ export function useAppHistoryTracker() {
   }, []);
 
   useEffect(() => {
-    if (firstRef.current) {
-      firstRef.current = false;
-      return;
-    }
+    // 첫 화면이거나 같은 경로면 세지 않는다. 개발 모드의 Strict Mode는 효과를 두 번 돌리므로 이전 경로와 비교한다
+    const previous = previousRef.current;
+    previousRef.current = pathname;
+    if (previous === null || previous === pathname) return;
     // 뒤로가기로 온 화면이면 하나 줄이고, 링크나 router로 온 화면이면 하나 늘린다
     if (poppedTo === pathname) depth = Math.max(0, depth - 1);
     else depth += 1;
