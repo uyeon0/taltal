@@ -97,3 +97,42 @@ test('동작 줄이기에서는 움직임 없이 바로 옮긴다', () => {
   fireEvent.click(screen.getByRole('button', { name: copy.common.goToSlide(2) }));
   assert.deepEqual(api.scrollTo.mock.calls[0], [1, true]);
 });
+
+test('조작이 없으면 점 표시와 화살표가 없고 모든 장이 화면 읽기에 남는다', () => {
+  const { container } = render(<Carousel label="이름" slides={SLIDES} controls={false} />);
+  assert.equal(screen.queryAllByRole('button').length, 0);
+  for (const slide of slidesOf(container)) {
+    assert.equal(slide.getAttribute('aria-hidden'), null);
+    assert.equal(slide.hasAttribute('inert'), false);
+    assert.equal(slide.getAttribute('tabindex'), '0');
+  }
+});
+
+test('조작이 없으면 포커스 외곽선을 장이 아니라 내용을 감싼 요소에 그린다', () => {
+  const { container } = render(<Carousel label="이름" slides={SLIDES} controls={false} />);
+  for (const slide of slidesOf(container)) {
+    assert.match(slide.className, /(^|\s)group(\s|$)/);
+    assert.match(slide.className, /focus-visible:outline-none/);
+    const wrapper = slide.firstElementChild!;
+    assert.match(wrapper.className, /group-focus-visible:outline-solid/);
+    assert.equal(wrapper.firstElementChild?.tagName, 'P');
+  }
+});
+
+test('조작이 있으면 내용을 감싸지 않는다', () => {
+  const { container } = render(<Carousel label="이름" slides={SLIDES} />);
+  for (const slide of slidesOf(container)) assert.equal(slide.firstElementChild?.tagName, 'P');
+});
+
+test('조작이 없으면 장에 포커스가 올 때 그 장으로 넘긴다', () => {
+  const { container } = render(<Carousel label="이름" slides={SLIDES} controls={false} />);
+  fireEvent.focus(slidesOf(container)[2]!);
+  assert.deepEqual(api.scrollTo.mock.calls[0], [2, false]);
+});
+
+test('조작이 없을 때도 동작 줄이기에서는 움직임 없이 넘긴다', () => {
+  vi.stubGlobal('matchMedia', () => ({ matches: true }));
+  const { container } = render(<Carousel label="이름" slides={SLIDES} controls={false} />);
+  fireEvent.focus(slidesOf(container)[1]!);
+  assert.deepEqual(api.scrollTo.mock.calls[0], [1, true]);
+});

@@ -22,7 +22,11 @@ export const copy = {
   home: {
     title: '냉장고에\n뭐가 있나요?',
     guide: '가진 재료부터 담아 주세요.',
-    pickDirectly: '직접 고르기'
+    pickDirectly: '직접 고르기',
+    sampleTitle: '이렇게 나눠 쓸 수 있어요',
+    sampleCarouselLabel: '예시 요리 묶음',
+    // 재료 이름을 쉼표로 이은 문자열을 받는다
+    toBuy: (ingredients: string) => `따로 사요: ${ingredients}`
   },
 
   ingredientSheet: {
