@@ -14,11 +14,13 @@ import { Button } from './button';
 type AppHeaderProps = {
   /** 뒤로가기 버튼을 둘 때, 앱 안의 이전 기록이 없으면 갈 주소 */
   backHref?: string;
+  /** 뒤로가기 버튼에 아이콘과 함께 보일 글자. 없으면 아이콘만 두고 화면 읽기에는 "뒤로"를 전한다 */
+  backLabel?: string;
   className?: string;
 };
 
 /** 머리글. 로고는 BRAND 한 곳에서 불러오고, 로고 파일이 없으면 서비스 이름을 글자로 보여 준다 */
-export function AppHeader({ backHref, className }: AppHeaderProps) {
+export function AppHeader({ backHref, backLabel, className }: AppHeaderProps) {
   const router = useRouter();
 
   const goBack = () => {
@@ -32,12 +34,14 @@ export function AppHeader({ backHref, className }: AppHeaderProps) {
         {backHref ? (
           <Button
             variant="ghost"
-            size="icon"
-            aria-label={copy.common.back}
+            size={backLabel ? 'default' : 'icon'}
+            aria-label={backLabel ? undefined : copy.common.back}
             onClick={goBack}
+            className={backLabel ? '-ml-2 px-2' : undefined}
             {...{ [BACK_BUTTON_ATTR]: '' }}
           >
             <ChevronLeft />
+            {backLabel}
           </Button>
         ) : null}
       </div>
