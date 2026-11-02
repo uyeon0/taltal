@@ -8,7 +8,7 @@
 | --- | --- |
 | 이미지 내용 | "N번째 요리", 요리 이름, 조리 시간, 요약, 재료와 양, 만드는 법과 팁, 서비스 이름과 주소, 레시피 출처 |
 | 재료 그림 | 넣지 않는다 |
-| 저장 방식 | 터치 기기에서 파일 공유를 지원하면 공유 시트, 아니면 PNG 다운로드. PC는 공유를 지원해도 다운로드한다 |
+| 저장 방식 | 아이폰, 아이패드에서 파일 공유를 지원하면 공유 시트, 아니면 PNG 다운로드. 안드로이드와 PC는 공유를 지원해도 다운로드한다 |
 | 서비스 주소 | 도메인을 아직 정하지 않았다. 주소를 한 곳에 두고, 정하기 전에는 서비스 이름만 쓴다 |
 | 레시피 출처 | "레시피 출처: 농림축산식품 공공데이터 포털" |
 | 이미지용 글꼴 | 공식 배포본을 받아 둔다. SUIT는 GitHub 릴리스 v2.0.5의 `SUIT-otf.zip`, 낭만있구미체는 구미시 공식 페이지의 `낭만있구미체.zip`이다 |
@@ -18,7 +18,7 @@
 1. 상세를 받으면 시트 아래 고정 영역의 "이미지로 저장" 버튼을 쓸 수 있다.
 2. 버튼을 누르면 브라우저가 `POST /api/recipes/[id]/image`로 이 요리의 입력을 보낸다.
 3. 서버는 데이터 파일에서 레시피, 상세, 재료를 읽고, 시트와 같은 `toRecipeDetailView`로 값을 만든 뒤 `ImageResponse`로 PNG를 그려 돌려준다.
-4. 브라우저는 받은 PNG를 `File`로 만든다. 터치 기기이고 `navigator.canShare({ files })`가 참이면 `navigator.share`로 공유 시트를 연다. 아니면 `<a download>`로 내려받는다.
+4. 브라우저는 받은 PNG를 `File`로 만든다. 아이폰, 아이패드이고 `navigator.canShare({ files })`가 참이면 `navigator.share`로 공유 시트를 연다. 아니면 `<a download>`로 내려받는다.
 
 ## API
 
@@ -165,7 +165,7 @@ SUIT와 낭만있구미체를 한 `ImageResponse`의 `fonts`에 함께 넣으면
 `src/widgets/recipe-detail-sheet/model/save-recipe-image.ts`에 둔다.
 
 - `requestRecipeImage(recipeId, body, signal)`: API를 부르고 PNG `Blob`을 돌려준다. 응답이 성공이 아니면 오류를 던진다.
-- `saveImage(blob, fileName)`: `File`을 만들고, 터치 기기이면서 `navigator.canShare?.({ files: [file] })`가 참이면 `navigator.share({ files: [file] })`를 부른다. 터치 기기는 브라우저 이름이 아니라 `matchMedia('(pointer: coarse)')`로 판단한다. Windows의 Chrome과 Edge도 파일 공유를 지원하지만 그 공유 창에는 파일로 저장하는 항목이 없어서, PC에서는 바로 내려받는다(Windows에서 확인). 사용자가 공유 시트를 닫아 `AbortError`가 나면 조용히 끝낸다. `NotAllowedError`가 나면 다운로드로 넘어간다. 공유를 지원하지 않으면 object URL과 `<a download>`로 내려받고 URL을 해제한다.
+- `saveImage(blob, fileName)`: `File`을 만들고, 아이폰, 아이패드이면서 `navigator.canShare?.({ files: [file] })`가 참이면 `navigator.share({ files: [file] })`를 부른다. 아이폰, 아이패드는 `navigator.userAgent`의 `iPhone`, `iPad`, `iPod`로 판단하고, 아이패드는 맥으로 알리므로 `Macintosh`이면서 `navigator.maxTouchPoints`가 1보다 크면 아이패드로 본다. iOS는 내려받은 이미지를 파일 앱에 두므로 사진 앱에 저장하려면 공유 시트를 거쳐야 한다. 안드로이드는 내려받으면 다운로드 폴더에 저장되고 갤러리에서도 보이므로 바로 내려받는다. Windows의 Chrome과 Edge는 파일 공유를 지원하지만 그 공유 창에는 파일로 저장하는 항목이 없어서 PC도 바로 내려받는다(Windows에서 확인). 사용자가 공유 시트를 닫아 `AbortError`가 나면 조용히 끝낸다. `NotAllowedError`가 나면 다운로드로 넘어간다. 공유를 지원하지 않으면 object URL과 `<a download>`로 내려받고 URL을 해제한다.
 - 파일 이름은 `${SITE.name}-${요리 이름}.png`다. 파일 이름에 쓸 수 없는 문자(`\/:*?"<>|`)는 `-`로 바꾼다.
 
 `navigator.share`는 사용자 동작 직후에만 부를 수 있다. 서버 응답을 기다리는 사이 이 조건이 풀리면 `NotAllowedError`가 난다. 그래서 그 경우 다운로드로 넘어가게 둔다. 실제 휴대폰에서 응답 시간 안에 공유 시트가 열리는지는 확인 기준에서 본다.
