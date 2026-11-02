@@ -5,6 +5,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { ImageResponse } from 'next/og';
 import { test, vi } from 'vitest';
 
+import { appDataPath } from '@/shared/db';
 import { toImageText } from '@/widgets/recipe-detail-sheet/index.server';
 
 import { loadSuitFonts } from '../fonts/image-fonts.server';
@@ -38,7 +39,7 @@ test('형식이 틀리거나 너무 큰 본문은 400이다', async () => {
   for (const [name, b] of cases) assert.equal((await call('1', b)).status, 400, name);
 });
 
-const recipesFile = 'data/app/recipes.json';
+const recipesFile = appDataPath('recipes.json');
 const recipes: { id: number; ingredients: { ingredientId: string; grams: number | null }[] }[] = existsSync(recipesFile)
   ? JSON.parse(readFileSync(recipesFile, 'utf-8'))
   : [];
@@ -72,7 +73,7 @@ dataTest('데이터의 모든 글자를 SUIT로 그려 글꼴을 내려받으려
   vi.stubGlobal('fetch', fetchSpy);
   try {
     const text = ['recipes.json', 'recipe-steps.json', 'ingredients.json']
-      .map((file) => readFileSync(`data/app/${file}`, 'utf-8'))
+      .map((file) => readFileSync(appDataPath(file), 'utf-8'))
       .join('');
     const chars = [...new Set(toImageText(text))].filter((char) => !/\s/.test(char)).join('');
     const image = new ImageResponse(
