@@ -87,7 +87,7 @@ function MealCard({ meal, shoppingList, recipes, ingredients, units, onOpen }: M
           <>
             <span className="flex flex-wrap gap-1">
               {owned.map((use) => (
-                <IngredientImage key={use.ingredientId} ingredientId={use.ingredientId} size={32} />
+                <IngredientImage key={use.ingredientId} ingredientId={use.ingredientId} size={48} />
               ))}
             </span>
             <span className="break-keep">
