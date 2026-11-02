@@ -9,13 +9,20 @@ export const copy = {
   intro: {
     title: '이 재료들을\n어떻게 다 먹지?',
     description: '산 재료를 나눠 쓰는 요리 3~5가지를 알려 드려요.',
-    exampleLabel: '가상 예시',
-    exampleIngredient: '두부 300g',
-    exampleMeals: '두부조림 150g · 두부찌개 100g · 두부전 30g',
+    // 소개의 세 미리 보기가 이어 쓰는 가상 예시. 첫 재료(두부)를 요리 세 가지에 나눠 쓴다
+    exampleIngredients: [
+      { name: '두부', amount: '300g' },
+      { name: '대파', amount: '1단' },
+      { name: '계란', amount: '5개' }
+    ],
+    exampleMeals: [
+      { name: '두부조림', amount: '150g' },
+      { name: '두부찌개', amount: '100g' },
+      { name: '두부전', amount: '30g' }
+    ],
     exampleLeftover: '20g 남아요',
     start: '내 재료로 시작하기',
     steps: ['가진 재료와 양을 넣어요.', '재료를 나눠 쓸 요리를 확인해요.', '어디에 얼마나 쓰고 남는지 봐요.'],
-    stepLabel: (step: number) => `${step}단계`,
     carouselLabel: '서비스 소개'
   },
 

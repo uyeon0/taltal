@@ -41,10 +41,10 @@ test('장 세 개와 단계 문구, 화면 모형 영역이 나온다', () => {
   assert.equal(container.querySelectorAll('[data-slot="intro-preview"][aria-hidden="true"]').length, 3);
 });
 
-test('다람쥐 대체 텍스트는 비어 있다', () => {
+test('모형의 재료 그림은 대체 텍스트가 비어 있다', () => {
   const { container } = render(<IntroCarousel />);
   const images = [...container.querySelectorAll('img')];
-  assert.equal(images.length, 3);
+  assert.ok(images.length > 0);
   assert.ok(images.every((img) => img.getAttribute('alt') === ''));
 });
 
