@@ -16,6 +16,8 @@ const shownPath = (container: HTMLElement) => new URL(container.querySelector('i
 test('그림이 있는 재료는 그 그림을, 없는 재료는 대체 그림을 쓴다', () => {
   assert.equal(ingredientImageSrc('양파'), INGREDIENT_IMAGES['양파']);
   assert.equal(ingredientImageSrc('나중에 추가된 재료'), INGREDIENT_FALLBACK_IMAGE);
+  // 객체 프로토타입의 이름도 대체 그림으로 간다
+  assert.equal(ingredientImageSrc('constructor'), INGREDIENT_FALLBACK_IMAGE);
 });
 
 test('불러오지 못하면 대체 그림으로 바꾸고, 대체 그림도 실패하면 더 바꾸지 않는다', () => {

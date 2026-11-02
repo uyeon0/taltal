@@ -7,7 +7,8 @@ import { INGREDIENT_FALLBACK_IMAGE, INGREDIENT_IMAGES } from '../model/ingredien
 
 /** 재료 ID로 그림 경로를 찾는다. 그림이 없는 재료와 나중에 추가되는 재료는 공통 대체 그림을 쓴다 */
 export function ingredientImageSrc(ingredientId: string): string {
-  return INGREDIENT_IMAGES[ingredientId] ?? INGREDIENT_FALLBACK_IMAGE;
+  // 일반 객체라 'constructor' 같은 이름은 프로토타입의 값을 돌려주므로 표에 직접 있는 키만 쓴다
+  return Object.hasOwn(INGREDIENT_IMAGES, ingredientId) ? INGREDIENT_IMAGES[ingredientId] : INGREDIENT_FALLBACK_IMAGE;
 }
 
 type IngredientImageProps = {
