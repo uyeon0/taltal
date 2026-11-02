@@ -45,12 +45,17 @@ async function resize(source, target, size) {
   await sharp(source).resize(size, size, { fit: 'contain' }).png({ compressionLevel: 9 }).toFile(target);
 }
 
+// 원본을 모두 확인한 뒤에 출력 폴더를 지운다.
+const ingredientAssets = Object.values(manifest.assets);
+for (const asset of ingredientAssets) {
+  if (sha256(join(recordDir, asset.source)) !== asset.sha256)
+    throw new Error(`해시가 manifest와 다릅니다: ${asset.source}`);
+}
+
 const ingredientDir = join(repoDir, 'public/images/ingredients');
 rmSync(ingredientDir, { recursive: true, force: true });
-for (const asset of Object.values(manifest.assets)) {
-  const source = join(recordDir, asset.source);
-  if (sha256(source) !== asset.sha256) throw new Error(`해시가 manifest와 다릅니다: ${asset.source}`);
-  await resize(source, join(ingredientDir, asset.file), INGREDIENT_SIZE);
+for (const asset of ingredientAssets) {
+  await resize(join(recordDir, asset.source), join(ingredientDir, asset.file), INGREDIENT_SIZE);
 }
 
 for (const [pose, file] of Object.entries(MASCOT_FILES)) {
