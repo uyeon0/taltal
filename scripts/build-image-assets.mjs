@@ -45,8 +45,12 @@ async function resize(source, target, size) {
   await sharp(source).resize(size, size, { fit: 'contain' }).png({ compressionLevel: 9 }).toFile(target);
 }
 
-// 원본을 모두 확인한 뒤에 출력 폴더를 지운다.
+// 원본을 모두 확인한 뒤에 출력 폴더를 지운다. 중간에 멈추면 커밋된 그림이 지워진 채 남기 때문이다
 const ingredientAssets = Object.values(manifest.assets);
+const mascotSources = Object.values(MASCOT_FILES).map((file) => join(designDir, 'mascot', file));
+for (const source of mascotSources) {
+  if (!existsSync(source)) throw new Error(`다람쥐 원본이 없습니다: ${source}`);
+}
 for (const asset of ingredientAssets) {
   if (sha256(join(recordDir, asset.source)) !== asset.sha256)
     throw new Error(`해시가 manifest와 다릅니다: ${asset.source}`);
