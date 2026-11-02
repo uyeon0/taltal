@@ -46,6 +46,11 @@ test('다람쥐 대체 텍스트는 비어 있다', () => {
   assert.equal(container.querySelector('main img')?.getAttribute('alt'), '');
 });
 
+test('머리글 다람쥐가 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
+  const { container } = render(<HomePage />);
+  assert.ok(container.querySelector('main img')?.className.includes('size-(--mascot-header-size)'));
+});
+
 test('직접 고르기 아래에 예시 구역 제목이 있다', () => {
   const { container } = render(<HomePage />);
   const heading = screen.getByRole('heading', { level: 2, name: copy.home.sampleTitle });
