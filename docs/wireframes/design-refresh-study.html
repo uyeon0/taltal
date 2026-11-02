@@ -1,0 +1,536 @@
+<!-- 디자인 보완 비교 시안. 구현 기준은 docs/design.md와 docs/requirements/다. -->
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>디자인 보완 비교 시안</title>
+  <!--
+    디자인 보완 후보(색 면, 모양, 글자, 그림)를 같은 화면에서 비교하는 시안이다.
+
+    색·모양 (1번, 2번)
+      A 지금: 현재 앱 화면을 옮겨 그렸다.
+      C-1 주황 바탕 + 흰 요약 카드
+      C-2 주황 바탕 + 깎은 모서리 요약 카드 (채택)
+
+    글자 (3번). 모두 C-2 위에서 비교한다.
+      C-2 지금 글자
+      T-1 수치 크게 + 작고 굵은 자간 넓힌 라벨
+      T-2 수치 크게 + Ink 알약 태그 라벨 + 제목 자간 -3%
+
+    - 문구, 재료, 수량은 로컬에서 확인한 화면의 예시다.
+    - 그림은 public/images/를 상대 경로로 불러온다. 이 파일은 docs/wireframes/에 있어야 그림이 보인다.
+    - 폰트는 시안에서만 CDN으로 불러온다.
+  -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/SUIT.css">
+  <style>
+@font-face{font-family:Gumi;src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-1@1.0/GumiRomanceTTF.woff2') format('woff2');font-weight:400;font-display:swap}
+
+:root {
+  --primary: #fa8835;
+  --light: #fafaf7;
+  --ink: #20211e;
+  --muted: #5f625a;
+  --subtle: #cfd1c9;
+  --a1: #6699cc;
+  --a2: #004488;
+  --a3: #eecc66;
+  --line: 3px;
+  --sans: "SUIT", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --display: Gumi, var(--sans);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #ecebe4;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-synthesis: none;
+  line-height: 1.5;
+}
+
+button { font: inherit; color: inherit; }
+
+/* 검토용 머리글 */
+.study-head { max-width: 1280px; margin: 0 auto; padding: 24px 16px 8px; }
+.study-head h1 { margin: 0 0 4px; font-size: 1.25rem; }
+.study-head p { margin: 0 0 12px; color: var(--muted); font-size: .875rem; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.tabs .k { align-self: center; font-size: .875rem; color: var(--muted); min-width: 40px; }
+.tabs button {
+  min-height: 44px; padding: 0 16px;
+  border: var(--line) solid var(--ink); border-radius: 999px;
+  background: var(--light); font-weight: 600; cursor: pointer;
+}
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--light); }
+
+.grid {
+  max-width: 1280px; margin: 0 auto; padding: 16px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 24px; align-items: start;
+}
+.col h2 { margin: 0 0 4px; font-size: 1rem; }
+.col .note { margin: 0 0 12px; font-size: .875rem; color: var(--muted); min-height: 3em; }
+
+.phone {
+  width: 100%; max-width: 390px;
+  border: var(--line) solid var(--ink);
+  background: var(--light);
+  overflow: hidden;
+}
+.screen[hidden] { display: none; }
+
+/* 공통 머리 */
+.appbar { height: 52px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 16px; }
+.appbar .back { display: inline-flex; align-items: center; gap: 4px; font-size: .875rem; font-weight: 500; }
+.appbar .logo { font-family: var(--display); font-size: 1.25rem; }
+.body { padding: 0 16px 24px; }
+.display { font-family: var(--display); font-weight: 400; line-height: 1.3; margin: 0; }
+.title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.title-row .display { font-size: 1.75rem; }
+.title-row img { width: 88px; height: auto; flex: none; }
+.sub { margin: 4px 0 0; font-size: .875rem; }
+.section-q { margin: 24px 0 12px; font-size: 1.125rem; font-weight: 600; }
+svg.i { width: 18px; height: 18px; flex: none; }
+
+/* 버튼 */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; min-height: 48px;
+  border: var(--line) solid var(--ink); border-radius: 8px;
+  font-weight: 700; background: var(--primary);
+}
+.btn.secondary { background: var(--light); font-weight: 600; min-height: 44px; }
+.btn.ink { background: var(--ink); color: var(--light); }
+.ghost { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; border: 0; background: none; padding: 0 8px; font-weight: 500; }
+.bottom-bar { border-top: var(--line) solid var(--ink); padding: 12px 16px 16px; background: var(--light); }
+
+/* ===== 재료 입력 ===== */
+.ing-list { display: grid; gap: 8px; margin-top: 16px; }
+.ing { border: var(--line) solid var(--ink); border-radius: 12px; background: var(--light); }
+.ing-row { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 0 12px; }
+.ing-row img { width: 48px; height: 48px; }
+.ing-row .name { flex: 1; font-weight: 600; }
+.ing-row .val { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
+.ing-row .val.pending { font-weight: 500; }
+.editor { padding: 0 12px 12px; }
+.editor .q { margin: 0 0 8px; font-size: .875rem; font-weight: 500; }
+.presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.chip {
+  min-height: 44px; border: var(--line) solid var(--ink); border-radius: 8px;
+  background: var(--light);
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  font-weight: 600;
+}
+.chip.on { background: var(--ink); color: var(--light); }
+.editor .btn.secondary { margin-top: 8px; }
+.add { margin-top: 16px; }
+.pantry { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; font-size: .875rem; }
+.servings { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+/* ===== 추천 결과 ===== */
+.counts { display: flex; gap: 8px; }
+.counts .chip { padding: 0 16px; }
+.summary { margin-top: 16px; border: var(--line) solid var(--ink); border-radius: 12px; background: var(--primary); padding: 16px; }
+.sum-block { margin-bottom: 12px; }
+.sum-head { margin: 0; font-size: 1.25rem; font-weight: 600; }
+.sum-block p { margin: 4px 0 0; }
+.meals { display: grid; gap: 8px; margin-top: 24px; }
+.meal { border: var(--line) solid var(--ink); border-radius: 12px; padding: 16px; background: var(--light); }
+.meal .top { display: flex; justify-content: space-between; align-items: center; font-size: .875rem; }
+.meal .order { display: inline-flex; align-items: center; gap: 8px; }
+.dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ink); }
+.meal h4 { margin: 4px 0 8px; font-size: 1.25rem; font-weight: 700; }
+.meal h4 small { font-size: .875rem; font-weight: 500; margin-left: 6px; }
+.meal .icons { display: flex; gap: 8px; }
+.meal .icons img { width: 32px; height: 32px; }
+.meal .use { margin: 8px 0 4px; }
+.meal .extra { margin: 0; font-size: .875rem; }
+.more { margin-top: 24px; border: var(--line) solid var(--ink); border-radius: 12px; padding: 16px; }
+.more h3 { margin: 0 0 12px; font-size: 1.125rem; }
+.foot { margin: 16px 0 0; font-size: .875rem; color: var(--muted); }
+
+/* ===== C: 주황 바탕 + Light 카드, 역할별 모양 ===== */
+.v-c.phone { background: var(--primary); }
+.v-c .bottom-bar { background: var(--primary); }
+.v-c .hero .body { padding-bottom: 0; }
+.v-c .chip { border-radius: 999px; }
+.v-c .ing-group, .v-c .meal-group, .v-c .summary, .v-c .more, .v-c .servings-card { border-radius: 20px; }
+.ing-group, .meal-group, .servings-card { border: var(--line) solid var(--ink); background: var(--light); overflow: hidden; }
+.ing-group .ing, .meal-group .meal { border: 0; border-radius: 0; }
+.ing-group .ing + .ing, .meal-group .meal + .meal { border-top: 1px solid var(--subtle); }
+.v-c .editor .btn.secondary, .v-c .add .btn.secondary {
+  border: 0; background: none; justify-content: flex-start; padding: 0 4px; min-height: 44px; width: auto;
+}
+.v-c .section-q { font-weight: 700; }
+.v-c .servings-card { padding: 12px; }
+.v-c .summary { background: var(--light); }
+.v-c .more { background: var(--light); }
+.v-c .foot { color: var(--ink); }
+.v-c .pantry { font-weight: 500; }
+
+/* C-2: 요약 카드만 모서리를 사선으로 깎는다. 바깥 Ink 면 안에 Light 면을 3px 들여 겹쳐 선을 만든다 */
+.v-c2 .summary {
+  --cut: 24px;
+  border: 0; border-radius: 0; padding: var(--line); background: var(--ink);
+  clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut));
+}
+.v-c2 .summary-inner {
+  --cut-in: calc(var(--cut) - 1.25px);
+  background: var(--light); padding: 16px 20px;
+  clip-path: polygon(var(--cut-in) 0, calc(100% - var(--cut-in)) 0, 100% var(--cut-in), 100% calc(100% - var(--cut-in)), calc(100% - var(--cut-in)) 100%, var(--cut-in) 100%, 0 calc(100% - var(--cut-in)), 0 var(--cut-in));
+}
+
+/* ===== 글자: 공통(T-1, T-2) 요약 수치 크게 ===== */
+.t-big .sum-head { display: flex; flex-direction: column; gap: 0; }
+.t-big .sum-head .num { font-size: 2.25rem; font-weight: 800; line-height: 1.2; }
+.t-big .sum-block + .sum-block { border-top: 1px solid var(--subtle); padding-top: 12px; }
+.t-big .meal .extra .k { font-weight: 700; }
+
+/* 수치 크기를 줄인 안 */
+.n-24 .sum-head { flex-direction: row; align-items: baseline; gap: 8px; }
+.n-24 .sum-head .num { font-size: 1.5rem; font-weight: 700; line-height: 1.3; }
+.n-28 .sum-head .num { font-size: 1.75rem; font-weight: 700; line-height: 1.3; }
+/* N-24에 요약 라벨만 Ink 알약 태그. 라벨과 수치를 세로 가운데로 맞춘다 */
+.n-24p .sum-head { align-items: center; }
+.n-24p .sum-head .lbl,
+.m-1 .meal .order-text {
+  background: var(--ink); color: var(--light);
+  font-size: .875rem; font-weight: 700; letter-spacing: 0; line-height: 1.5;
+  padding: 4px 12px; border-radius: 999px;
+}
+/* P-1: 요리 카드의 재료 그림을 재료 입력 목록과 같은 48px로 */
+.p-icons .meal .icons img { width: 48px; height: 48px; }
+/* P-2: 다람쥐를 카드 위 모서리에 걸친다. 카드의 clip-path, overflow에 잘리지 않게 바깥 래퍼에 둔다 */
+.p-perch .title-row img { display: none; }
+.perch-wrap { position: relative; }
+.perch-wrap .perch {
+  position: absolute; right: 16px; bottom: calc(100% - 20px);
+  width: 96px; height: auto; z-index: 1; pointer-events: none;
+}
+.p-perch .summary-perch { margin-top: 64px; }
+.p-perch .ing-perch { margin-top: 64px; }
+.p-perch .summary-perch .summary, .p-perch .ing-perch .ing-group { margin-top: 0 !important; }
+/* M-2: 있으면 좋음, 필요한 양념도 테두리 알약 */
+.m-2 .meal .extra .k {
+  display: inline-block; border: 2px solid var(--ink); border-radius: 999px;
+  padding: 0 8px; margin: 0 4px 4px 0; font-weight: 700; letter-spacing: 0;
+}
+
+/* T-1: 작고 굵게, 자간을 넓힌 라벨 */
+.t-1 .lbl { font-size: .875rem; font-weight: 800; letter-spacing: .08em; }
+.t-1 .meal .order { font-size: .875rem; font-weight: 800; letter-spacing: .08em; }
+.t-1 .meal .extra .k { letter-spacing: .08em; font-weight: 800; }
+
+/* T-2: Ink 알약 태그 라벨 + 제목 자간 -3% */
+.t-2 .lbl, .t-2 .meal .order-text {
+  display: inline-block; align-self: flex-start;
+  background: var(--ink); color: var(--light);
+  font-size: .875rem; font-weight: 700; line-height: 1.5;
+  padding: 2px 12px; border-radius: 999px;
+}
+.t-2 .meal .extra .k {
+  display: inline-block; border: 2px solid var(--ink); border-radius: 999px;
+  padding: 0 8px; margin: 0 4px 4px 0; font-weight: 700;
+}
+.t-2 .display { letter-spacing: -.03em; }
+
+.legend { max-width: 1280px; margin: 0 auto; padding: 0 16px 40px; font-size: .875rem; color: var(--muted); }
+.legend ul { margin: 4px 0 0; padding-left: 20px; }
+.legend[hidden] { display: none; }
+  </style>
+</head>
+<body>
+
+<header class="study-head">
+  <h1>디자인 보완 비교 시안</h1>
+  <p>디자인 보완 후보(색 면, 모양, 글자, 그림)를 같은 화면에서 비교한다.</p>
+  <div class="tabs" role="tablist" aria-label="비교 묶음">
+    <span class="k">비교</span>
+    <button role="tab" aria-selected="false" data-set="shape">색·모양</button>
+    <button role="tab" aria-selected="false" data-set="type">글자</button>
+    <button role="tab" aria-selected="false" data-set="size">수치 크기</button>
+    <button role="tab" aria-selected="false" data-set="pill">요약 라벨</button>
+    <button role="tab" aria-selected="false" data-set="meal">요리 라벨</button>
+    <button role="tab" aria-selected="true" data-set="pic">그림</button>
+  </div>
+  <div class="tabs" role="tablist" aria-label="화면">
+    <span class="k">화면</span>
+    <button role="tab" aria-selected="false" data-screen="input">재료 입력</button>
+    <button role="tab" aria-selected="true" data-screen="results">추천 결과</button>
+  </div>
+</header>
+
+<main class="grid" id="grid"></main>
+
+<section class="legend" data-legend="shape" hidden>
+  <strong>C-1, C-2에서 바꾼 것</strong>
+  <ul>
+    <li>화면 배경 전체를 주황으로 두고 정보는 Light 카드에 담는다. 아래 고정 영역의 주요 버튼은 Ink 면, Light 카드 안의 주요 버튼은 Primary 면.</li>
+    <li>카드 라운딩 12px → 20px. 하나 고르는 칩(수량, 인분, 가짓수)은 알약 모양.</li>
+    <li>재료 행, 요리 카드처럼 같은 묶음의 행은 카드 하나에 담고 1px Subtle 선으로 나눈다.</li>
+    <li>직접 입력, 재료 추가 같은 보조 행동은 상자를 빼고 Ghost로 둔다.</li>
+    <li>C-2는 요약 카드만 모서리를 사선으로 깎는다. 재료 입력 화면은 C-1과 같다.</li>
+  </ul>
+</section>
+<section class="legend" data-legend="type">
+  <strong>T-1, T-2에서 바꾼 것</strong>
+  <ul>
+    <li>요약: "다 써요", "남아요"를 라벨로 떼고 수치를 36px, 800으로 키운다. 두 덩어리 사이를 1px Subtle 선으로 나눈다.</li>
+    <li>T-1 라벨: 14px, 800, 자간 +8%. "N번째 요리", "다 써요/남아요", "있으면 좋음/필요한 양념"에 쓴다.</li>
+    <li>T-2 라벨: Ink 알약 태그. 요리 카드의 "있으면 좋음/필요한 양념"은 테두리만 있는 알약. 큰 제목 자간 -3%.</li>
+    <li>재료 입력 화면은 T-2의 제목 자간만 다르다.</li>
+  </ul>
+</section>
+
+<section class="legend" data-legend="size" hidden>
+  <strong>수치 크기 비교</strong>
+  <ul>
+    <li>세 안 모두 T-1 라벨(14px, 800, 자간 +8%)을 쓰고 요약 수치 크기만 다르다.</li>
+  </ul>
+</section>
+
+<section class="legend" data-legend="pill" hidden>
+  <strong>요약 라벨 비교</strong>
+  <ul>
+    <li>두 안 모두 요약 수치 24px, 700이고 라벨과 수치가 한 줄이다.</li>
+    <li>N-24P의 알약 태그는 Ink 면에 선이 없고 높이가 낮아, 3px 선과 44px 높이의 선택 칩과 모양이 다르다.</li>
+  </ul>
+</section>
+
+<section class="legend" data-legend="meal" hidden>
+  <strong>요리 라벨 비교</strong>
+  <ul>
+    <li>세 안 모두 요약은 N-24P(알약 라벨, 수치 24px)다. 요리 카드 라벨만 다르다.</li>
+  </ul>
+</section>
+
+<section class="legend" data-legend="pic" hidden>
+  <strong>그림 비교</strong>
+  <ul>
+    <li>세 안 모두 M-1(색·모양, 글자 결정 반영) 위에서 비교한다.</li>
+    <li>P-2의 다람쥐는 몸과 꼬리를 자르지 않고, 발만 카드 위쪽 선에 걸친다. 재료 입력 화면도 확인한다.</li>
+    <li>재료 입력 화면은 실제 앱처럼 재료를 담은 뒤 제목 옆에 다람쥐가 없다. P-2의 재료 목록 위 다람쥐는 새로 더하는 그림이다.</li>
+  </ul>
+</section>
+
+<template id="tpl">
+  <div class="col">
+    <h2 data-slot="title"></h2>
+    <p class="note" data-slot="note"></p>
+    <div class="phone" data-slot="phone">
+
+      <!-- 재료 입력 -->
+      <div class="screen" data-screen="input">
+        <div class="hero">
+          <div class="appbar">
+            <span class="back"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span>
+            <span class="logo">탈탈</span><span></span>
+          </div>
+          <div class="body">
+            <div class="title-row">
+              <h3 class="display">재료와 양을<br>알려 주세요</h3>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div data-slot="ing-list"></div>
+          <div class="add"><button class="btn secondary"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>재료 추가</button></div>
+          <div class="pantry"><span>기본 양념은 직접 입력하지 않아도 돼요.</span><span class="ghost">12개 보기 <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span></div>
+          <p class="section-q">한 번에 몇 인분씩 만들까요?</p>
+          <div class="servings-wrap">
+            <div class="servings">
+              <span class="chip">1인분</span>
+              <span class="chip on"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>2인분</span>
+              <span class="chip">3인분</span>
+              <span class="chip">4인분</span>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-bar"><button class="btn" data-primary>남은 2개 양 정하기</button></div>
+      </div>
+
+      <!-- 추천 결과 -->
+      <div class="screen" data-screen="results">
+        <div class="hero">
+          <div class="appbar">
+            <span class="back"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>재료 수정</span>
+            <span class="logo">탈탈</span><span></span>
+          </div>
+          <div class="body">
+            <div class="title-row">
+              <div>
+                <h3 class="display">이렇게 나눠 쓰면<br>이만큼 남아요</h3>
+                <p class="sub">각 요리 2인분 기준</p>
+              </div>
+              <img src="../../public/images/mascot/meal.png" alt="">
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <p class="section-q">몇 가지 요리를 만들까요?</p>
+          <div class="counts">
+            <span class="chip on"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>3가지</span>
+          </div>
+          <div class="summary"><div class="summary-inner">
+            <div class="sum-block">
+              <h3 class="sum-head"><span class="lbl">다 써요</span> <span class="num">1개</span></h3>
+              <p>두부</p>
+            </div>
+            <div class="sum-block">
+              <h3 class="sum-head"><span class="lbl">남아요</span> <span class="num">4개</span></h3>
+              <p>양파 1개, 당근 1개, 대파 약 1단, 계란 3개</p>
+            </div>
+            <button class="btn secondary">재료별 사용량 보기 <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          </div></div>
+          <div data-slot="meals"></div>
+          <div class="more">
+            <h3>조금 사서 더 써 볼까요?</h3>
+            <button class="btn" data-primary>조금 사는 요리 보기</button>
+          </div>
+          <p class="foot">양은 일반적인 무게로 계산해서 실제와 조금 다를 수 있어요.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<script>
+const IMG = '../../public/images/ingredients/';
+const ING = [
+  { name: '대파', img: 'ingredient-66ac8a1b9c4c895b.png', val: '1단' },
+  { name: '양파', img: 'ingredient-0a21c52b44b4a3ba.png', val: '1개' },
+  { name: '계란', img: 'ingredient-fb5373d67f2355ed.png', open: true, presets: ['2개', '5개', '10개'] },
+  { name: '당근', img: 'ingredient-08eba4e95e0c24c6.png' },
+  { name: '두부', img: 'ingredient-727260a4a1c6344e.png' },
+];
+const MEALS = [
+  { n: 1, color: 'var(--a1)', name: '두부양념조림', time: '조리 20분', imgs: ['ingredient-727260a4a1c6344e.png'], use: '두부 ½모', extra: [['있으면 좋음', '홍고추'], ['필요한 양념', '물엿, 실고추']] },
+  { n: 2, color: 'var(--a2)', name: '미소된장국', time: '조리 30분', imgs: ['ingredient-727260a4a1c6344e.png'], use: '두부 ½모', extra: [['있으면 좋음', '팽이버섯, 실파'], ['필요한 양념', '미소된장, 다시마']] },
+  { n: 3, color: 'var(--a3)', name: '계란말이', time: '조리 30분', imgs: ['ingredient-fb5373d67f2355ed.png', 'ingredient-66ac8a1b9c4c895b.png'], use: '계란 2개 · 대파 0.1단 미만(3.6g)', extra: [['필요한 양념', '마늘, 다시마']] },
+];
+const SETS = {
+  shape: [
+    { key: 'a', cls: [], title: 'A. 지금', note: '현재 앱 화면. 머리 영역은 Light이고, 모든 요소가 같은 3px 상자다.' },
+    { key: 'c1', cls: ['v-c'], title: 'C-1. 주황 바탕 + 흰 요약 카드', note: '화면 전체가 주황이고 정보는 Light 카드에 담는다. 요약 카드도 다른 카드와 같은 모양.' },
+    { key: 'c2', cls: ['v-c', 'v-c2'], title: 'C-2. 주황 바탕 + 깎은 모서리 요약 카드', note: 'C-1과 같고, 요약 카드만 모서리를 사선으로 깎아 다른 카드와 구분한다. 채택.' },
+  ],
+  type: [
+    { key: 'c2', cls: ['v-c', 'v-c2'], title: 'C-2. 지금 글자', note: '색·모양에서 고른 안. 라벨과 본문이 같은 서체, 비슷한 크기다.' },
+    { key: 't1', cls: ['v-c', 'v-c2', 't-big', 't-1'], title: 'T-1. 큰 수치 + 자간 넓힌 라벨', note: '요약 수치를 36px로 키운다. 라벨은 작고 굵게, 자간을 넓힌다.' },
+    { key: 't2', cls: ['v-c', 'v-c2', 't-big', 't-2'], title: 'T-2. 큰 수치 + 알약 태그 라벨', note: '요약 수치를 36px로 키운다. 라벨은 Ink 알약 태그. 큰 제목 자간 -3%.' },
+  ],
+  size: [
+    { key: 't1', cls: ['v-c', 'v-c2', 't-big', 't-1'], title: 'T-1. 수치 36px', note: '앞 비교의 T-1. 라벨 아래 줄에 수치 36px, 800.' },
+    { key: 'n28', cls: ['v-c', 'v-c2', 't-big', 't-1', 'n-28'], title: 'N-28. 수치 28px', note: '라벨 아래 줄에 수치 28px, 700.' },
+    { key: 'n24', cls: ['v-c', 'v-c2', 't-big', 't-1', 'n-24'], title: 'N-24. 수치 24px, 한 줄', note: '라벨과 수치를 한 줄에 두고 수치 24px, 700.' },
+  ],
+  pill: [
+    { key: 'n24', cls: ['v-c', 'v-c2', 't-big', 't-1', 'n-24'], title: 'N-24. 자간 라벨', note: '앞 비교의 N-24. 라벨과 수치의 글자 기준선을 맞췄다.' },
+    { key: 'n24p', cls: ['v-c', 'v-c2', 't-big', 't-1', 'n-24', 'n-24p'], title: 'N-24P. 알약 라벨', note: '요약의 "다 써요", "남아요"만 Ink 알약 태그. 요리 카드 라벨은 자간 라벨 그대로.' },
+  ],
+  meal: [
+    { key: 'n24p', cls: ['v-c', 'v-c2', 't-big', 't-1', 'n-24', 'n-24p'], title: 'N-24P. 요약만 알약', note: '앞 비교의 N-24P. 요리 카드 라벨은 자간 라벨.' },
+    { key: 'm1', cls: ['v-c', 'v-c2', 't-big', 't-1', 'n-24', 'n-24p', 'm-1'], title: 'M-1. 요리 순서도 알약', note: '"N번째 요리"도 Ink 알약. 있으면 좋음, 필요한 양념은 굵은 글자.' },
+    { key: 'm2', cls: ['v-c', 'v-c2', 't-big', 't-1', 'n-24', 'n-24p', 'm-1', 'm-2'], title: 'M-2. 부가 정보까지 알약', note: 'M-1에 더해 있으면 좋음, 필요한 양념도 테두리 알약.' },
+  ],
+  pic: [
+    { key: 'm1', cls: ['v-c', 'v-c2', 't-big', 't-1', 'n-24', 'n-24p', 'm-1'], title: 'M-1. 지금까지 정한 안', note: '다람쥐는 제목 오른쪽, 요리 카드의 재료 그림은 32px.' },
+    { key: 'p1', cls: ['v-c', 'v-c2', 't-big', 't-1', 'n-24', 'n-24p', 'm-1', 'p-icons'], title: 'P-1. 재료 그림 48px', note: '요리 카드의 재료 그림을 재료 입력 목록과 같은 48px로 키운다.' },
+    { key: 'p2', cls: ['v-c', 'v-c2', 't-big', 't-1', 'n-24', 'n-24p', 'm-1', 'p-icons', 'p-perch'], title: 'P-2. 다람쥐 걸치기', note: 'P-1에 더해 다람쥐가 요약 카드(재료 입력은 재료 목록 카드) 위 모서리에 걸친다.' },
+  ],
+};
+
+const chevDown = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>';
+const chevUp = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg>';
+const chevRight = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>';
+const trash = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+
+function ingHTML(i) {
+  const val = i.val
+    ? `<span class="val">${i.val} ${chevDown}</span>`
+    : `<span class="val pending">양 고르기 ${i.open ? chevUp : chevDown}</span>`;
+  const editor = i.open ? `
+    <div class="editor">
+      <p class="q">얼마나 가지고 있나요?</p>
+      <div class="presets">${i.presets.map(p => `<span class="chip">${p}</span>`).join('')}</div>
+      <button class="btn secondary">직접 입력 ${chevDown}</button>
+      <span class="ghost">${trash}재료 삭제</span>
+    </div>` : '';
+  return `<div class="ing${i.open ? ' open' : ''}"><div class="ing-row"><img src="${IMG}${i.img}" alt=""><span class="name">${i.name}</span>${val}</div>${editor}</div>`;
+}
+
+function mealHTML(m) {
+  return `<div class="meal">
+    <div class="top"><span class="order"><span class="dot" style="background:${m.color}"></span><span class="order-text">${m.n}번째 요리</span></span>${chevRight}</div>
+    <h4>${m.name}<small>${m.time}</small></h4>
+    <div class="icons">${m.imgs.map(s => `<img src="${IMG}${s}" alt="">`).join('')}</div>
+    <p class="use">${m.use}</p>
+    ${m.extra.map(([k, v]) => `<p class="extra"><span class="k">${k}</span><span class="sep">: </span>${v}</p>`).join('')}
+  </div>`;
+}
+
+const grid = document.getElementById('grid');
+const tpl = document.getElementById('tpl');
+const state = { set: 'pic', screen: 'results' };
+
+function render() {
+  grid.innerHTML = '';
+  for (const v of SETS[state.set]) {
+    const node = tpl.content.cloneNode(true);
+    node.querySelector('[data-slot=title]').textContent = v.title;
+    node.querySelector('[data-slot=note]').textContent = v.note;
+    const phone = node.querySelector('[data-slot=phone]');
+    phone.classList.add(...v.cls);
+    const grouped = v.key !== 'a';
+    const isC = v.cls.includes('v-c');
+
+    const ingList = node.querySelector('[data-slot=ing-list]');
+    ingList.className = grouped ? 'ing-group' : 'ing-list';
+    if (grouped) ingList.style.marginTop = '16px';
+    ingList.innerHTML = ING.map(ingHTML).join('');
+
+    const meals = node.querySelector('[data-slot=meals]');
+    meals.className = grouped ? 'meal-group' : 'meals';
+    if (grouped) meals.style.marginTop = '24px';
+    meals.innerHTML = MEALS.map(mealHTML).join('');
+
+    // 큰 수치 안과 알약 태그 안은 구분 기호를 빼고 라벨 모양으로 구분한다
+    if (v.cls.includes('t-2') || v.cls.includes('m-2')) node.querySelectorAll('.extra .sep').forEach(s => { s.textContent = ' '; });
+    if (v.cls.includes('p-perch')) {
+      const perch = (target, wrapClass, src) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'perch-wrap ' + wrapClass;
+        target.replaceWith(wrap);
+        wrap.appendChild(target);
+        const img = document.createElement('img');
+        img.className = 'perch';
+        img.src = src;
+        img.alt = '';
+        wrap.appendChild(img);
+      };
+      perch(node.querySelector('.summary'), 'summary-perch', '../../public/images/mascot/meal.png');
+      perch(ingList, 'ing-perch', '../../public/images/mascot/discovery.png');
+    }
+    if (isC) {
+      node.querySelector('.servings-wrap').classList.add('servings-card');
+      node.querySelectorAll('.bottom-bar [data-primary]').forEach(b => b.classList.add('ink'));
+    }
+    node.querySelectorAll('.screen').forEach(s => { s.hidden = s.dataset.screen !== state.screen; });
+    grid.appendChild(node);
+  }
+  document.querySelectorAll('[data-legend]').forEach(l => { l.hidden = l.dataset.legend !== state.set; });
+  document.querySelectorAll('[data-set]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.set === state.set)));
+  document.querySelectorAll('[data-screen]').forEach(b => { if (b.tagName === 'BUTTON') b.setAttribute('aria-selected', String(b.dataset.screen === state.screen)); });
+}
+
+document.querySelectorAll('button[data-set]').forEach(b => b.addEventListener('click', () => { state.set = b.dataset.set; render(); }));
+document.querySelectorAll('button[data-screen]').forEach(b => b.addEventListener('click', () => { state.screen = b.dataset.screen; render(); }));
+render();
+</script>
+</body>
+</html>
