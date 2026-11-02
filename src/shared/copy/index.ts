@@ -31,6 +31,7 @@ export const copy = {
     searchPlaceholder: '산 재료를 찾아보세요',
     alreadyAdded: '담김',
     add: (count: number) => `${count}개 담기`,
+    addDisabledReason: '재료를 고르면 담을 수 있어요.',
     // 따옴표가 있어 조사를 "는"으로 고정한다
     noResult: (query: string) => `"${query}"는 목록에 없어요. 다른 이름으로 찾아보세요.`,
     clearSearch: '검색어 지우기'
@@ -41,19 +42,22 @@ export const copy = {
     emptyTitle: '아직 고른 재료가 없어요',
     emptyDescription: '장 본 재료를 고르면 나눠 쓸 요리를 찾아 드려요.',
     addIngredient: '재료 추가',
-    amountTitle: (ingredient: string) => `${ingredient}, 얼마나 있어요?`,
+    amountTitle: '얼마나 가지고 있나요?',
     amountUnset: '양 고르기',
     customAmount: '직접 입력',
     customAmountSave: '이 양으로 정하기',
+    unit: '단위',
     remove: '재료 삭제',
     amountError: '0보다 크고 100,000 이하로 넣어 주세요.',
-    pantryGuide: '소금, 식용유 같은 기본 양념은 넣지 않아도 돼요.',
+    pantryGuide: '기본 양념은 직접 입력하지 않아도 돼요.',
     pantryExpand: (count: number) => `${count}개 보기`,
     pantryCollapse: '목록 접기',
     servings: '한 번에 몇 인분씩 만들까요?',
+    servingsOption: (servings: number) => `${servings}인분`,
     receiptComingSoon: '영수증으로 넣기 · 준비 중',
     receiptComingSoonGuide: '영수증으로 넣기는 준비 중이에요. 지금은 재료를 직접 골라 주세요.',
     findMeals: '요리 찾기',
+    findMealsDisabledReason: '재료를 담으면 요리를 찾을 수 있어요.',
     setRemainingAmounts: (count: number) => `남은 ${count}개 양 정하기`
   },
 
