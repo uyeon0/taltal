@@ -86,7 +86,12 @@ function ResultsSearch({ ingredients }: ResultsScreenProps) {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <AppHeader backHref={INGREDIENTS_HREF} backLabel={copy.results.editIngredients} />
+      {/* 스크롤해도 위에 붙어 재료 수정 버튼이 늘 보인다. 아래 선으로 스크롤되는 내용과 층을 나눈다(docs/design.md "공간과 형태") */}
+      <AppHeader
+        backHref={INGREDIENTS_HREF}
+        backLabel={copy.results.editIngredients}
+        className="sticky top-0 z-10 border-b border-foreground bg-background"
+      />
       {state.status === 'done' && !empty ? (
         <ResultsView key={state.id} search={state.search} ingredients={ingredients} units={units} servings={servings} />
       ) : (
