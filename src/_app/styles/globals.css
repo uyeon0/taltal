@@ -117,6 +117,7 @@
   --radius-pill: 9999px; /* 하나 고르는 선택 항목 */
   --radius-card: 1.25rem;
   --radius-sheet: 1.25rem;
+  --summary-corner-cut: 1.5rem; /* 결과 요약 카드의 사선 모서리 */
   --border-width-divider: 1px;
   --border-width: 3px;
   --border-width-strong: 3px;
@@ -170,6 +171,39 @@
   --border: var(--border-subtle);
   background-color: var(--neutral-light);
   color: var(--neutral-ink);
+}
+
+/* 결과 요약 카드. 네 모서리를 사선으로 깎는다. clip-path는 테두리를 잘라 내므로,
+   바깥 Ink 면 안에 Light 면을 기본 선 굵기만큼 들여 겹쳐 선을 만든다.
+   안쪽 면은 선 굵기만큼 들어가 있으므로, 사선 방향 선 굵기도 같아지도록 안쪽 꼭짓점을 (2 − √2) × 선 굵기만큼 줄인다 */
+.summary-card {
+  --cut: var(--summary-corner-cut);
+  padding: var(--border-width);
+  background-color: var(--neutral-ink);
+  clip-path: polygon(
+    var(--cut) 0,
+    calc(100% - var(--cut)) 0,
+    100% var(--cut),
+    100% calc(100% - var(--cut)),
+    calc(100% - var(--cut)) 100%,
+    var(--cut) 100%,
+    0 calc(100% - var(--cut)),
+    0 var(--cut)
+  );
+}
+.summary-card > * {
+  --cut-inner: calc(var(--cut) - var(--border-width) * 0.5858);
+  background-color: var(--neutral-light);
+  clip-path: polygon(
+    var(--cut-inner) 0,
+    calc(100% - var(--cut-inner)) 0,
+    100% var(--cut-inner),
+    100% calc(100% - var(--cut-inner)),
+    calc(100% - var(--cut-inner)) 100%,
+    var(--cut-inner) 100%,
+    0 calc(100% - var(--cut-inner)),
+    0 var(--cut-inner)
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {

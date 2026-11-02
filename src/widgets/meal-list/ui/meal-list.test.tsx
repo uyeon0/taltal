@@ -94,17 +94,19 @@ test('day 순서로 보여 주고, 카드마다 같은 뜻의 opener를 단다',
 
 test('순서 이유는 빨리 상함일 때만 쓴다', () => {
   renderList();
-  // 순서 이유는 순서 옆에 이어 쓴다
+  // 순서 이유는 순서 라벨 태그 옆에 이어 쓴다
   const [first, second] = screen.getAllByRole('button');
-  assert.ok(first.textContent?.includes(`${copy.mealCard.order(1)} · ${copy.mealCard.orderReason('상추')}`));
+  assert.ok(first.textContent?.includes(`${copy.mealCard.order(1)} ${copy.mealCard.orderReason('상추')}`));
   assert.ok(!second.textContent?.includes(copy.mealCard.orderReason('두부')));
 });
 
 test('사야 하는 재료는 기본 단위와 g으로, 있으면 좋은 재료는 양 없이 쓴다', () => {
   renderList();
   screen.getByText(copy.mealCard.toBuy('청고추 2개 (20g), 표고버섯 2개 (40g)'));
-  screen.getByText(copy.mealCard.optional('대파'));
-  screen.getByText(copy.mealCard.specialSeasoning('마늘'));
+  // 이름만 굵게 그려 요소가 나뉘므로 글자 내용으로 찾는다
+  const [first] = screen.getAllByRole('button');
+  assert.ok(first.textContent?.includes(`${copy.mealCard.optionalLabel}: 대파`));
+  assert.ok(first.textContent?.includes(`${copy.mealCard.specialSeasoningLabel}: 마늘`));
   // 가진 재료는 사용자가 고른 단위로 쓰고, 사는 재료는 넣지 않는다
   screen.getByText('상추 3장');
   screen.getByText('두부 ½모');

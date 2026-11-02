@@ -75,8 +75,10 @@ export const copy = {
     servings: (servings: number) => `각 요리 ${servings}인분 기준`,
     dishCountLabel: '몇 가지 요리를 만들까요?',
     dishCountTab: (count: number) => `${count}가지`,
-    summaryUsedUp: (count: number) => `다 써요 ${count}개`,
-    summaryLeftover: (count: number) => `남아요 ${count}개`,
+    // 요약은 라벨 태그와 개수를 나눠 그린다. 이어 읽으면 "다 써요 1개"다
+    summaryUsedUpLabel: '다 써요',
+    summaryLeftoverLabel: '남아요',
+    summaryCount: (count: number) => `${count}개`,
     summaryNoLeftover: '남는 재료 없음',
     openUsage: '재료별 사용량 보기',
     estimateNotice: '양은 일반적인 무게로 계산해서 실제와 조금 다를 수 있어요.',
@@ -91,8 +93,9 @@ export const copy = {
     cookingTime: (time: string) => `조리 ${time}`,
     // 재료와 양을 "청고추 2개 (20g)"처럼 쓰고, 여럿이면 쉼표로 이은 문자열을 넘긴다
     toBuy: (ingredients: string) => `따로 사야 해요: ${ingredients}`,
-    optional: (ingredients: string) => `있으면 좋음: ${ingredients}`,
-    specialSeasoning: (seasonings: string) => `필요한 양념: ${seasonings}`
+    // 이름만 굵게 그리고 뒤에 ": 재료"를 잇는다
+    optionalLabel: '있으면 좋음',
+    specialSeasoningLabel: '필요한 양념'
   },
 
   purchaseMode: {

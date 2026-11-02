@@ -7,6 +7,7 @@ import type { Recipe } from '@/entities/recipe';
 import { copy } from '@/shared/copy';
 import { SHEET_OPENER_ATTR } from '@/shared/lib/use-sheet-route';
 import { AllocationSwatch } from '@/shared/ui/allocation-swatch';
+import { LabelTag } from '@/shared/ui/label-tag';
 
 /** 요리 카드의 data-sheet-opener 값. 탭이나 묶음을 바꿔 다시 그려져도 같은 요리 카드로 포커스를 돌려준다 */
 export const mealOpener = (recipeId: number) => `recipe-${recipeId}`;
@@ -67,15 +68,16 @@ function MealCard({ meal, shoppingList, recipes, ingredients, units, onOpen }: M
       {...{ [SHEET_OPENER_ATTR]: mealOpener(meal.recipeId) }}
     >
       <span className="flex min-w-0 flex-1 flex-col gap-2">
-        {/* 위계: 요리명(20px 700)만 굵게 두고, 순서와 이유, 조리 시간, 부가 정보는 14px로 낮춘다 */}
-        <span className="flex items-start gap-2 text-xs font-medium break-keep">
-          <AllocationSwatch order={meal.day} className="mt-1" />
-          <span>
-            {copy.mealCard.order(meal.day)}
-            {meal.urgency === '빨리 상함' && meal.urgentIngredients.length > 0
-              ? ` · ${copy.mealCard.orderReason(meal.urgentIngredients.join(', '))}`
-              : null}
-          </span>
+        {/* 위계: 요리명(20px 700)만 굵게 두고, 순서는 라벨 태그, 이유와 조리 시간, 부가 정보는 14px로 낮춘다 */}
+        <span className="flex flex-wrap items-center gap-2 text-xs font-medium break-keep">
+          <AllocationSwatch order={meal.day} />
+          <LabelTag>{copy.mealCard.order(meal.day)}</LabelTag>
+          {meal.urgency === '빨리 상함' && meal.urgentIngredients.length > 0 ? (
+            <>
+              {/* flex 안의 공백은 보이지 않고, 화면 읽기 프로그램이 순서와 이유를 띄어 읽게 한다 */}{' '}
+              <span>{copy.mealCard.orderReason(meal.urgentIngredients.join(', '))}</span>
+            </>
+          ) : null}
         </span>
         <span className="flex flex-wrap items-baseline gap-x-2">
           <span className="text-xl font-bold break-keep">{meal.name}</span>
@@ -109,10 +111,14 @@ function MealCard({ meal, shoppingList, recipes, ingredients, units, onOpen }: M
           </span>
         ) : null}
         {optional.length > 0 ? (
-          <span className="text-xs break-keep">{copy.mealCard.optional(optional.join(', '))}</span>
+          <span className="text-xs break-keep">
+            <span className="font-bold">{copy.mealCard.optionalLabel}</span>: {optional.join(', ')}
+          </span>
         ) : null}
         {meal.pantryNeeded.length > 0 ? (
-          <span className="text-xs break-keep">{copy.mealCard.specialSeasoning(meal.pantryNeeded.join(', '))}</span>
+          <span className="text-xs break-keep">
+            <span className="font-bold">{copy.mealCard.specialSeasoningLabel}</span>: {meal.pantryNeeded.join(', ')}
+          </span>
         ) : null}
       </span>
       <ChevronRight aria-hidden="true" className="mt-1 size-5 shrink-0" />
