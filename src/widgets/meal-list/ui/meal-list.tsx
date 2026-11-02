@@ -24,16 +24,16 @@ type MealListProps = {
 
 /**
  * 요리 카드 목록. day 순서로 보여 준다. 고를 수 있는 후보처럼 보이지 않게 체크나 선택 표시를 두지 않고,
- * 순서 번호와 배분색으로 한 묶음의 요리라는 것을 보여 준다.
+ * 순서 번호와 배분색으로 한 묶음의 요리라는 것을 보여 준다. 요리들은 카드 하나에 담고 줄 사이를 장식 구분선으로 나눈다.
  * 누르면 레시피 상세를 연다.
  */
 export function MealList({ result, onOpenMeal, ...rest }: MealListProps) {
   const meals = [...result.meals].sort((a, b) => a.day - b.day);
 
   return (
-    <ol className="flex flex-col gap-2">
+    <ol className="surface-default flex flex-col rounded-xl border border-foreground bg-card">
       {meals.map((meal) => (
-        <li key={meal.recipeId} className="rounded-xl border border-foreground bg-card">
+        <li key={meal.recipeId} className="border-t-(length:--border-width-divider) first:border-t-0">
           <MealCard meal={meal} shoppingList={result.shoppingList} onOpen={onOpenMeal} {...rest} />
         </li>
       ))}
@@ -63,7 +63,7 @@ function MealCard({ meal, shoppingList, recipes, ingredients, units, onOpen }: M
     <button
       type="button"
       onClick={(event) => onOpen(meal, event.currentTarget)}
-      className="flex w-full items-start gap-3 rounded-xl p-(--card-padding) text-left hover:text-action-hover"
+      className="flex w-full items-start gap-3 p-(--card-padding) text-left hover:text-action-hover"
       {...{ [SHEET_OPENER_ATTR]: mealOpener(meal.recipeId) }}
     >
       <span className="flex min-w-0 flex-1 flex-col gap-2">

@@ -136,8 +136,8 @@ export function IngredientInputScreen({ pickable, pantryBasics }: IngredientInpu
         <div className="flex flex-col gap-3">
           <Button
             ref={addButtonRef}
-            variant="secondary"
-            className="w-full"
+            variant="ghost"
+            className="self-start"
             onClick={(event) => sheet.openSheet(event.currentTarget)}
             {...{ [SHEET_OPENER_ATTR]: INGREDIENT_PICKER_SHEET }}
           >

@@ -36,8 +36,9 @@ export function IngredientList({ ingredients, openId, ...handlers }: IngredientL
     );
   }
 
+  // 담은 재료는 한 묶음이라 카드 하나에 담고 줄 사이를 장식 구분선으로 나눈다(docs/design.md "공간과 형태")
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="surface-default flex flex-col rounded-xl border border-foreground bg-card">
       {items.map((item) => {
         const ingredient = ingredients.get(item.ingredientId);
         // 재료 데이터에서 빠진 재료는 이름, 단위를 알 수 없어 보여 주지 않는다
@@ -74,13 +75,13 @@ function IngredientRow({
   const editorId = useId();
 
   return (
-    <li className="rounded-xl border border-foreground bg-card">
+    <li className="border-t-(length:--border-width-divider) first:border-t-0">
       <button
         type="button"
         aria-expanded={open}
         aria-controls={open ? editorId : undefined}
         onClick={() => onToggle(ingredient.id)}
-        className="flex min-h-(--control-height) w-full items-center gap-3 rounded-xl p-3 text-left hover:text-action-hover"
+        className="flex min-h-(--control-height) w-full items-center gap-3 p-3 text-left hover:text-action-hover"
         {...{ [INGREDIENT_ROW_ATTR]: ingredient.id }}
       >
         <IngredientImage ingredientId={ingredient.id} size={48} />

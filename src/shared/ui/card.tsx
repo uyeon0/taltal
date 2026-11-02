@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/shared/lib/cn';
 
-// 카드는 Light 면, 기본 굵기 Ink 선, 12px 라운딩이다. 화면 배경이 주황이라 surface-default로 Light 면의 값을 되돌린다.
+// 카드는 Light 면, 기본 굵기 Ink 선, 20px 라운딩이다. 화면 배경이 주황이라 surface-default로 Light 면의 값을 되돌린다.
 // 그래서 카드 안의 주요 버튼은 Primary 면이고 부가 글자는 Muted다
 function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
