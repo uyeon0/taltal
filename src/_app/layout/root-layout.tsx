@@ -8,6 +8,8 @@ import { AppProviders } from '../providers/app-providers';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
+  // 공유 미리보기 이미지의 주소를 절대 주소로 만든다
+  metadataBase: SITE.url ? new URL(`https://${SITE.url}`) : undefined,
   // 화면이 제목을 정하면 "화면 제목 · 탈탈"이 되고, 정하지 않은 시작 홈은 서비스 이름만 쓴다
   title: { default: SITE.name, template: `%s · ${SITE.name}` },
   description: SITE.description,
@@ -18,6 +20,7 @@ export const metadata: Metadata = {
     locale: 'ko_KR',
     type: 'website'
   },
+  twitter: { card: 'summary_large_image' },
   icons: {
     icon: BRAND.favicon,
     apple: BRAND.appleIcon
