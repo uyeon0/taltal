@@ -121,3 +121,24 @@ test('주소로 바로 들어와 연 시트는 기록을 되돌리지 않고 쿼
   // 연 버튼을 모르므로 뒤로가기 버튼으로 돌아간다
   assert.equal(document.activeElement, screen.getByText('뒤로'));
 });
+
+test('빠르게 두 번 열어도 기록은 하나만 쌓고, 두 번 닫아도 한 번만 되돌린다', async () => {
+  render(<Sheet />);
+  const push = vi.spyOn(window.history, 'pushState');
+  const opener = screen.getByText('재료 추가');
+  act(() => {
+    opener.click();
+    opener.click();
+  });
+  assert.equal(push.mock.calls.length, 1);
+
+  const back = vi.spyOn(window.history, 'back');
+  const close = screen.getByText('닫기');
+  act(() => {
+    close.click();
+    close.click();
+  });
+  assert.equal(back.mock.calls.length, 1);
+  await settle();
+  assert.equal(screen.queryByRole('dialog'), null);
+});

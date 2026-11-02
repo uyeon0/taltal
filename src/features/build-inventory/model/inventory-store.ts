@@ -19,10 +19,14 @@ export const useInventory = create<InventoryState & InventoryActions>()((set) =>
 
   addItems: (items) =>
     set((state) => {
-      // 이미 담은 재료는 다시 담지 않는다
+      // 이미 담은 재료와 한 번에 넘긴 목록 안의 중복은 다시 담지 않는다
       const added = new Set(state.items.map((item) => item.ingredientId));
       const newItems = items
-        .filter((item) => !added.has(item.ingredientId))
+        .filter((item) => {
+          if (added.has(item.ingredientId)) return false;
+          added.add(item.ingredientId);
+          return true;
+        })
         .map((item) => ({ ingredientId: item.ingredientId, amount: null, unit: item.unit }));
       return newItems.length === 0 ? state : { items: [...state.items, ...newItems] };
     }),

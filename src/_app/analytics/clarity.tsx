@@ -3,7 +3,7 @@ import { CLARITY_PROJECT_ID } from '@/shared/config';
 
 /**
  * 유저 테스트용 Microsoft Clarity 세션 녹화. 프로젝트 ID가 없으면 아무것도 불러오지 않는다.
- * 재료 이름과 양은 가리지 않는다(앱 열의 data-clarity-unmask). 입력칸 값은 Clarity가 늘 가린다.
+ * 재료 이름과 양은 가리지 않는다(body의 data-clarity-unmask). 입력칸 값은 Clarity가 늘 가린다.
  */
 export function Clarity() {
   if (!CLARITY_PROJECT_ID) return null;

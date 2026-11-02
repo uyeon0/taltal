@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { X } from 'lucide-react';
 import { copy } from '@/shared/copy';
-import { cn } from '@/shared/lib/cn';
 import { Button } from './button';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerTitle } from './drawer';
 
@@ -46,7 +45,7 @@ function BottomSheet({ open, onOpenChange, title, description, footer, children,
         {/* 시트 안의 스크롤이 본문으로 넘어가지 않게 막는다 */}
         <div
           data-slot="bottom-sheet-body"
-          className={cn('min-h-0 flex-1 overflow-y-auto overscroll-contain px-(--sheet-padding) pb-(--sheet-padding)')}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-(--sheet-padding) pb-(--sheet-padding)"
         >
           {children}
         </div>
