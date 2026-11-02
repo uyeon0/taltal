@@ -46,6 +46,7 @@ _app → _pages → widgets → features → entities → shared
 | `/results` | 추천 결과 | `results` |
 | `POST /api/candidates` | 후보 레시피 | `_app/api-routes` |
 | `GET /api/recipes/[id]` | 레시피 상세 | `_app/api-routes` |
+| `POST /api/recipes/[id]/image` | 레시피 이미지(PNG) | `_app/api-routes` |
 
 - 첫 방문 리다이렉트는 루트 `proxy.ts`가 맡는다. `/` 요청에 방문 쿠키가 없으면 `/intro`로 보낸다. 서버가 화면을 보내기 전에 정하므로 소개나 시작 홈이 잠깐 보이지 않는다.
 - 재료 선택, 사용량, 레시피 상세 시트는 주소의 쿼리로 연다. 그래서 브라우저 뒤로가기로 시트를 닫을 수 있다.
@@ -59,8 +60,8 @@ _app → _pages → widgets → features → entities → shared
 | --- | --- |
 | `layout` | 루트 레이아웃과 메타데이터. 앱 열, 폰트, 공급자, Clarity를 조립한다 |
 | `providers` | 앱 전체에 한 번만 다는 것. 지금은 뒤로가기 버튼이 쓰는 앱 안 기록 세기다 |
-| `styles` | 전역 CSS와 토큰 |
-| `fonts` | `next/font/local` 설정 |
+| `styles` | 전역 CSS와 토큰. 서버 이미지가 쓸 색을 전역 CSS에서 꺼내는 함수 |
+| `fonts` | `next/font/local` 설정과 서버 이미지용 글꼴 파일 |
 | `api-routes` | 서버 API의 처리 함수 |
 | `analytics` | Microsoft Clarity |
 

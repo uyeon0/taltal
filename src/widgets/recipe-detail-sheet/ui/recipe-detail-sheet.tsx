@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { Meal, Result } from '@/features/find-meals';
 import type { Ingredient, InputUnit } from '@/entities/ingredient';
 import type { Recipe } from '@/entities/recipe';
 import { copy } from '@/shared/copy';
 import { BottomSheet } from '@/shared/ui/bottom-sheet';
+import { Button } from '@/shared/ui/button';
 import { LoadingStatus } from '@/shared/ui/loading-status';
 import { StatusMessage } from '@/shared/ui/status-message';
 import { toRecipeDetailView } from '../model/recipe-detail-view';
+import { recipeImageFileName, toRecipeImageRequest } from '../model/save-recipe-image';
 import { useRecipeDetail } from '../model/use-recipe-detail';
+import { useSaveRecipeImage } from '../model/use-save-recipe-image';
 import { RecipeDetailContent } from './recipe-detail-content';
 
 type RecipeDetailSheetProps = {
@@ -48,6 +51,17 @@ export function RecipeDetailSheet({
   }
 
   const state = useRecipeDetail(shown?.meal.recipeId ?? null, open);
+  const saveImage = useSaveRecipeImage(
+    shown
+      ? {
+          recipeId: shown.meal.recipeId,
+          fileName: recipeImageFileName(shown.meal.name),
+          body: toRecipeImageRequest(shown.meal, shown.shoppingList, units)
+        }
+      : null,
+    open
+  );
+  const errorId = useId();
   const view = shown
     ? toRecipeDetailView(
         shown.meal,
@@ -77,6 +91,26 @@ export function RecipeDetailSheet({
       // 요리 카드처럼 조리 시간은 Ink로 쓴다. 시트 설명의 기본 색은 Muted다
       description={
         view ? <span className="text-foreground">{copy.mealCard.cookingTime(view.cookingTime)}</span> : undefined
+      }
+      footer={
+        view ? (
+          <div className="flex flex-col gap-2">
+            {saveImage.status === 'error' ? (
+              <StatusMessage id={errorId} tone="error" title={copy.recipeSheet.saveImageError} />
+            ) : null}
+            <Button
+              size="primary"
+              className="w-full"
+              // 요약과 만드는 법을 받은 뒤에만 저장할 수 있다
+              disabled={state.status !== 'ready'}
+              loading={saveImage.status === 'saving'}
+              aria-describedby={saveImage.status === 'error' ? errorId : undefined}
+              onClick={saveImage.save}
+            >
+              {saveImage.status === 'saving' ? copy.recipeSheet.savingImage : copy.recipeSheet.saveImage}
+            </Button>
+          </div>
+        ) : undefined
       }
     >
       {view && shown ? (
