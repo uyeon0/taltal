@@ -143,21 +143,11 @@ const start = () => {
 
 Light 영역: 구역 사이 24px.
 
-1. 주 행동: `Link`에 `buttonVariants({ size: 'primary' })` 클래스를 준다. `Button asChild`는 서버 컴포넌트에서 `onClick`을 `Link`에 넘겨 빌드가 실패하므로 쓰지 않는다. 문구 `copy.home.pickDirectly`, 오른쪽에 `ArrowRight`. 이동하는 곳은 `/ingredients?sheet=ingredient-picker`다. 위 "사용자와 정한 것"의 시트 이름을 `shared`가 아니라 `_pages/home`의 상수 하나로 둔다
-2. 준비 중 표시: `copy.home.receiptComingSoon`
+주 행동: `Link`에 `buttonVariants({ size: 'primary' })` 클래스를 준다. `Button asChild`는 서버 컴포넌트에서 `onClick`을 `Link`에 넘겨 빌드가 실패하므로 쓰지 않는다. 문구 `copy.home.pickDirectly`, 오른쪽에 `ArrowRight`. 이동하는 곳은 `/ingredients?sheet=ingredient-picker`다. 위 "사용자와 정한 것"의 시트 이름을 `shared`가 아니라 `_pages/home`의 상수 하나로 둔다
 
 `/ingredients`로 가는 `Link`는 프리페치해도 된다. 그 주소는 리다이렉트하지 않는다.
 
 시작 홈은 입력을 받지 않고 입력 상태(`useInventory`)를 읽지 않는다. 재료 입력에서 뒤로 오면 홈이 다시 보이고 담은 재료는 스토어에 그대로 있다.
-
-### 준비 중 표시
-
-`div`에 `aria-disabled="true"`를 달고 `Button`을 쓰지 않는다. 누를 수 있는 요소가 아니기 때문이다.
-
-- 모양은 비활성 기준을 따른다. Light 면, Muted 글자, Subtle 선(`--disabled-*` 토큰)이다. 투명도로 만들지 않는다
-- 색만으로 구분하지 않도록 "준비 중"이 문구에 들어 있다(`영수증으로 넣기 · 준비 중`)
-- 커서는 `not-allowed`로 둔다. 다른 요소의 동작은 막지 않는다
-- 키보드 포커스를 받지 않는다. 화면 읽기는 "비활성"과 함께 문구를 읽는다
 
 ## 첫 화면 높이
 
@@ -189,7 +179,7 @@ Light 영역: 구역 사이 24px.
 - `StartButton`: 누르면 `markVisited`가 먼저, `router.replace('/')`가 나중에 불린다. `router.push`는 불리지 않는다
 - `IntroPage`: `/`로 가는 링크(`a[href="/"]`)가 없다. 다람쥐 `alt`가 비어 있고 장 수만큼 있다. 제목, 설명, 머리글 쪽 다람쥐가 나오고 장 세 개에 `copy.intro.steps` 세 개가 나온다. 화면 모형 영역 세 개가 있고 `aria-hidden`이다
 - `IntroCarousel`: jsdom에는 Embla가 쓰는 브라우저 API가 없으므로 `embla-carousel-react`를 가짜 API로 바꿔서 확인한다. 이전, 다음 버튼이 `scrollPrev`, `scrollNext`를 부르고 점이 `scrollTo(n)`을 부른다. 첫 장에서 이전, 마지막 장에서 다음이 `disabled`다. 현재 장의 점에 `aria-current`가 있고, 보이지 않는 장에 `aria-hidden`이 있다
-- `HomePage`: "직접 고르기"가 `/ingredients?sheet=ingredient-picker`로 가는 링크다. 준비 중 항목이 `aria-disabled="true"`이고 링크나 버튼이 아니며, 글자에 "준비 중"이 있다. 다람쥐 `alt`가 비어 있다
+- `HomePage`: "직접 고르기"가 `/ingredients?sheet=ingredient-picker`로 가는 링크다. 다람쥐 `alt`가 비어 있다
 - `design-values.test.ts`가 새 파일의 임의 값을 걸러 준다
 
 ## 브라우저 확인
