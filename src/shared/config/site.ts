@@ -4,6 +4,6 @@ import { copy } from '@/shared/copy';
 export const SITE = {
   name: copy.service.name,
   description: copy.intro.description,
-  /** 레시피 이미지 맺음에 쓰는 서비스 주소. 도메인을 정하기 전이라 비워 두고, 비어 있으면 이름만 쓴다 */
-  url: null as string | null
+  /** 레시피 이미지 맺음에 쓰는 서비스 주소. 읽기 쉽게 https://는 뺀다. 비어 있으면 이름만 쓴다 */
+  url: 'taltal.vercel.app' as string | null
 } as const;
