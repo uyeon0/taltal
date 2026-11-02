@@ -43,7 +43,7 @@
 - `html`에 폰트 변수 클래스와 `lang="ko"`를 둔다.
 - 앱 열은 가운데 448px(`--app-max-width`)이고 Light 배경이다. 좌우 Ink 선(기본 선 3px)은 열 바깥에 가상 요소로 그려서, 화면이 448px 이하이면 화면 밖으로 나가 보이지 않는다. 새 breakpoint를 만들지 않기 위해서다. 가로 넘침은 앱 열을 감싼 `.app-frame`의 `overflow-x: clip`으로 막는다. `body`에 두면 값이 화면(viewport)으로 넘어가 잘리지 않고 선 굵기만큼 가로 스크롤이 생긴다.
 - `body`에 `data-clarity-unmask="true"`를 둔다. 바텀시트는 `body` 아래 포털로 그려져 앱 열 밖에 있으므로 앱 열에 달면 시트 안의 재료 이름과 양이 가려진다.
-- 메타데이터는 `src/shared/config/site.ts`의 서비스 이름과 한 줄 설명을 쓴다. 제목은 "탈탈", 설명은 copy.md 소개 설명("산 재료를 탈탈 털어 나눠 쓰는 요리 3~5가지를 알려 드려요.")이다. `openGraph`에 같은 제목, 설명, `ko_KR`을 넣는다. 공유 이미지는 넣지 않는다.
+- 메타데이터는 `src/shared/config/site.ts`의 서비스 이름과 한 줄 설명을 쓴다. 제목은 "탈탈", 설명은 copy.md 소개 설명("산 재료를 탈탈 털어 나눠 쓰는 요리를 알려 드려요.")이다. `openGraph`에 같은 제목, 설명, `ko_KR`을 넣는다. 공유 이미지는 넣지 않는다.
 - 파비콘은 `metadata.icons`에 `src/shared/assets`의 경로를 넣는다. `app/favicon.ico`는 지운다. 파일 규칙 파비콘이 `metadata.icons`보다 앞서기 때문이다.
 
 ## 이미지 자산
