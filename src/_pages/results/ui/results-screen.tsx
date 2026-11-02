@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { preload } from 'react-dom';
 import { isInventoryReady, toStocks, useInventory } from '@/features/build-inventory';
@@ -61,6 +61,21 @@ function ResultsSearch({ ingredients }: ResultsScreenProps) {
     if (!ready) router.replace('/');
   }, [ready, router]);
 
+  // 두 묶음 모두 탭이 없으면 추천 없음이다
+  const empty =
+    state.status === 'done' &&
+    state.search.options.noBuy.options.length === 0 &&
+    state.search.options.buy.options.length === 0;
+  const needsRecovery = state.status === 'error' || empty;
+  const recoveryRef = useRef<HTMLElement>(null);
+
+  // 누른 "요리 찾기" 버튼이 사라지면 포커스가 body로 빠진다. 그럴 때만 첫 행동 버튼으로 옮긴다
+  useEffect(() => {
+    if (!needsRecovery) return;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    recoveryRef.current?.querySelector<HTMLElement>('[data-slot="status-message"] button')?.focus();
+  }, [needsRecovery]);
+
   if (!ready) return null;
 
   // 머리글의 뒤로가기와 같다. 재료 입력에서 왔으면 뒤로 가고, 아니면 재료 입력으로 간다
@@ -69,19 +84,16 @@ function ResultsSearch({ ingredients }: ResultsScreenProps) {
     else router.push(INGREDIENTS_HREF);
   };
 
-  // 두 묶음 모두 탭이 없으면 추천 없음이다
-  const empty =
-    state.status === 'done' &&
-    state.search.options.noBuy.options.length === 0 &&
-    state.search.options.buy.options.length === 0;
-
   return (
     <div className="flex min-h-dvh flex-col">
       <AppHeader backHref={INGREDIENTS_HREF} backLabel={copy.results.editIngredients} />
       {state.status === 'done' && !empty ? (
         <ResultsView key={state.id} search={state.search} ingredients={ingredients} units={units} servings={servings} />
       ) : (
-        <main className="flex flex-1 flex-col items-center justify-center gap-6 px-(--page-gutter) pb-12">
+        <main
+          ref={recoveryRef}
+          className="flex flex-1 flex-col items-center justify-center gap-6 px-(--page-gutter) pb-12"
+        >
           {state.status === 'loading' ? (
             <>
               <Mascot pose="thinking" size={200} priority />

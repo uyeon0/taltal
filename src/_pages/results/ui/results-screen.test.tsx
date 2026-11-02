@@ -228,3 +228,31 @@ test('가짓수 탭 패널은 Tab 정지점이 아니다', async () => {
   await screen.findByText('패널1');
   assert.equal(screen.getByRole('tabpanel').getAttribute('tabindex'), '-1');
 });
+
+test('오류가 나면 포커스를 잃었을 때 다시 찾기로 포커스를 옮긴다', async () => {
+  searchMeals.mockRejectedValueOnce(new Error('500'));
+  render(<ResultsScreen ingredients={INGREDIENTS} />);
+
+  const retry = await screen.findByRole('button', { name: copy.recovery.errorRetry });
+  assert.equal(document.activeElement, retry);
+});
+
+test('추천 없음이 나오면 포커스를 잃었을 때 재료 수정하기로 포커스를 옮긴다', async () => {
+  searchMeals.mockResolvedValue(search(none, none));
+  render(<ResultsScreen ingredients={INGREDIENTS} />);
+
+  const edit = await screen.findByRole('button', { name: copy.recovery.emptyAction });
+  assert.equal(document.activeElement, edit);
+});
+
+test('오류가 났을 때 포커스가 다른 곳에 있으면 옮기지 않는다', async () => {
+  let fail: (error: Error) => void = () => {};
+  searchMeals.mockReturnValueOnce(new Promise<MealSearch>((_, reject) => (fail = reject)));
+  render(<ResultsScreen ingredients={INGREDIENTS} />);
+  const back = screen.getByRole('button', { name: copy.results.editIngredients });
+  back.focus();
+
+  await act(async () => fail(new Error('500')));
+  await screen.findByRole('button', { name: copy.recovery.errorRetry });
+  assert.equal(document.activeElement, back);
+});
