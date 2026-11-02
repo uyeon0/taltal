@@ -12,5 +12,7 @@ export type InventoryState = {
   servings: number;
 };
 
-// 인분 기본값은 재료 입력 화면 작업에서 정한다
-export const INITIAL_INVENTORY: InventoryState = { items: [], servings: 1 };
+/** 고를 수 있는 인분. 요리 하나의 인분이다 */
+export const SERVINGS_OPTIONS = [1, 2, 3, 4] as const;
+
+export const INITIAL_INVENTORY: InventoryState = { items: [], servings: 2 };
