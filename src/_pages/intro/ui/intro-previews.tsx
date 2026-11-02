@@ -13,7 +13,6 @@ const { exampleIngredients, exampleMeals, exampleLeftover } = copy.intro;
 const [mainIngredient] = exampleIngredients;
 
 /**
- * 모형을 미리 보기 영역 가운데에 둔다.
  * 360px 휴대폰에서 장 제목이 두 줄이 되면 모형에 쓸 높이가 140px 안팎이라, 모형은 실제 화면보다 촘촘하게 그린다
  */
 function PreviewFrame({ children }: { children: ReactNode }) {

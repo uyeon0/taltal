@@ -21,7 +21,8 @@ export function IntroCarousel() {
         content: (
           <>
             <h2 className="text-center font-display text-2xl">{copy.intro.steps[index]}</h2>
-            {/* 장의 문구가 뜻을 전하므로 모형은 화면 읽기에서 숨긴다 */}
+            {/* 장의 문구가 뜻을 전하므로 모형은 화면 읽기에서 숨긴다.
+                영역이 장 제목 아래 남는 공간을 채우고 모형을 세로 가운데에 둔다. 화살표도 이 영역의 세로 가운데에 놓여 모형과 맞는다 */}
             <div data-slot="intro-preview" aria-hidden className="min-h-0 w-full flex-1">
               <Preview />
             </div>
