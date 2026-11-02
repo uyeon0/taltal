@@ -98,7 +98,7 @@
   --radius-card: 0.75rem;
   --radius-sheet: 1.25rem;
   --border-width-divider: 1px;
-  --border-width: 2px;
+  --border-width: 3px;
   --border-width-strong: 3px;
   --focus-ring-width: 3px;
   --focus-ring-offset: 2px;
@@ -238,7 +238,7 @@
   --radius-3xl: var(--radius-sheet);
   --radius-4xl: var(--radius-sheet);
 
-  /* border 클래스 기본값 2px. 장식 구분선은 border-(length:--border-width-divider)로 쓴다 */
+  /* border 클래스 기본값 3px. 장식 구분선은 border-(length:--border-width-divider)로 쓴다 */
   --default-border-width: var(--border-width);
 
   --shadow-2xs: none;
