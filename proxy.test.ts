@@ -29,3 +29,8 @@ test('첫 방문을 보낼 때 쿼리를 그대로 넘긴다', () => {
   const response = proxy(new NextRequest('https://example.com/?utm_source=slack'));
   assert.equal(response.headers.get('location'), 'https://example.com/intro?utm_source=slack');
 });
+
+test('시트 상태는 소개로 넘기지 않고 다른 쿼리는 남긴다', () => {
+  const response = proxy(new NextRequest('https://example.com/?sheet=ingredients&utm_source=slack'));
+  assert.equal(response.headers.get('location'), 'https://example.com/intro?utm_source=slack');
+});

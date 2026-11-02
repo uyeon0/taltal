@@ -2,8 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
-
-export const SHEET_PARAM = 'sheet';
+import { SHEET_PARAM } from '@/shared/config/sheet';
 
 /** 시트를 연 버튼에 단다. 버튼이 다시 그려져도 같은 값의 버튼으로 포커스를 돌려준다 */
 export const SHEET_OPENER_ATTR = 'data-sheet-opener';
