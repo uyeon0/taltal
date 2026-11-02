@@ -17,7 +17,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 const PADDING = 72;
-const MASCOT_SIZE = 460;
+const MASCOT_SIZE = 380;
 const WORDMARK_HEIGHT = 140;
 
 /**
