@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { LOADING_PHRASE_INTERVAL_MS } from '@/shared/config';
 import { cn } from '@/shared/lib/cn';
+import { useMounted } from '@/shared/lib/use-mounted';
 import { Spinner } from './spinner';
 
 type LoadingStatusProps = {
@@ -23,6 +24,7 @@ function prefersReducedMotion() {
  */
 export function LoadingStatus({ phrases, announcement, className }: LoadingStatusProps) {
   const [index, setIndex] = useState(0);
+  const mounted = useMounted();
 
   useEffect(() => {
     if (phrases.length < 2 || prefersReducedMotion()) return;
@@ -32,8 +34,9 @@ export function LoadingStatus({ phrases, announcement, className }: LoadingStatu
 
   return (
     <div className={cn('flex flex-col items-center gap-3 text-center', className)}>
+      {/* 처음부터 글자를 담은 live region은 읽히지 않을 수 있어 마운트 뒤에 채운다 */}
       <span role="status" className="sr-only">
-        {announcement}
+        {mounted ? announcement : null}
       </span>
       <Spinner className="size-8" />
       {/* 바뀌는 문구는 화면 읽기에서 숨긴다. 매번 읽으면 같은 안내가 쌓인다 */}
