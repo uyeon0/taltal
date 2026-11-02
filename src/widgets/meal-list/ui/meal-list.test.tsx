@@ -22,9 +22,13 @@ const make = (id: string, unitGrams: Partial<Record<InputUnit, number>>): Ingred
   gramsSource: 'AI 추정'
 });
 const ingredients = new Map(
-  [make('두부', { 모: 300 }), make('상추', { 장: 10 }), make('청고추', { 개: 10 }), make('대파', { 대: 100 })].map(
-    (i) => [i.id, i]
-  )
+  [
+    make('두부', { 모: 300 }),
+    make('상추', { 장: 10 }),
+    make('청고추', { 개: 10 }),
+    make('표고버섯', { 개: 20 }),
+    make('대파', { 대: 100 })
+  ].map((i) => [i.id, i])
 );
 
 const meal = (day: number, overrides: Partial<Meal> = {}): Meal => ({
@@ -48,9 +52,10 @@ const result: Result = {
       uses: [
         { ingredientId: '상추', grams: 30 },
         { ingredientId: '청고추', grams: 20 },
+        { ingredientId: '표고버섯', grams: 40 },
         { ingredientId: '대파', grams: 5 }
       ],
-      toBuy: ['청고추', '대파'],
+      toBuy: ['청고추', '표고버섯', '대파'],
       pantryNeeded: ['마늘'],
       urgency: '빨리 상함',
       urgentIngredients: ['상추']
@@ -58,6 +63,7 @@ const result: Result = {
   ],
   shoppingList: [
     { ingredientId: '청고추', grams: 20, optional: false },
+    { ingredientId: '표고버섯', grams: 40, optional: false },
     { ingredientId: '대파', grams: 5, optional: true }
   ],
   leftovers: [],
@@ -94,7 +100,7 @@ test('순서 이유는 빨리 상함일 때만 쓴다', () => {
 
 test('사야 하는 재료는 기본 단위와 g으로, 있으면 좋은 재료는 양 없이 쓴다', () => {
   renderList();
-  screen.getByText(copy.mealCard.toBuy('청고추', '2개 (20g)'));
+  screen.getByText(copy.mealCard.toBuy('청고추 2개 (20g), 표고버섯 2개 (40g)'));
   screen.getByText(copy.mealCard.optional('대파'));
   screen.getByText(copy.mealCard.specialSeasoning('마늘'));
   // 가진 재료는 사용자가 고른 단위로 쓰고, 사는 재료는 넣지 않는다

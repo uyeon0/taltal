@@ -91,15 +91,19 @@ function MealCard({ meal, shoppingList, recipes, ingredients, units, onOpen }: M
             </span>
           </>
         ) : null}
-        {required.map((item) => (
-          <span key={item.ingredientId} className="flex items-start gap-2 font-semibold break-keep">
+        {required.length > 0 ? (
+          <span className="flex items-start gap-2 font-semibold break-keep">
             <ShoppingBasket aria-hidden="true" className="size-6 shrink-0" />
             {copy.mealCard.toBuy(
-              item.ingredientId,
-              amount(item.ingredientId, item.grams, defaultUnit(item.ingredientId), true)
+              required
+                .map(
+                  (item) =>
+                    `${item.ingredientId} ${amount(item.ingredientId, item.grams, defaultUnit(item.ingredientId), true)}`
+                )
+                .join(', ')
             )}
           </span>
-        ))}
+        ) : null}
         {optional.length > 0 ? (
           <span className="text-sm break-keep">{copy.mealCard.optional(optional.join(', '))}</span>
         ) : null}

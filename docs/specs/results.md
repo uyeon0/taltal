@@ -139,7 +139,7 @@
 | 이름, 조리 시간 | `Meal.name`(SUIT 20px 600), 후보 레시피의 `cookingTime`(14px). 후보에서 찾지 못하면 시간을 쓰지 않는다 |
 | 가진 재료 그림 | 가진 재료의 `IngredientImage`를 32px로 나란히 둔다. 대체 텍스트는 비운다 |
 | 가진 재료와 양 | `meal.uses` 중 `toBuy`에 없는 재료. "재료 이름 양"을 " · "로 잇는다. 양은 `formatAmount(ingredient, grams, 단위)` |
-| 사야 하는 재료 | `mealPurchases`의 `required`. 재료마다 한 줄로 "따로 사야 해요: {재료} {양}". 양은 `formatAmount(ingredient, grams, ingredient.inputUnits[0], { withGrams: true })`. 장바구니 아이콘과 굵은 글자로 다른 재료와 구분한다 |
+| 사야 하는 재료 | `mealPurchases`의 `required`. 한 줄로 "따로 사야 해요: {재료와 양}"이고, 재료가 여럿이면 "재료 양"을 쉼표로 잇는다. 양은 `formatAmount(ingredient, grams, ingredient.inputUnits[0], { withGrams: true })`. 장바구니 아이콘과 굵은 글자로 다른 재료와 구분한다 |
 | 있으면 좋은 재료 | `mealPurchases`의 `optional`. "있으면 좋음: {재료}". 양을 쓰지 않는다 |
 | 필요한 특수 양념 | `meal.pantryNeeded`가 있을 때 "필요한 양념: {양념}" |
 
