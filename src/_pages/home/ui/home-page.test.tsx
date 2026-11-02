@@ -51,6 +51,14 @@ test('머리글 다람쥐가 화면 폭에 맞춰 줄어드는 크기를 쓴다'
   assert.ok(container.querySelector('main img')?.className.includes('size-(--mascot-header-size)'));
 });
 
+test('머리글 다람쥐 옆에 물음표가 있고 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
+  const { container } = render(<HomePage />);
+  const [, question] = [...container.querySelectorAll('main img')];
+  assert.match(question?.getAttribute('src') ?? '', /question/);
+  assert.equal(question?.getAttribute('alt'), '');
+  assert.ok(question?.className.includes('size-(--mascot-question-size)'));
+});
+
 test('직접 고르기 아래에 예시 구역 제목이 있다', () => {
   const { container } = render(<HomePage />);
   const heading = screen.getByRole('heading', { level: 2, name: copy.home.sampleTitle });
