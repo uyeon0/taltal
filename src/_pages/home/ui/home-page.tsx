@@ -26,7 +26,7 @@ export function HomePage() {
             <p className="text-xl">{home.guide}</p>
           </div>
           <div className="relative -ml-4 shrink-0">
-            <Mascot pose="default" size={150} priority className="mr-4" />
+            <Mascot pose="default" size={150} priority className="mr-4 size-(--mascot-header-size)" />
           </div>
         </div>
       </div>

@@ -32,6 +32,13 @@ test('머리글 다람쥐 옆에 물음표가 있고 대체 텍스트가 비어 
   assert.equal(question?.getAttribute('alt'), '');
 });
 
+test('머리글 다람쥐와 물음표가 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
+  const { container } = render(<IntroPage />);
+  const [mascot, question] = [...container.querySelectorAll('main img')];
+  assert.ok(mascot?.className.includes('size-(--mascot-header-size)'));
+  assert.ok(question?.className.includes('size-(--mascot-question-size)'));
+});
+
 test('제목, 설명, 캐러셀, 시작 버튼이 순서대로 나온다', () => {
   const { container, getByRole, getByTestId } = render(<IntroPage />);
   getByRole('heading', { level: 1, name: copy.intro.title });
