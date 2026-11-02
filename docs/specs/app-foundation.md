@@ -110,7 +110,7 @@
 | `secondary` | Light 면, Ink 글자, Ink 선 |
 | `ghost` | 면과 선 없음. 아이콘을 받는다. 밝은 면에서는 hover 시 블루, 주황 면에서는 밑줄 |
 
-hover와 pressed(`:active`)는 `#234386` 면, White 글자다. `loading`을 주면 폭을 유지한 채 스피너와 문구를 보여 주고 `aria-busy`와 `disabled`를 단다.
+hover와 pressed(`:active`)는 `#234386` 면, White 글자다. 전역 CSS가 `hover` 변형을 `(hover: hover) and (pointer: fine)`일 때만 적용하도록 다시 정의한다. 일부 휴대폰 브라우저가 `(hover: hover)`를 알려 누른 버튼이 hover 색으로 남았기 때문이다. `loading`을 주면 폭을 유지한 채 스피너와 문구를 보여 주고 `aria-busy`와 `disabled`를 단다.
 
 ### BottomSheet
 
