@@ -24,10 +24,9 @@ export const copy = {
   },
 
   home: {
-    title: '냉장고에 뭐가 있나요?',
-    guide: '가진 재료부터 담아 볼까요?',
+    title: '냉장고에\n뭐가 있나요?',
+    guide: '가진 재료부터 담아 주세요.',
     pickDirectly: '직접 고르기',
-    pickDirectlyDescription: '여러 개 골라 담고, 가진 양만 알려 주세요.',
     receiptComingSoon: '영수증으로 넣기 · 준비 중'
   },
 
