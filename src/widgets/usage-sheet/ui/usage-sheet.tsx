@@ -121,7 +121,7 @@ function AllocationRow({ allocation, ingredient, unit }: AllocationRowProps) {
             </li>
           ) : null}
         </ul>
-        {!reconciles ? <p className="pt-2 text-sm text-muted-foreground">{copy.usageSheet.roundingNotice}</p> : null}
+        {!reconciles ? <p className="pt-2 text-xs text-muted-foreground">{copy.usageSheet.roundingNotice}</p> : null}
       </CollapsibleContent>
     </Collapsible>
   );

@@ -130,18 +130,17 @@
 - 목록은 `<ol>` 하나이고, 요리마다 Ink 선 카드를 8px 간격으로 둔다. 고를 수 있는 후보처럼 보이지 않게 체크나 선택 표시를 두지 않고, 순서 번호와 배분색으로 한 묶음의 요리라는 것을 보여 준다.
 - 요리 하나는 전체가 버튼이다. 오른쪽에 화살표 아이콘을 둔다. `data-sheet-opener={`recipe-${meal.recipeId}`}`를 단다.
 
-카드 안은 위에서 아래로 다음과 같다.
+카드 안은 위에서 아래로 다음과 같다. 굵게 쓰는 것은 요리명뿐이고, 글자는 모두 Ink다.
 
 | 항목 | 표시 |
 | --- | --- |
-| 순서 | "{day}번째 요리". 앞에 `allocation.{day}` 색 원과 번호를 둔다. 사용량 시트와 같은 색이다 |
-| 순서 이유 | `urgency`가 "빨리 상함"일 때만 "빨리 상하는 {재료}부터 써요". 재료는 `urgentIngredients`를 쉼표로 잇는다 |
-| 이름, 조리 시간 | `Meal.name`(SUIT 20px 600), 후보 레시피의 `cookingTime`(14px). 후보에서 찾지 못하면 시간을 쓰지 않는다 |
+| 순서와 순서 이유 | 한 줄로 "{day}번째 요리 · 빨리 상하는 {재료}부터 써요"(14px 500). 앞에 `allocation.{day}` 색 원을 둔다. 사용량 시트와 같은 색이다. 순서 이유는 `urgency`가 "빨리 상함"일 때만 붙이고, 재료는 `urgentIngredients`를 쉼표로 잇는다 |
+| 이름, 조리 시간 | `Meal.name`(SUIT 20px 700), 후보 레시피의 `cookingTime`(14px). 후보에서 찾지 못하면 시간을 쓰지 않는다 |
 | 가진 재료 그림 | 가진 재료의 `IngredientImage`를 32px로 나란히 둔다. 대체 텍스트는 비운다 |
-| 가진 재료와 양 | `meal.uses` 중 `toBuy`에 없는 재료. "재료 이름 양"을 " · "로 잇는다. 양은 `formatAmount(ingredient, grams, 단위)` |
-| 사야 하는 재료 | `mealPurchases`의 `required`. 한 줄로 "따로 사야 해요: {재료와 양}"이고, 재료가 여럿이면 "재료 양"을 쉼표로 잇는다. 양은 `formatAmount(ingredient, grams, ingredient.inputUnits[0], { withGrams: true })`. 장바구니 아이콘과 굵은 글자로 다른 재료와 구분한다 |
-| 있으면 좋은 재료 | `mealPurchases`의 `optional`. "있으면 좋음: {재료}". 양을 쓰지 않는다 |
-| 필요한 특수 양념 | `meal.pantryNeeded`가 있을 때 "필요한 양념: {양념}" |
+| 가진 재료와 양 | `meal.uses` 중 `toBuy`에 없는 재료(16px 400). "재료 이름 양"을 " · "로 잇는다. 양은 `formatAmount(ingredient, grams, 단위)` |
+| 사야 하는 재료 | `mealPurchases`의 `required`(16px 400). 한 줄로 "따로 사야 해요: {재료와 양}"이고, 재료가 여럿이면 "재료 양"을 쉼표로 잇는다. 양은 `formatAmount(ingredient, grams, ingredient.inputUnits[0], { withGrams: true })`. 따로 떨어진 줄, 장바구니 아이콘, 라벨로 가진 재료와 구분한다 |
+| 있으면 좋은 재료 | `mealPurchases`의 `optional`. "있으면 좋음: {재료}"(14px). 양을 쓰지 않는다 |
+| 필요한 특수 양념 | `meal.pantryNeeded`가 있을 때 "필요한 양념: {양념}"(14px) |
 
 있으면 좋은 재료는 사용자가 조금 가진 고명일 수 있다. 그래서 가진 재료 줄에 넣지 않고 "있으면 좋음"에만 둔다. 세션 E의 상세 시트도 같은 규칙으로 나눈다.
 

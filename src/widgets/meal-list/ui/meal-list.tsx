@@ -67,16 +67,19 @@ function MealCard({ meal, shoppingList, recipes, ingredients, units, onOpen }: M
       {...{ [SHEET_OPENER_ATTR]: mealOpener(meal.recipeId) }}
     >
       <span className="flex min-w-0 flex-1 flex-col gap-2">
-        <span className="flex items-center gap-2 text-sm font-semibold">
-          <AllocationSwatch order={meal.day} />
-          {copy.mealCard.order(meal.day)}
+        {/* 위계: 요리명(20px 700)만 굵게 두고, 순서와 이유, 조리 시간, 부가 정보는 14px로 낮춘다 */}
+        <span className="flex items-start gap-2 text-xs font-medium break-keep">
+          <AllocationSwatch order={meal.day} className="mt-1" />
+          <span>
+            {copy.mealCard.order(meal.day)}
+            {meal.urgency === '빨리 상함' && meal.urgentIngredients.length > 0
+              ? ` · ${copy.mealCard.orderReason(meal.urgentIngredients.join(', '))}`
+              : null}
+          </span>
         </span>
-        {meal.urgency === '빨리 상함' && meal.urgentIngredients.length > 0 ? (
-          <span className="text-sm">{copy.mealCard.orderReason(meal.urgentIngredients.join(', '))}</span>
-        ) : null}
         <span className="flex flex-wrap items-baseline gap-x-2">
-          <span className="text-xl font-semibold break-keep">{meal.name}</span>
-          {cookingTime ? <span className="text-sm">{copy.mealCard.cookingTime(cookingTime)}</span> : null}
+          <span className="text-xl font-bold break-keep">{meal.name}</span>
+          {cookingTime ? <span className="text-xs">{copy.mealCard.cookingTime(cookingTime)}</span> : null}
         </span>
         {owned.length > 0 ? (
           <>
@@ -93,7 +96,7 @@ function MealCard({ meal, shoppingList, recipes, ingredients, units, onOpen }: M
           </>
         ) : null}
         {required.length > 0 ? (
-          <span className="flex items-start gap-2 font-semibold break-keep">
+          <span className="flex items-start gap-2 break-keep">
             <ShoppingBasket aria-hidden="true" className="size-6 shrink-0" />
             {copy.mealCard.toBuy(
               required
@@ -106,10 +109,10 @@ function MealCard({ meal, shoppingList, recipes, ingredients, units, onOpen }: M
           </span>
         ) : null}
         {optional.length > 0 ? (
-          <span className="text-sm break-keep">{copy.mealCard.optional(optional.join(', '))}</span>
+          <span className="text-xs break-keep">{copy.mealCard.optional(optional.join(', '))}</span>
         ) : null}
         {meal.pantryNeeded.length > 0 ? (
-          <span className="text-sm break-keep">{copy.mealCard.specialSeasoning(meal.pantryNeeded.join(', '))}</span>
+          <span className="text-xs break-keep">{copy.mealCard.specialSeasoning(meal.pantryNeeded.join(', '))}</span>
         ) : null}
       </span>
       <ChevronRight aria-hidden="true" className="mt-1 size-5 shrink-0" />

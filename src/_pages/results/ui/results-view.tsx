@@ -135,7 +135,7 @@ export function ResultsView({ search, ingredients, units, servings }: ResultsVie
         </section>
       ) : null}
 
-      <p className="text-sm text-muted-foreground">{copy.results.estimateNotice}</p>
+      <p className="text-xs text-muted-foreground">{copy.results.estimateNotice}</p>
 
       <UsageSheet
         open={usageSheet.open}

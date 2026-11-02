@@ -94,8 +94,10 @@ test('day 순서로 보여 주고, 카드마다 같은 뜻의 opener를 단다',
 
 test('순서 이유는 빨리 상함일 때만 쓴다', () => {
   renderList();
-  screen.getByText(copy.mealCard.orderReason('상추'));
-  assert.equal(screen.queryByText(copy.mealCard.orderReason('두부')), null);
+  // 순서 이유는 순서 옆에 이어 쓴다
+  const [first, second] = screen.getAllByRole('button');
+  assert.ok(first.textContent?.includes(`${copy.mealCard.order(1)} · ${copy.mealCard.orderReason('상추')}`));
+  assert.ok(!second.textContent?.includes(copy.mealCard.orderReason('두부')));
 });
 
 test('사야 하는 재료는 기본 단위와 g으로, 있으면 좋은 재료는 양 없이 쓴다', () => {
