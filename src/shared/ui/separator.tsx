@@ -1,9 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { cn } from '@/shared/lib/cn';
 import { Separator as SeparatorPrimitive } from 'radix-ui';
+import { cn } from '@/shared/lib/cn';
 
+/** 장식 구분선. 1px Subtle이고, 입력이나 선택을 표시하는 데 쓰지 않는다 */
 function Separator({
   className,
   orientation = 'horizontal',
@@ -16,7 +17,7 @@ function Separator({
       decorative={decorative}
       orientation={orientation}
       className={cn(
-        'shrink-0 bg-border data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch',
+        'shrink-0 bg-border data-horizontal:h-(--border-width-divider) data-horizontal:w-full data-vertical:w-(--border-width-divider) data-vertical:self-stretch',
         className
       )}
       {...props}
