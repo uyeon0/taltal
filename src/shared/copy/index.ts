@@ -145,6 +145,9 @@ export const copy = {
     tip: '팁',
     loading: '레시피를 불러오고 있어요',
     error: '레시피를 불러오지 못했어요. 시트를 닫고 다시 열어 주세요.',
+    saveImage: '이미지로 저장',
+    savingImage: '이미지를 만들고 있어요',
+    saveImageError: '이미지를 만들지 못했어요. 다시 눌러 주세요.',
     // 레시피 이미지 맺음에 쓴다
     recipeSource: '레시피 출처: 농림축산식품 공공데이터 포털'
   },

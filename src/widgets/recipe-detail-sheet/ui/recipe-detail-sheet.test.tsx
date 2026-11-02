@@ -61,12 +61,12 @@ const detail = (id: number): RecipeDetail => ({
 
 /** 요청마다 응답을 직접 정하는 fetch. 응답 전에 끊긴 요청도 기록한다 */
 function stubFetch() {
-  const calls: { url: string; signal: AbortSignal; respond: (res: Response) => void }[] = [];
+  const calls: { url: string; init: RequestInit; signal: AbortSignal; respond: (res: Response) => void }[] = [];
   vi.stubGlobal(
     'fetch',
     vi.fn(
       (url: string, init: RequestInit) =>
-        new Promise<Response>((resolve) => calls.push({ url, signal: init.signal!, respond: resolve }))
+        new Promise<Response>((resolve) => calls.push({ url, init, signal: init.signal!, respond: resolve }))
     )
   );
   return calls;
@@ -165,4 +165,72 @@ test('연 요리가 새 결과에 없어 meal이 null이 돼도 마지막 내용
   assert.ok(screen.getByText('요약7'));
   assert.ok(screen.getByText('½봉지'));
   assert.equal(calls.length, 1);
+});
+
+const saveButton = () => screen.getByRole('button', { name: copy.recipeSheet.saveImage });
+
+test('상세를 받기 전에는 이미지 저장 버튼을 누를 수 없다', async () => {
+  const calls = stubFetch();
+  render(<RecipeDetailSheet {...props(7)} />);
+  assert.equal((saveButton() as HTMLButtonElement).disabled, true);
+
+  await act(async () => calls[0].respond(Response.json(detail(7))));
+  assert.equal((saveButton() as HTMLButtonElement).disabled, false);
+});
+
+test('상세를 받지 못하면 이미지 저장 버튼을 누를 수 없다', async () => {
+  const calls = stubFetch();
+  render(<RecipeDetailSheet {...props(7)} />);
+  await act(async () => calls[0].respond(Response.json({ error: '서버 오류' }, { status: 500 })));
+  assert.equal((saveButton() as HTMLButtonElement).disabled, true);
+});
+
+test('누르면 화면에만 있는 양과 단위를 보내 이미지를 요청한다', async () => {
+  const calls = stubFetch();
+  const shoppingList = [{ ingredientId: '두부', grams: 100, optional: false }];
+  render(<RecipeDetailSheet {...props(7)} shoppingList={shoppingList} />);
+  await act(async () => calls[0].respond(Response.json(detail(7))));
+
+  fireEvent.click(saveButton());
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].url, '/api/recipes/7/image');
+  assert.equal(calls[1].init.method, 'POST');
+  assert.deepEqual(JSON.parse(calls[1].init.body as string), {
+    day: 3,
+    uses: [{ ingredientId: '콩나물', grams: 150 }],
+    toBuy: [],
+    shoppingList,
+    units: { 콩나물: '봉지' }
+  });
+  // 받는 동안 글자를 바꾸고 다시 누를 수 없다
+  const saving = screen.getByRole('button', { name: copy.recipeSheet.savingImage });
+  fireEvent.click(saving);
+  assert.equal(calls.length, 2);
+  await flush();
+});
+
+test('이미지를 받지 못하면 시트 안에 안내하고, 다시 누르면 안내를 지운다', async () => {
+  const calls = stubFetch();
+  render(<RecipeDetailSheet {...props(7)} />);
+  await act(async () => calls[0].respond(Response.json(detail(7))));
+
+  fireEvent.click(saveButton());
+  await act(async () => calls[1].respond(new Response(null, { status: 500 })));
+  assert.ok(screen.getAllByText(copy.recipeSheet.saveImageError).length > 0);
+  assert.ok(screen.getByText('요약7'));
+
+  fireEvent.click(saveButton());
+  assert.equal(screen.queryAllByText(copy.recipeSheet.saveImageError).length, 0);
+  await flush();
+});
+
+test('이미지를 받는 중에 닫으면 요청을 끊는다', async () => {
+  const calls = stubFetch();
+  const { rerender } = render(<RecipeDetailSheet {...props(7)} />);
+  await act(async () => calls[0].respond(Response.json(detail(7))));
+
+  fireEvent.click(saveButton());
+  rerender(<RecipeDetailSheet {...props(7, false)} />);
+  assert.equal(calls[1].signal.aborted, true);
+  await flush();
 });
