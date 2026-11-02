@@ -11,7 +11,7 @@
 
 | 항목 | 결정 |
 | --- | --- |
-| Clarity 가림 범위 | 문서대로 재료 이름과 양을 가리지 않는다. 앱 영역에 `data-clarity-unmask="true"`를 둔다. 입력칸 값은 Clarity가 어느 설정에서도 가리므로 검색어와 직접 입력한 수량은 녹화에 남지 않는다 |
+| Clarity 가림 범위 | 문서대로 재료 이름과 양을 가리지 않는다. `body`에 `data-clarity-unmask="true"`를 둔다. 입력칸 값은 Clarity가 어느 설정에서도 가리므로 검색어와 직접 입력한 수량은 녹화에 남지 않는다 |
 | 이미지 크기 | 재료 그림은 256px, 다람쥐는 640px PNG로 줄여 `public/`에 넣는다. 줄이는 스크립트를 저장소에 둔다 |
 | 임시 로고와 파비콘 | 로고 파일이 오기 전까지 머리글은 "탈탈" 글자를 낭만있구미체로 보여 주고, 파비콘은 `mascot.default`를 줄인 PNG를 쓴다 |
 | 입력 상태 위치 | 저장소(스토어, 타입)는 `features/build-inventory`의 model에 둔다 |
@@ -42,7 +42,7 @@
 
 - `html`에 폰트 변수 클래스와 `lang="ko"`를 둔다.
 - 앱 열은 가운데 448px(`--app-max-width`)이고 Light 배경이다. 좌우 Ink 선(기본 선 3px)은 열 바깥에 가상 요소로 그려서, 화면이 448px 이하이면 화면 밖으로 나가 보이지 않는다. 새 breakpoint를 만들지 않기 위해서다. 가로 넘침은 앱 열을 감싼 `.app-frame`의 `overflow-x: clip`으로 막는다. `body`에 두면 값이 화면(viewport)으로 넘어가 잘리지 않고 선 굵기만큼 가로 스크롤이 생긴다.
-- 앱 열에 `data-clarity-unmask="true"`를 둔다.
+- `body`에 `data-clarity-unmask="true"`를 둔다. 바텀시트는 `body` 아래 포털로 그려져 앱 열 밖에 있으므로 앱 열에 달면 시트 안의 재료 이름과 양이 가려진다.
 - 메타데이터는 `src/shared/config/site.ts`의 서비스 이름과 한 줄 설명을 쓴다. 제목은 "탈탈", 설명은 copy.md 소개 설명("산 재료를 나눠 쓰는 요리 3~5가지를 알려 드려요.")이다. `openGraph`에 같은 제목, 설명, `ko_KR`을 넣는다. 공유 이미지는 넣지 않는다.
 - 파비콘은 `metadata.icons`에 `src/shared/assets`의 경로를 넣는다. `app/favicon.ico`는 지운다. 파일 규칙 파비콘이 `metadata.icons`보다 앞서기 때문이다.
 
@@ -130,6 +130,7 @@ vaul `Drawer`로 만든다.
 
 - 열 때 `window.history.pushState`로 쿼리를 더한다. Next.js가 `useSearchParams`와 맞춰 주고 서버 요청을 하지 않는다.
 - 닫기 버튼, Esc, 막 누르기로 닫으면 `history.back()`을 부른다. 주소로 바로 들어와 앞 기록이 없으면 쿼리만 지운다(`replaceState`).
+- 빠르게 두 번 눌러도 기록을 한 번만 더하고 한 번만 되돌린다. 렌더된 `open` 값은 아직 바뀌지 않았을 수 있어서, 열 때는 주소의 쿼리를 직접 보고 닫을 때는 `history.back()`을 부른 뒤 닫힐 때까지 다시 부르지 않는다.
 - 브라우저 뒤로가기로 쿼리가 사라지면 시트가 닫힌다.
 
 닫은 뒤 포커스는 다음 순서로 옮긴다. vaul의 기본 복귀는 끈다(`onCloseAutoFocus`에서 `preventDefault`).
@@ -144,16 +145,16 @@ vaul `Drawer`로 만든다.
 
 `shared/ui/app-header.tsx`. 왼쪽에 선택적인 뒤로가기 버튼(`data-back-button`), 가운데 로고를 둔다. 로고는 `BRAND.logo`가 있으면 이미지, 없으면 사이트 이름을 `font-display`로 보여 준다. 뒤로가기는 앱 안에서 온 기록이 있으면 `history.back()`, 없으면 받은 주소로 간다.
 
-앱 안의 기록은 `shared/lib/app-history.ts`가 센다. `_app/providers`가 한 번 다는 `useAppHistoryTracker`가 경로가 바뀔 때마다 깊이를 하나 늘리고, `popstate`로 돌아온 경로면 하나 줄인다. 시트는 쿼리만 바꾸므로 세지 않는다. 브라우저 앞으로가기도 줄이는 쪽으로 세지만, 깊이가 실제보다 작아지면 받은 주소로 가므로 앱을 나가지 않는다.
+앱 안의 기록은 `shared/lib/app-history.ts`가 센다. `_app/providers`가 한 번 다는 `useAppHistoryTracker`가 경로가 바뀔 때마다 깊이를 하나 늘리고, `popstate`로 돌아온 경로면 하나 줄인다. 시트는 쿼리만 바꾸므로 세지 않는다. 첫 화면과 같은 경로는 세지 않는데, 개발 모드의 Strict Mode가 효과를 두 번 돌리므로 "첫 실행 건너뛰기"가 아니라 이전 경로와 비교해서 판단한다. 브라우저 앞으로가기도 줄이는 쪽으로 세지만, 깊이가 실제보다 작아지면 받은 주소로 가므로 앱을 나가지 않는다.
 
 ### StatusMessage
 
-`shared/ui/status-message.tsx`. `tone`(`success`, `warning`, `error`, `info`), 제목, 설명, 행동 버튼 자리를 받는다. Light 바탕, Ink 글자와 기본 선 굵기의 Ink 외곽선, 왼쪽 3px 상태색 강조선, 상태별 lucide 아이콘이다. `error`는 `role="alert"`, 나머지는 `role="status"`다.
+`shared/ui/status-message.tsx`. `tone`(`success`, `warning`, `error`, `info`), 제목과 설명(문자열), 행동 버튼 자리를 받는다. Light 바탕, Ink 글자와 기본 선 굵기의 Ink 외곽선, 왼쪽 3px 상태색 강조선, 상태별 lucide 아이콘이다. 화면 읽기에는 숨긴 live region으로 제목과 설명을 한 번 전달한다. `error`는 `role="alert"`, 나머지는 `role="status"`다. 처음부터 글자를 담고 나타난 live region은 읽히지 않을 수 있어서, 비운 채 그린 뒤 다음 작업에서 채운다(`shared/lib/use-mounted.ts`). 보이는 제목과 설명은 중복해서 읽히지 않게 `aria-hidden`을 둔다.
 
 ### 로딩
 
 - `shared/ui/spinner.tsx`의 `Spinner`: `--spinner-duration`으로 돈다. 동작 줄이기에서는 멈춘다.
-- `shared/ui/loading-status.tsx`의 `LoadingStatus`: 문구 배열을 받아 1.2초마다 바꾸고, 화면 읽기에는 받은 고정 안내를 한 번만 전달한다(`aria-live`는 고정 안내에만). 동작 줄이기에서는 첫 문구를 유지한다. 문구는 SUIT다.
+- `shared/ui/loading-status.tsx`의 `LoadingStatus`: 문구 배열을 받아 1.2초마다 바꾸고, 화면 읽기에는 받은 고정 안내를 한 번만 전달한다. 안내를 담는 `role="status"`는 `StatusMessage`와 같은 방법으로 마운트 뒤에 채운다. 동작 줄이기에서는 첫 문구를 유지한다. 문구는 SUIT다.
 - `shared/lib/with-min-duration.ts`: 프로미스가 2.4초보다 빨리 끝나도 2.4초 뒤에 결과를 돌려준다.
 
 ## 입력 상태
@@ -181,7 +182,7 @@ type InventoryState = { items: InventoryItem[]; servings: number };
 방문 여부는 쿠키에 저장하고, 루트의 `proxy.ts`가 `/` 요청에서 쿠키를 확인한다. 서버가 HTML을 보내기 전에 보낼 곳을 정하므로 소개나 시작 홈이 잠깐 보였다 사라지지 않는다.
 
 - 쿠키 이름과 보관 기간(3일)은 `shared/config/visit.ts`에 둔다. 값은 `1`, `Path=/`, `SameSite=Lax`이고 HTTPS에서는 `Secure`를 붙인다.
-- `proxy.ts`는 `matcher`를 `/` 하나로 두고, 쿠키가 없으면 `/intro`로 307 리다이렉트한다. `/` 페이지는 쿠키를 읽지 않아 정적으로 남는다.
+- `proxy.ts`는 `matcher`를 `/` 하나로 두고, 쿠키가 없으면 `/intro`로 307 리다이렉트한다. 모집 글 링크의 추적 쿼리를 잃지 않게 쿼리는 그대로 넘긴다. 쿠키 이름은 `@/shared/config/visit`에서 바로 가져온다. 묶음(`@/shared/config`)을 거치면 화면 문구까지 proxy에 딸려 오기 때문이다. `/` 페이지는 쿠키를 읽지 않아 정적으로 남는다.
 - `shared/lib/visit.ts`의 `markVisited()`가 `document.cookie`로 쿠키를 쓴다. 소개의 시작 버튼이 이 함수를 부른 뒤 `router.replace('/')`로 간다. `replace`라서 소개는 기록에 남지 않는다.
 - 소개에서 `/`로 가는 `Link`는 두지 않는다. 쿠키를 쓰기 전에 프리페치한 리다이렉트 응답이 남아 다시 소개로 돌아올 수 있기 때문이다. 시작 버튼이 실제로 시작 홈으로 가는지는 소개 화면 작업에서 확인한다.
 - `/intro`에 바로 들어오면 방문 여부와 관계없이 소개를 보여 준다.
