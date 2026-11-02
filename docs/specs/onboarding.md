@@ -133,11 +133,11 @@ const start = () => {
 
 머리글, 주황 상단 면, Light 영역이다.
 
-주황 상단 면: `surface-brand` 안에 머리글과 제목 영역을 둔다. 제목 영역의 구조와 클래스는 소개의 제목 영역(`intro-page.tsx`)과 같고, 설명 자리에 시작 안내(`copy.home.guide`, `text-xl`)를 두고 물음표만 없다.
+주황 상단 면: `surface-brand` 안에 머리글과 제목 영역을 둔다. 제목 영역의 구조와 클래스는 소개의 제목 영역(`intro-page.tsx`)과 같고, 설명 자리에 시작 안내(`copy.home.guide`, `text-xl`)를 둔다. 물음표(`mascot.question`)도 소개와 같다.
 
 - 제목 `h1`: `copy.home.title`, `font-display text-display-sm whitespace-pre-line`(28px). 문구의 `
 `이 줄바꿈이 되도록 `whitespace-pre-line`이 필요하다. 제목을 `flex flex-col gap-4` 열에 둔다
-- 다람쥐: `Mascot pose="default"`, 150px, `alt` 비움, `priority`. `relative -ml-4 shrink-0` 틀에 두고 이미지에 `mr-4`를 준다. 제목 옆에 겹치지 않고 나란히 둔다
+- 다람쥐: `Mascot pose="default"`, 150px, `alt` 비움, `priority`. `relative -ml-4 shrink-0` 틀에 두고 이미지에 `mr-4`를 준다. 물음표는 같은 틀 안에서 `absolute top-0 right-0`이다. 제목 옆에 겹치지 않고 나란히 둔다
 - 제목 영역 바깥 틀은 `flex flex-col gap-1 px-(--page-gutter) pt-4 pb-4`, 안쪽 줄은 `flex items-center gap-2`다. 소개를 고치면 같이 고친다
 - 360px 폭에서 제목이 두 줄로 나뉜다. 시작 홈의 "직접 고르기"는 360×560에서 298px 높이에 있어 스크롤 없이 보인다
 
