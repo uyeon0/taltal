@@ -17,6 +17,10 @@ function urlWithSheet(name: string | null): string {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
+function sheetInUrl(): string | null {
+  return new URL(window.location.href).searchParams.get(SHEET_PARAM);
+}
+
 function findFocusTarget(opener: HTMLElement | null, openerKey: string | null): HTMLElement | null {
   if (opener?.isConnected) return opener;
   if (openerKey) {
@@ -40,10 +44,13 @@ export function useSheetRoute(name: string) {
   const openerKeyRef = useRef<string | null>(null);
   const scrollYRef = useRef<number | null>(null);
   const wasOpenRef = useRef(open);
+  // history.back()은 비동기라 닫히기 전에 다시 누르면 기록을 두 번 되돌린다
+  const closingRef = useRef(false);
 
   const openSheet = useCallback(
     (opener?: HTMLElement | null) => {
-      if (open) return;
+      // 렌더된 open 값은 빠르게 두 번 누를 때 아직 바뀌지 않았으므로 주소를 직접 본다
+      if (sheetInUrl() === name) return;
       const element = opener ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
       openerRef.current = element;
       openerKeyRef.current = element?.closest(`[${SHEET_OPENER_ATTR}]`)?.getAttribute(SHEET_OPENER_ATTR) ?? null;
@@ -51,12 +58,13 @@ export function useSheetRoute(name: string) {
       pushedRef.current = true;
       window.history.pushState(null, '', urlWithSheet(name));
     },
-    [name, open]
+    [name]
   );
 
   const closeSheet = useCallback(() => {
-    if (!open) return;
+    if (!open || closingRef.current) return;
     if (pushedRef.current) {
+      closingRef.current = true;
       window.history.back();
     } else {
       window.history.replaceState(null, '', urlWithSheet(null));
@@ -68,6 +76,7 @@ export function useSheetRoute(name: string) {
     const wasOpen = wasOpenRef.current;
     wasOpenRef.current = open;
     if (!wasOpen || open) return;
+    closingRef.current = false;
 
     pushedRef.current = false;
     const scrollY = scrollYRef.current;
