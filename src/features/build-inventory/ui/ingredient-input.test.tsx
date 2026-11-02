@@ -144,7 +144,7 @@ test('범위를 벗어난 값에서 오류가 보이고 입력칸과 연결된�
 
   assert.equal(input.getAttribute('aria-invalid'), 'true');
   const error = document.getElementById(input.getAttribute('aria-describedby')!);
-  assert.equal(error?.textContent, '0보다 크고 100,000 이하로 넣어 주세요.');
+  assert.equal(error?.textContent, '0보다 크고 100,000 이하인 숫자로 넣어 주세요.');
   assert.equal(store().items[0].amount, null);
 });
 

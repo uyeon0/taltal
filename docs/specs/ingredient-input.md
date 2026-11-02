@@ -151,7 +151,7 @@ type PickableIngredients = {
 - 100,000 초과
 - `toGrams(ingredient, 값, unit)`이 10,000,000 초과
 
-오류는 저장을 누를 때 보여 준다. 수량 칸에 `aria-invalid`와 `aria-describedby`(오류 문구의 id)를 달고, Error 경계와 그 아래 오류 문구 "0보다 크고 100,000 이하로 넣어 주세요."를 둔다. 오류 문구는 `role="alert"`다. 수량을 고치면 오류를 지운다.
+오류는 저장을 누를 때 보여 준다. 수량 칸에 `aria-invalid`와 `aria-describedby`(오류 문구의 id)를 달고, Error 경계와 그 아래 오류 문구 "0보다 크고 100,000 이하인 숫자로 넣어 주세요."를 둔다. 오류 문구는 `role="alert"`다. 수량을 고치면 오류를 지운다.
 
 #### 단위 환산
 

@@ -48,7 +48,7 @@ export const copy = {
     customAmountSave: '이 양으로 정하기',
     unit: '단위',
     remove: '재료 삭제',
-    amountError: '0보다 크고 100,000 이하로 넣어 주세요.',
+    amountError: '0보다 크고 100,000 이하인 숫자로 넣어 주세요.',
     pantryGuide: '기본 양념은 직접 입력하지 않아도 돼요.',
     pantryExpand: (count: number) => `${count}개 보기`,
     pantryCollapse: '목록 접기',
