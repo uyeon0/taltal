@@ -32,8 +32,8 @@
 Node.js 24에서 실행합니다. 배포 빌드도 Node.js 24를 씁니다.
 
 ```bash
-git clone https://github.com/uyeon0/camp-project-1.git
-cd camp-project-1
+git clone https://github.com/uyeon0/taltal.git
+cd taltal
 npm ci
 npm run dev
 ```
