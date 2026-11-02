@@ -14,7 +14,8 @@
 | Clarity 가림 범위 | 문서대로 재료 이름과 양을 가리지 않는다. 앱 영역에 `data-clarity-unmask="true"`를 둔다. 입력칸 값은 Clarity가 어느 설정에서도 가리므로 검색어와 직접 입력한 수량은 녹화에 남지 않는다 |
 | 이미지 크기 | 재료 그림은 256px, 다람쥐는 640px PNG로 줄여 `public/`에 넣는다. 줄이는 스크립트를 저장소에 둔다 |
 | 임시 로고와 파비콘 | 로고 파일이 오기 전까지 머리글은 "탈탈" 글자를 낭만있구미체로 보여 주고, 파비콘은 `mascot.default`를 줄인 PNG를 쓴다 |
-| 입력 상태 위치 | 저장소(context, 훅, 타입)는 `features/build-inventory`의 model에 둔다. `_app/providers`는 그 공급자를 달기만 한다 |
+| 입력 상태 위치 | 저장소(스토어, 타입)는 `features/build-inventory`의 model에 둔다 |
+| 입력 상태 도구 | zustand 스토어를 쓴다. 공급자 없이 모듈에 스토어 하나를 둔다 |
 | 방문 여부 | localStorage 대신 쿠키에 저장하고, `proxy.ts`가 첫 방문을 `/intro`로 보낸다 |
 
 ## 토큰과 전역 CSS
@@ -40,7 +41,7 @@
 `app/layout.tsx`는 `src/_app`에서 가져온 레이아웃을 내보내기만 한다. 레이아웃은 `src/_app/layout/`에 둔다.
 
 - `html`에 폰트 변수 클래스와 `lang="ko"`를 둔다.
-- 앱 열은 가운데 448px(`--app-max-width`)이고 Light 배경이다. 좌우 2px Ink 선은 열 바깥에 가상 요소로 그려서, 화면이 448px 이하이면 화면 밖으로 나가 보이지 않는다. 새 breakpoint를 만들지 않기 위해서다. 가로 넘침은 `overflow-x: clip`으로 막는다.
+- 앱 열은 가운데 448px(`--app-max-width`)이고 Light 배경이다. 좌우 Ink 선(기본 선 3px)은 열 바깥에 가상 요소로 그려서, 화면이 448px 이하이면 화면 밖으로 나가 보이지 않는다. 새 breakpoint를 만들지 않기 위해서다. 가로 넘침은 앱 열을 감싼 `.app-frame`의 `overflow-x: clip`으로 막는다. `body`에 두면 값이 화면(viewport)으로 넘어가 잘리지 않고 선 굵기만큼 가로 스크롤이 생긴다.
 - 앱 열에 `data-clarity-unmask="true"`를 둔다.
 - 메타데이터는 `src/shared/config/site.ts`의 서비스 이름과 한 줄 설명을 쓴다. 제목은 "탈탈", 설명은 copy.md 소개 설명("산 재료를 나눠 쓰는 요리 3~5가지를 알려 드려요.")이다. `openGraph`에 같은 제목, 설명, `ko_KR`을 넣는다. 공유 이미지는 넣지 않는다.
 - 파비콘은 `metadata.icons`에 `src/shared/assets`의 경로를 넣는다. `app/favicon.ico`는 지운다. 파일 규칙 파비콘이 `metadata.icons`보다 앞서기 때문이다.
@@ -56,15 +57,16 @@
 | `public/images/ingredients/<file>` | `delivery-manifest.json`의 `assets` 32개를 256px로 줄인 PNG. 이름은 manifest의 `file`을 쓴다 |
 | `public/images/mascot/<식별자>.png` | design.md 표의 다섯 파일을 640px로 줄인 PNG. 이름은 `default`, `discovery`, `thinking`, `meal`, `retry` |
 | `public/brand/favicon.png`, `public/brand/apple-icon.png` | `squirrel-v2.png`를 64px, 180px로 줄인 PNG. 로고가 오면 바꾼다 |
-| `src/shared/assets/ingredient-images.ts` | manifest의 `ingredients`에서 만든 재료 ID → 경로 객체와 대체 그림 경로 |
+| `src/entities/ingredient/model/ingredient-images.ts` | manifest의 `ingredients`에서 만든 재료 ID → 경로 객체(`INGREDIENT_IMAGES`)와 대체 그림 경로(`INGREDIENT_FALLBACK_IMAGE`). 키가 재료 ID라서 shared가 아니라 entities에 둔다 |
 
 스크립트는 manifest의 `source_sha256`과 실제 `ingredients.json`의 해시가 다르면 경고만 하고 계속한다. 데이터가 바뀌어도 대체 그림 규칙으로 동작하기 때문이다.
 
 ### 경로 모음 `src/shared/assets`
 
+도메인과 무관한 이미지의 경로만 둔다.
+
 | 내보내는 것 | 내용 |
 | --- | --- |
-| `INGREDIENT_IMAGES`, `INGREDIENT_FALLBACK_IMAGE` | 스크립트가 만든 경로 |
 | `MASCOT_IMAGES` | `default`, `discovery`, `thinking`, `meal`, `retry` → 경로 |
 | `BRAND` | `logo: string \| null`, `favicon`, `appleIcon`. 지금 `logo`는 `null`이다 |
 
@@ -96,7 +98,7 @@
 고칠 때 지키는 기준은 다음과 같다.
 
 - 그림자, 투명도로 만든 색(`/50` 같은 수식어), backdrop blur를 지운다.
-- 라운딩은 컨트롤 8px, 카드 12px, 시트 20px만 쓴다. 선은 2px, 선택은 3px이다.
+- 라운딩은 컨트롤 8px, 카드 12px, 시트 20px만 쓴다. 기본 선과 선택 선은 모두 3px이다. 선택은 선 굵기가 아니라 체크와 면 색으로 구분한다.
 - 비활성은 투명도 대신 Light 면, Muted 글자, Subtle 선이다.
 - 터치 영역은 44px 이상, 주 행동은 48px이다.
 
@@ -118,7 +120,9 @@ vaul `Drawer`로 만든다.
 - 시트 본문은 `overflow-y: auto`와 `overscroll-behavior: contain`으로 본문 스크롤과 섞이지 않게 한다.
 - 제목은 `Drawer.Title`, 닫기 버튼은 Ghost로 둔다. Esc로 닫힌다.
 - 가상 키보드가 열려도 입력칸과 주 행동이 보이게, 주 행동을 시트 아래에 고정하고 `visualViewport` 높이에 맞춘다. vaul의 `repositionInputs`로 충분한지 실제 기기에서 확인하고, 모자라면 직접 맞춘다.
-- 앱 열과 같은 폭(최대 448px)으로 가운데 둔다.
+- 앱 열과 같은 폭(최대 448px)으로 가운데 둔다. 시트가 열리면 Radix가 본문 스크롤바 자리를 채우므로, 시트의 `right`를 `--removed-body-scroll-bar-size`만큼 비켜 앱 열과 가운데를 맞춘다.
+- vaul은 기본으로 열 때 포커스를 옮기지 않으므로 `autoFocus`를 켠다. 키보드로 열면 포커스가 시트 안에서 시작한다.
+- vaul이 넣는 0.5s 전환은 전역 CSS에서 `--duration-sheet`로 덮는다. 끌어 놓을 때 vaul이 inline으로 넣는 전환도 덮어야 해서 `!important`를 쓴다.
 
 ### 시트와 브라우저 기록
 
@@ -140,9 +144,11 @@ vaul `Drawer`로 만든다.
 
 `shared/ui/app-header.tsx`. 왼쪽에 선택적인 뒤로가기 버튼(`data-back-button`), 가운데 로고를 둔다. 로고는 `BRAND.logo`가 있으면 이미지, 없으면 사이트 이름을 `font-display`로 보여 준다. 뒤로가기는 앱 안에서 온 기록이 있으면 `history.back()`, 없으면 받은 주소로 간다.
 
+앱 안의 기록은 `shared/lib/app-history.ts`가 센다. `_app/providers`가 한 번 다는 `useAppHistoryTracker`가 경로가 바뀔 때마다 깊이를 하나 늘리고, `popstate`로 돌아온 경로면 하나 줄인다. 시트는 쿼리만 바꾸므로 세지 않는다. 브라우저 앞으로가기도 줄이는 쪽으로 세지만, 깊이가 실제보다 작아지면 받은 주소로 가므로 앱을 나가지 않는다.
+
 ### StatusMessage
 
-`shared/ui/status-message.tsx`. `tone`(`success`, `warning`, `error`, `info`), 제목, 설명, 행동 버튼 자리를 받는다. Light 바탕, Ink 글자와 2px Ink 외곽선, 왼쪽 3px 상태색 강조선, 상태별 lucide 아이콘이다. `error`는 `role="alert"`, 나머지는 `role="status"`다.
+`shared/ui/status-message.tsx`. `tone`(`success`, `warning`, `error`, `info`), 제목, 설명, 행동 버튼 자리를 받는다. Light 바탕, Ink 글자와 기본 선 굵기의 Ink 외곽선, 왼쪽 3px 상태색 강조선, 상태별 lucide 아이콘이다. `error`는 `role="alert"`, 나머지는 `role="status"`다.
 
 ### 로딩
 
@@ -152,7 +158,7 @@ vaul `Drawer`로 만든다.
 
 ## 입력 상태
 
-`features/build-inventory/model/inventory-store.tsx`에 저장소를 둔다.
+`features/build-inventory/model/inventory-store.ts`에 zustand 스토어를 두고, 타입과 처음 상태는 `inventory.ts`에 둔다.
 
 ```ts
 type InventoryItem = {
@@ -164,10 +170,11 @@ type InventoryItem = {
 type InventoryState = { items: InventoryItem[]; servings: number };
 ```
 
-- `InventoryProvider`와 `useInventory()`를 공개 API로 내보낸다. 상태를 바꾸는 함수는 `addItems`, `setAmount`, `removeItem`, `setServings`, `reset`이다. 재료 입력 화면 작업에서 필요한 함수를 더할 수 있다.
-- 상태는 React 메모리에만 둔다. 새로고침하면 초기화된다.
+- 스토어 훅 `useInventory`를 공개 API로 내보낸다. 상태를 바꾸는 함수는 `addItems`, `setAmount`, `removeItem`, `setServings`, `reset`이다. 재료 입력 화면 작업에서 필요한 함수를 더할 수 있다.
+- 상태는 브라우저 메모리에만 둔다. 새로고침하면 초기화된다.
+- zustand 문서는 Next.js에서 요청마다 스토어를 만들라고 권한다. 서버에서 값을 바꾸면 요청 사이에 섞이기 때문이다. 이 앱은 서버가 처음 상태를 그리기만 하고 값은 브라우저에서만 바꾸므로 스토어 하나로 둔다.
 - 인분 기본값은 이번 스펙에서 정하지 않는다. requirements에 없어서 재료 입력 화면 작업에서 정한다. 그때까지는 `1`로 둔다.
-- `src/_app/providers/`의 `AppProviders`가 `InventoryProvider`를 달고, 레이아웃이 `AppProviders`로 감싼다.
+- 공급자가 필요 없다. `src/_app/providers/`의 `AppProviders`는 앱 안 기록 세기(`useAppHistoryTracker`)만 단다.
 
 ## 첫 방문
 
@@ -206,7 +213,7 @@ PROJ1-121에서 확인한 것은 다음과 같다. Microsoft Learn 문서로 확
 | 문서 | 고칠 곳 |
 | --- | --- |
 | `docs/overview.md` | 화면 사이의 상태 표에서 방문 여부의 저장 위치를 쿠키로 바꾼다 |
-| `docs/architecture.md` | `_app` 세그먼트에 `layout`을 더한다. `build-inventory`가 입력 상태 저장소를 갖고 `_app/providers`는 달기만 한다고 적는다. `shared/assets`에 로고와 파비콘 경로를 더한다. 루트 파일 예시를 `proxy.ts`로 바꾸고, `/`의 첫 방문 리다이렉트를 `proxy.ts`가 맡는다고 적는다 |
+| `docs/architecture.md` | `_app` 세그먼트에 `layout`을 더한다. `build-inventory`가 입력 상태 저장소를 갖고 `_app/providers`는 달기만 한다고 적는다. `shared/assets`는 다람쥐, 로고, 파비콘 경로를 담고, 재료 그림 경로 표는 `entities/ingredient`가 갖는다고 적는다. 루트 파일 예시를 `proxy.ts`로 바꾸고, `/`의 첫 방문 리다이렉트를 `proxy.ts`가 맡는다고 적는다 |
 | `docs/requirements/foundation.md` | 사용 기록에 입력칸 값 가림을 더한다 |
 | `docs/design.md` | 지원 글자 목록 경로. 그림 파일이 앱에서 256px, 640px로 줄어 들어간다는 것 |
 
@@ -215,7 +222,7 @@ PROJ1-121에서 확인한 것은 다음과 같다. Microsoft Learn 문서로 확
 - 토큰: `globals.css`의 `:root` 변수가 `docs/tokens.css`와 같은지 확인한다.
 - 임의 값: `src/`와 `app/`의 `.tsx`, `.ts`에 HEX 색, Tailwind 임의 값(`-[...]`), 투명도 수식어(`/숫자`), 허용하지 않은 간격 숫자(5, 7, 10 등), `shadow-` 클래스가 없는지 확인한다. `globals.css`와 생성 파일은 뺀다.
 - 폰트: `unicode-range`의 한글 음절이 `gumi-romance-hangul.txt`와 같은지 확인한다.
-- 이미지: `INGREDIENT_IMAGES`의 경로와 `MASCOT_IMAGES`, `BRAND`의 경로에 파일이 있는지 확인한다. 실제 데이터가 있으면 `pantry`가 `null`인 재료가 모두 그림이나 대체 그림을 받는지 본다.
+- 이미지: `MASCOT_IMAGES`, `BRAND`의 경로(`shared/assets`)와 `INGREDIENT_IMAGES`의 경로(`entities/ingredient`)에 파일이 있는지 각 위치의 테스트에서 확인한다. 실제 데이터가 있으면 `pantry`가 `null`인 재료가 모두 전용 그림을 받는지 본다.
 - `IngredientImage`: 없는 ID와 불러오기 실패에서 대체 그림을 쓰는지 확인한다.
 - `useSheetRoute`: 열기, 닫기, 뒤로가기, 앞 기록 없는 진입을 확인한다.
 - `proxy.ts`: 쿠키가 없으면 `/intro`로 리다이렉트하고, 있으면 통과시키는지 확인한다.
@@ -224,7 +231,7 @@ PROJ1-121에서 확인한 것은 다음과 같다. Microsoft Learn 문서로 확
 
 ## 확인용 화면
 
-화면 작업 전에 공통 컴포넌트를 눈으로 확인할 곳이 필요하다. `app/page.tsx`의 임시 화면을 머리글, 버튼 세 종류와 로딩, 상태 메시지 네 개, 시트 열기, 다람쥐와 재료 그림, 낭만있구미체 제목을 보여 주는 화면으로 바꾼다. 시작 홈 작업에서 이 화면을 지운다. 브라우저로 다음을 확인한다.
+화면 작업 전에 공통 컴포넌트를 눈으로 확인할 곳이 필요하다. 머리글, 버튼 세 종류와 로딩, 상태 메시지 네 개, 시트 열기, 다람쥐와 재료 그림, 낭만있구미체 제목을 보여 주는 임시 화면을 `_pages/home/ui/foundation-preview.tsx`에 두고 `/`에서 보여 준다. 루트 `app/`은 내보내기만 하므로 화면 코드는 `_pages`에 둔다. 시작 홈 작업에서 이 화면을 지운다. `/`는 방문 쿠키가 없으면 `/intro`로 가므로 확인할 때는 쿠키를 먼저 넣는다. 브라우저로 다음을 확인한다.
 
 - 360px, 390px, 1280px 폭에서 앱 열과 좌우 선
 - 동작 줄이기에서 시트와 색 변화가 0ms이고 스피너가 멈추는지
@@ -236,14 +243,17 @@ PROJ1-121에서 확인한 것은 다음과 같다. Microsoft Learn 문서로 확
 
 ## 커밋 순서
 
-1. shadcn과 `cn` 이동
-2. 토큰, 전역 CSS, 폰트, 앱 레이아웃, 메타데이터
+커밋할 때 husky가 타입 검사를 돌리므로, 커밋마다 그 시점의 파일만으로 타입 검사가 통과하도록 의존 순서대로 나눈다.
+
+1. shadcn과 `cn` 이동. 내용은 import 경로만 바꾼다
+2. 화면 문구와 설정 상수
 3. 이미지 자산 스크립트와 생성 파일, 이미지 컴포넌트
-4. 공통 컴포넌트(Button, BottomSheet, StatusMessage, 로딩, 머리글)와 시트 기록
-5. 입력 상태, 첫 방문, 문구
-6. Clarity
-7. 확인용 화면과 테스트
-8. 문서 반영
+4. 토큰, 전역 CSS, 공통 컴포넌트와 시트 기록
+5. 입력 상태 저장소
+6. 첫 방문 proxy
+7. 폰트, 루트 레이아웃, 메타데이터, Clarity
+8. 확인용 화면과 디자인 값 검사 테스트. 옛 임시 화면이 사라져야 테스트가 통과한다
+9. 문서 반영
 
 ## 완료 기준
 

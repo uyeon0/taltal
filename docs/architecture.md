@@ -57,7 +57,8 @@ _app → _pages → widgets → features → entities → shared
 
 | 세그먼트 | 담는 것 |
 | --- | --- |
-| `providers` | 화면 사이에서 입력 상태를 유지하는 공급자 |
+| `layout` | 루트 레이아웃과 메타데이터. 앱 열, 폰트, 공급자, Clarity를 조립한다 |
+| `providers` | 앱 전체에 한 번만 다는 것. 지금은 뒤로가기 버튼이 쓰는 앱 안 기록 세기다 |
 | `styles` | 전역 CSS와 토큰 |
 | `fonts` | `next/font/local` 설정 |
 | `api-routes` | 서버 API의 처리 함수 |
@@ -81,17 +82,18 @@ _app → _pages → widgets → features → entities → shared
 
 | 슬라이스 | 담는 것 |
 | --- | --- |
-| `build-inventory` | 재료 고르기, 양 정하기, 인분 고르기. 추천에 넣을 입력을 만드는 동작 |
+| `build-inventory` | 재료 고르기, 양 정하기, 인분 고르기. 추천에 넣을 입력을 만드는 동작과 입력 상태 저장소(zustand 스토어 `useInventory`) |
 | `find-meals` | 요리 찾기 요청, `filterCandidates`, `recommend`, 3·4·5가지 비교, 결과 타입(`Result`, `Meal`, `Leftover`) |
 
 - `find-meals`는 사지 않는 묶음과 조금 사는 묶음을 함께 돌려준다. 어느 쪽을 보여 줄지는 결과 화면이 정한다.
-- `build-inventory`와 `find-meals`는 서로 import하지 않는다. 입력을 결과로 넘기는 일은 `_app`의 상태 공급자와 `_pages`가 맡는다.
+- `build-inventory`와 `find-meals`는 서로 import하지 않는다. 입력을 결과로 넘기는 일은 `_pages`가 맡는다. 결과 화면은 `build-inventory`의 `useInventory`로 입력을 읽어 `find-meals`에 넘긴다.
+- 입력 상태 저장소는 `_pages`가 읽어야 하므로 `_app`이 아니라 `build-inventory`에 둔다. zustand 스토어라 공급자를 달지 않는다.
 
 ### `entities`
 
 | 슬라이스 | 담는 것 |
 | --- | --- |
-| `ingredient` | `Ingredient`, `INPUT_UNITS`, `toGrams`, `formatAmount`, 재료 이미지 |
+| `ingredient` | `Ingredient`, `INPUT_UNITS`, `toGrams`, `formatAmount`, 재료 이미지와 재료 ID별 그림 경로 표 |
 | `recipe` | `Recipe`, `RecipeDetail`, 레시피 읽기와 상세 조회 |
 
 `Recipe`는 재료를 `ingredientId` 문자열로만 가리킨다. 그래서 `recipe`는 `ingredient`를 import하지 않는다.
@@ -106,9 +108,11 @@ _app → _pages → widgets → features → entities → shared
 | `db` | 서버에서 JSON 파일을 읽는 함수. 도메인 타입을 붙이지 않는다 |
 | `config` | 환경 변수와 상수 |
 | `copy` | `docs/copy.md`의 화면 문구 |
-| `assets` | 다람쥐와 재료 이미지의 경로 |
+| `assets` | 다람쥐, 로고, 파비콘의 경로 |
 
 `shared`에는 재료, 레시피, 추천 같은 도메인의 이름과 규칙을 넣지 않는다. 앱 데이터에 도메인 타입을 붙이는 일은 `entities`의 서버 전용 함수가 맡는다.
+
+재료 그림 경로 표는 키가 재료 ID라서 `shared/assets`가 아니라 `entities/ingredient`에 둔다. 표는 `scripts/build-image-assets.mjs`가 만들고, 그림 파일은 Next.js가 정적 파일로 내보내도록 `public/images/`에 둔다.
 
 ## 테스트
 
