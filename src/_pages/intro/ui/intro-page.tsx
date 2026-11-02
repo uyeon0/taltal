@@ -4,12 +4,12 @@ import { Mascot } from '@/shared/ui/mascot';
 import { IntroCarousel } from './intro-carousel';
 import { StartButton } from './start-button';
 
-// 첫 방문에만 나오는 화면. 머리글부터 화면 전체가 주황 면이다
+// 첫 방문에만 나오는 화면. 머리글부터 화면 전체가 앱 열의 주황 면이다
 export function IntroPage() {
   const { intro } = copy;
 
   return (
-    <main className="surface-brand flex min-h-svh flex-col">
+    <main className="flex min-h-svh flex-col">
       <AppHeader />
 
       <div className="flex flex-col gap-1 px-(--page-gutter) pt-4 pb-4">

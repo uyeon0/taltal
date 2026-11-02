@@ -95,8 +95,10 @@
 
   /* 형태 */
   --radius-control: 0.5rem;
-  --radius-card: 0.75rem;
+  --radius-pill: 9999px; /* 하나 고르는 선택 항목 */
+  --radius-card: 1.25rem;
   --radius-sheet: 1.25rem;
+  --summary-corner-cut: 1.5rem; /* 결과 요약 카드의 사선 모서리 */
   --border-width-divider: 1px;
   --border-width: 3px;
   --border-width-strong: 3px;

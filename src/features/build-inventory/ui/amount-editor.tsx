@@ -80,8 +80,10 @@ export function AmountEditor({ ingredient, item, id, onAmountSet, onRemove, onTy
         })}
       </div>
 
+      {/* 주 흐름을 돕는 보조 행동이라 Ghost로 둔다. 펼침 아이콘이 누를 수 있다는 것을 알린다 */}
       <Button
-        variant="secondary"
+        variant="ghost"
+        className="self-start"
         aria-expanded={customOpen}
         aria-controls={customId}
         onClick={() => setCustomOpen((open) => !open)}

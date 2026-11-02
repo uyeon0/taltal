@@ -12,6 +12,7 @@
 | `recipe-results-wireframe.html` | 결과 구성, 요약, 요리 카드, 사용량 시트, 레시피 상세 | `results.md`, `recipe-detail.md` |
 | `integrated-flow-wireframe.html` | 입력, 계산 중, 결과, 오류, 추천 없음 사이의 상태 전달 | `overview.md`, `results.md` |
 | `ingredient-input-style-study.html` | 색, 서체, 다람쥐를 입힌 시작 화면과 입력 화면의 인상 | `design.md` |
+| `design-refresh-study.html` | 색 면, 모양, 글자, 그림을 비교한 디자인 보완 시안 | `design.md` |
 
 ## 기준으로 쓰지 않는 것
 

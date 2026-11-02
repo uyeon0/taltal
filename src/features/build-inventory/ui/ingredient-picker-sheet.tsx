@@ -115,8 +115,8 @@ export function IngredientPickerSheet({ open, onOpenChange, ingredients, onAdded
                   aria-pressed={isAdded ? undefined : isSelected}
                   disabled={isAdded}
                   onClick={() => toggle(ingredient.id)}
-                  // 고른 칸은 체크로만 구분한다. 선과 면은 고르기 전과 같다(docs/design.md "컴포넌트 상태")
-                  className="relative flex min-h-(--control-height) flex-col items-center gap-1 rounded-xl border border-foreground bg-card px-1 py-2 text-center text-base font-semibold text-foreground transition-colors disabled:cursor-not-allowed disabled:border-(--disabled-border) disabled:text-(--disabled-foreground)"
+                  // 여러 개 고르는 칸이라 카드가 아니라 8px 라운딩이다. 고른 칸은 체크로만 구분하고, 선과 면은 고르기 전과 같다(docs/design.md "컴포넌트 상태")
+                  className="relative flex min-h-(--control-height) flex-col items-center gap-1 rounded-lg border border-foreground bg-card px-1 py-2 text-center text-base font-semibold text-foreground transition-colors disabled:cursor-not-allowed disabled:border-(--disabled-border) disabled:text-(--disabled-foreground)"
                 >
                   <IngredientImage ingredientId={ingredient.id} size={64} />
                   <span className="break-keep">{ingredient.id}</span>
