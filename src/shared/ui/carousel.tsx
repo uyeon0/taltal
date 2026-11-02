@@ -161,7 +161,7 @@ export function Carousel({
               aria-label={copy.common.goToSlide(index + 1)}
               aria-current={selected === index ? 'true' : undefined}
               onClick={() => scrollTo(index)}
-              className="flex h-(--control-height) w-8 items-center justify-center"
+              className="flex h-(--control-height) w-(--control-height) items-center justify-center"
             >
               <span
                 className={cn('size-3 rounded-full border border-foreground', selected === index && 'bg-foreground')}

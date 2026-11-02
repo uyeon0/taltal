@@ -136,3 +136,10 @@ test('조작이 없을 때도 동작 줄이기에서는 움직임 없이 넘긴�
   fireEvent.focus(slidesOf(container)[1]!);
   assert.deepEqual(api.scrollTo.mock.calls[0], [1, true]);
 });
+
+test('장 이동 점 버튼의 터치 영역이 44px 이상이다', () => {
+  render(<Carousel label="예시" slides={SLIDES} />);
+  const dot = screen.getByRole('button', { name: copy.common.goToSlide(1) });
+  assert.ok(dot.className.includes('w-(--control-height)'));
+  assert.ok(dot.className.includes('h-(--control-height)'));
+});
