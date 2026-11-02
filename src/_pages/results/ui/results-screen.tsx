@@ -2,8 +2,10 @@
 
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { preload } from 'react-dom';
 import { isInventoryReady, toStocks, useInventory } from '@/features/build-inventory';
 import type { Ingredient, InputUnit } from '@/entities/ingredient';
+import { MASCOT_IMAGES } from '@/shared/assets';
 import { copy } from '@/shared/copy';
 import { canGoBackInApp } from '@/shared/lib/app-history';
 import { AppHeader } from '@/shared/ui/app-header';
@@ -38,6 +40,8 @@ export function ResultsScreen({ ingredients }: ResultsScreenProps) {
  * 숨겨진 사이 입력이 바뀔 수 있어 저장소를 구독하고, 계산은 화면이 보일 때 시작한다. 이 화면은 저장소를 바꾸지 않는다.
  */
 function ResultsSearch({ ingredients }: ResultsScreenProps) {
+  // 오류 화면은 연결이 끊겼을 때 나오므로 그때 다람쥐를 받지 못한다. 미리 받아 둔다
+  preload(MASCOT_IMAGES.retry, { as: 'image' });
   const router = useRouter();
   const items = useInventory((state) => state.items);
   const servings = useInventory((state) => state.servings);

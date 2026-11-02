@@ -133,6 +133,12 @@ test('사지 않는 묶음이 없으면 조금 사는 묶음을 이유와 함께
   assert.equal(screen.queryByRole('button', { name: copy.purchaseMode.backToNoPurchase }), null);
 });
 
+test('연결이 끊겨도 오류 화면에 다람쥐를 보여 줄 수 있게 미리 받아 둔다', () => {
+  searchMeals.mockReturnValue(new Promise(() => {}));
+  render(<ResultsScreen ingredients={INGREDIENTS} />);
+  assert.ok(document.head.querySelector('link[rel="preload"][as="image"][href="/images/mascot/retry.png"]'));
+});
+
 test('두 묶음 모두 없으면 추천 없음을 보여 준다', async () => {
   searchMeals.mockResolvedValue(search(none, none));
   render(<ResultsScreen ingredients={INGREDIENTS} />);
