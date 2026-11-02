@@ -85,7 +85,10 @@ export default async function OgImage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 40, width: 600 }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse는 next/image를 쓰지 못한다 */}
         <img src={wordmark.src} width={wordmark.width} height={wordmark.height} alt="" />
-        <div style={{ display: 'flex', fontSize: 52, fontWeight: 600, lineHeight: 1.4 }}>{SITE.description}</div>
+        {/* 한글이 단어 중간에서 줄바꿈되지 않게 한다 */}
+        <div style={{ display: 'flex', fontSize: 52, fontWeight: 600, lineHeight: 1.4, wordBreak: 'keep-all' }}>
+          {SITE.description}
+        </div>
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse는 next/image를 쓰지 못한다 */}
       <img src={mascot} width={MASCOT_SIZE} height={MASCOT_SIZE} alt="" />
