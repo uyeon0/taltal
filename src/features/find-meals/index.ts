@@ -1,6 +1,13 @@
 export type { Leftover, Meal, Result } from './model/types';
 export { PERISH_WEIGHT, recommend } from './model/recommend';
 export { MAX_PURCHASES } from './model/inventory';
-export { DISH_COUNTS, compare, findMealOptions } from './model/compare';
+export { DISH_COUNTS, compare, findMealOptions, shouldSuggestBuy } from './model/compare';
 export type { Comparison, Mode, Option } from './model/compare';
+export { mealPurchases } from './model/purchases';
+export type { MealPurchases } from './model/purchases';
+export { USED_UP_GRAMS, splitLeftovers } from './model/leftovers';
+export { allocateStock } from './model/allocation';
+export type { StockAllocation } from './model/allocation';
 export { fetchCandidates } from './api/fetch-candidates';
+export { searchMeals } from './api/search-meals';
+export type { MealSearch } from './api/search-meals';
