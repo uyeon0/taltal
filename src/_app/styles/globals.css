@@ -6,6 +6,16 @@
 /* 주황 면(.surface-brand) 안. 그 안의 Light 영역(.surface-default)은 뺀다 */
 @custom-variant on-brand (&:where(.surface-brand, .surface-brand *):not(:where(.surface-default, .surface-default *)));
 
+/* hover는 마우스처럼 정밀한 포인터에서만 쓴다. 일부 휴대폰 브라우저가 (hover: hover)를 알려
+   손가락으로 누른 버튼이 hover 색으로 남기 때문이다. 누르는 동안의 반응은 active가 맡는다 */
+@custom-variant hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 /* 디자인 토큰. 기준 문서는 docs/design.md다.
    앱에 적용할 때 이 파일 내용을 src/_app/styles의 전역 CSS로 옮긴다. 폰트는 next/font/local을 쓴다. */
 
