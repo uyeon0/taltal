@@ -15,7 +15,7 @@
 
 | 토큰 | HEX | 역할 |
 | --- | --- | --- |
-| `brand.primary` | `#FA8835` | 브랜드 주황, 강조 면 |
+| `brand.primary` | `#F59A4F` | 브랜드 주황, 강조 면 |
 | `neutral.light` | `#FAFAF7` | 밝은 배경, 카드, 입력 면 |
 | `neutral.ink` | `#20211E` | 기본 글자, 주요 경계, 반전 버튼 |
 | `text.muted` | `#5F625A` | 밝은 면의 부가 설명, 단위 |
