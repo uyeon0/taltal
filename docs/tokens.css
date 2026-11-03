@@ -9,7 +9,7 @@
   --card-foreground: #20211e;
   --popover: #fafaf7;
   --popover-foreground: #20211e;
-  --primary: #fa8835;
+  --primary: #f59a4f;
   --primary-foreground: #20211e;
   --secondary: #fafaf7; /* 브랜드 Secondary 색은 없다. Light 면 + Ink 선 버튼용 */
   --secondary-foreground: #20211e;
@@ -29,7 +29,7 @@
   --radius: 0.5rem;
   --sidebar: #fafaf7;
   --sidebar-foreground: #20211e;
-  --sidebar-primary: #fa8835;
+  --sidebar-primary: #f59a4f;
   --sidebar-primary-foreground: #20211e;
   --sidebar-accent: #cfd1c9;
   --sidebar-accent-foreground: #20211e;
@@ -37,7 +37,7 @@
   --sidebar-ring: #234386;
 
   /* docs/design.md의 색 */
-  --brand-primary: #fa8835;
+  --brand-primary: #f59a4f;
   --neutral-light: #fafaf7;
   --neutral-ink: #20211e;
   --text-muted: #5f625a;
