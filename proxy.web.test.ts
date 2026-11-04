@@ -6,7 +6,7 @@ import { test } from 'vitest';
 
 import { VISIT_COOKIE } from '@/shared/config';
 
-import { config, proxy } from './proxy';
+import { config, proxy } from './proxy.web';
 
 test('방문 쿠키가 없으면 /intro로 보낸다', () => {
   const response = proxy(new NextRequest('https://example.com/'));

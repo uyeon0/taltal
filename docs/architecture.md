@@ -17,7 +17,8 @@ src/
 
 - Next.js의 `app/`은 프로젝트 루트에 두고, `src/`에는 FSD 코드만 둔다.
 - FSD의 `app`, `pages` 층은 Next.js 폴더 이름과 겹치지 않게 `_app`, `_pages`로 쓴다.
-- `proxy.ts`처럼 Next.js가 루트에 두기를 요구하는 파일은 루트 `app/` 옆에 둔다.
+- `proxy.web.ts`처럼 Next.js가 루트에 두기를 요구하는 파일은 루트 `app/` 옆에 둔다.
+- 서버가 있어야 동작하는 라우트 파일(API 라우트, `proxy`)은 이름에 `.web`을 붙인다. 웹 빌드에만 들어가고 앱인토스 미니앱 빌드에서는 빠진다(`docs/specs/apps-in-toss.md`).
 
 ## 의존 규칙
 
@@ -48,7 +49,7 @@ _app → _pages → widgets → features → entities → shared
 | `GET /api/recipes/[id]` | 레시피 상세 | `_app/api-routes` |
 | `POST /api/recipes/[id]/image` | 레시피 이미지(PNG) | `_app/api-routes` |
 
-- 첫 방문 리다이렉트는 루트 `proxy.ts`가 맡는다. `/` 요청에 방문 쿠키가 없으면 `/intro`로 보낸다. 서버가 화면을 보내기 전에 정하므로 소개나 시작 홈이 잠깐 보이지 않는다.
+- 첫 방문 리다이렉트는 루트 `proxy.web.ts`가 맡는다. `/` 요청에 방문 쿠키가 없으면 `/intro`로 보낸다. 서버가 화면을 보내기 전에 정하므로 소개나 시작 홈이 잠깐 보이지 않는다.
 - 재료 선택, 사용량, 레시피 상세 시트는 주소의 쿼리로 연다. 그래서 브라우저 뒤로가기로 시트를 닫을 수 있다.
 - 입력 상태는 브라우저 메모리에만 있다. `/results`에서 새로고침하거나 결과 없이 들어오면 시작 홈으로 보낸다.
 
