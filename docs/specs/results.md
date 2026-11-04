@@ -83,8 +83,8 @@
 
 위에서 아래로 다음 순서로 둔다. Light 배경이다.
 
-1. `AppHeader`. 뒤로가기 버튼에 "재료 수정" 글자와 왼쪽 화살표를 둔다. `AppHeader`에 `backLabel`을 더해, 있으면 아이콘과 글자를 함께 보여 주는 Ghost 버튼으로 그린다. 앱 안 기록이 있으면 `router.back()`, 없으면 `/ingredients`로 간다.
-2. 제목(`font-display`), 다람쥐(`mascot.meal`), 인분("각 요리 {인분}인분 기준", 16px). 제목 `h1`은 `tabIndex={-1}`이다.
+1. `AppHeader`. 서비스 이름만 둔다.
+2. 제목(`font-display`), 다람쥐(`mascot.meal`). 제목 `h1`은 `tabIndex={-1}`이다.
 3. 조금 사는 묶음 안내. 사지 않는 묶음이 없어 조금 사는 묶음을 보여 줄 때 `StatusMessage`(`info`)로 이유를 쓴다. 조금 사는 묶음을 고른 경우에는 "사지 않는 요리 보기" 버튼(Secondary)을 둔다.
 4. 가짓수 라벨과 탭, 바로 아래 탭 패널. 패널 안에 요약과 요리 카드 목록이 있다.
 5. 조금 사는 묶음 제안 카드.
@@ -196,7 +196,7 @@ type StockAllocation = {
 | 추천 없음 | `recovery.emptyTitle`, `recovery.emptyDescription` | 재료 수정하기(주요) |
 | 오류 | `recovery.errorTitle`, `recovery.errorDescription` | 다시 찾기(주요), 재료 수정하기(Secondary) |
 
-재료 수정하기는 머리글 뒤로가기와 같은 동작이다. 앱 안 기록이 있으면 뒤로, 없으면 `/ingredients`로 간다.
+재료 수정하기는 조건 칩과 같은 동작이다. 앱 안 기록이 있으면 뒤로, 없으면 `/ingredients`로 간다.
 
 ## 문구
 
