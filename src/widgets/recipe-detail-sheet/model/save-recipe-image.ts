@@ -1,7 +1,9 @@
-// 레시피 이미지를 서버에서 받아 저장한다. 파일 공유를 지원하면 공유 시트를 열고, 아니면 PNG를 내려받는다.
+// 레시피 이미지를 서버에서 받아 저장한다. 미니앱은 앱인토스 SDK로 기기에 저장한다.
+// 웹은 파일 공유를 지원하면 공유 시트를 열고, 아니면 PNG를 내려받는다.
 
 import type { Meal, Result } from '@/features/find-meals';
 import type { InputUnit } from '@/entities/ingredient';
+import { IS_AIT, apiUrl } from '@/shared/config';
 import { SITE } from '@/shared/config/site';
 
 /** POST /api/recipes/[id]/image의 본문. 요리 이름과 레시피 글은 서버가 데이터에서 읽는다 */
@@ -27,7 +29,7 @@ export async function requestRecipeImage(
   body: RecipeImageRequest,
   signal?: AbortSignal
 ): Promise<Blob> {
-  const res = await fetch(`/api/recipes/${recipeId}/image`, {
+  const res = await fetch(apiUrl(`/api/recipes/${recipeId}/image`), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -59,6 +61,7 @@ const isAppleMobile = () =>
  * 지나 공유가 막히면(NotAllowedError) 내려받기로 넘어간다.
  */
 export async function saveImage(blob: Blob, fileName: string): Promise<void> {
+  if (IS_AIT) return saveToDevice(blob, fileName);
   const file = new File([blob], fileName, { type: 'image/png' });
   if (isAppleMobile() && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
     try {
@@ -82,4 +85,20 @@ function download(file: File) {
   link.remove();
   // 바로 해제하면 일부 브라우저가 내려받기를 시작하기 전에 주소를 잃는다
   setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+/** 미니앱에서 기기에 저장한다. SDK는 미니앱에서만 불러온다 */
+async function saveToDevice(blob: Blob, fileName: string) {
+  const { File: AitFile } = await import('@apps-in-toss/web-framework');
+  await AitFile.saveBase64({ data: await toBase64(blob), fileName, mimeType: 'image/png' });
+}
+
+/** Blob을 data: 접두어 없는 Base64로 바꾼다 */
+function toBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).slice(String(reader.result).indexOf(',') + 1));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
 }

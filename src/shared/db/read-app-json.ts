@@ -22,15 +22,12 @@ export class MissingAppDataError extends Error {
 /** 앱 데이터 파일의 경로. 테스트도 이 함수로 같은 폴더를 찾는다 */
 export const appDataPath = (file: string) => path.join(/*turbopackIgnore: true*/ dataDir, file);
 
-/**
- * 파일이 없으면 MissingAppDataError를 던진다.
- * 'use cache' 함수 안에서 던진 오류는 프로덕션에서 내용이 감춰지므로, 캐시 함수를 부르기 전에 이 함수로 확인한다.
- */
+/** 파일이 없으면 MissingAppDataError를 던진다. readAppJson을 부르기 전에 이 함수로 확인한다 */
 export function assertAppData(file: string): void {
   if (!existsSync(/*turbopackIgnore: true*/ appDataPath(file))) throw new MissingAppDataError(file);
 }
 
-/** 파일이 있는지는 부르는 쪽이 assertAppData로 먼저 확인한다. 'use cache' 함수 안에서 부르기 때문이다 */
+/** 파일이 있는지는 부르는 쪽이 assertAppData로 먼저 확인한다 */
 export async function readAppJson<T>(file: string): Promise<T> {
   return JSON.parse(await readFile(/*turbopackIgnore: true*/ appDataPath(file), 'utf-8')) as T;
 }

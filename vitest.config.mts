@@ -12,6 +12,6 @@ export default defineConfig({
   test: {
     // 컴포넌트 테스트는 파일 첫 줄의 @vitest-environment jsdom 주석으로 환경을 바꾼다
     environment: 'node',
-    include: ['src/**/*.test.{ts,tsx}', 'proxy.test.ts']
+    include: ['src/**/*.test.{ts,tsx}', 'proxy.web.test.ts']
   }
 });

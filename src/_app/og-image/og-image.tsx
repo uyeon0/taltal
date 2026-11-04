@@ -49,13 +49,10 @@ async function readMascot() {
 }
 
 /**
- * 글꼴 파일, 색, 서비스 이름 PNG, 다람쥐를 읽어 둔다. 요청마다 파일을 읽지 않고 빌드할 때 한 번 읽도록 캐시한다.
- * cacheComponents가 켜져 있어 캐시하지 않은 파일 읽기가 있으면 이 경로가 요청마다 그려지는 동적 경로가 된다.
- * 캐시는 Buffer를 ArrayBuffer로만 돌려주므로 글꼴 데이터를 ArrayBuffer로 넘긴다
+ * 글꼴 파일, 색, 서비스 이름 PNG, 다람쥐를 읽는다. 라우트가 force-static이라 빌드할 때 한 번만 읽는다.
+ * ImageResponse에는 글꼴 데이터를 ArrayBuffer로 넘긴다
  */
 async function loadAssets() {
-  'use cache';
-
   const colors = await loadImageColors();
   const [suit, wordmark, mascot] = await Promise.all([loadSuitFonts(), drawWordmark(colors.ink), readMascot()]);
   const fonts = suit.map(({ data, ...font }) => ({

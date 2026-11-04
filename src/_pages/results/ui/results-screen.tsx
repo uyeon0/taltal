@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { preload } from 'react-dom';
 import { isInventoryReady, toStocks, useInventory } from '@/features/build-inventory';
@@ -25,21 +25,11 @@ type ResultsScreenProps = {
 };
 
 /**
- * cacheComponents가 켜져 있어 이 화면은 떠나도 지워지지 않고 숨겨진다(React Activity).
- * 숨겨질 때 계산하는 화면을 새로 그려 둔다. 그래서 다시 보일 때 이전 결과가 잠깐 보이지 않고 계산 중부터 시작한다.
- * 요리 찾기, 브라우저 뒤로가기·앞으로가기 어느 쪽으로 들어와도 그때의 입력으로 다시 계산한다.
+ * 입력을 확인하고 요리를 찾는다. 입력이 없으면(새로고침, 주소로 바로 들어옴) 시작 홈으로 보낸다.
+ * 요리 찾기, 브라우저 뒤로가기·앞으로가기 어느 쪽으로 들어와도 화면을 새로 그리므로 계산 중부터 시작한다.
+ * 이 화면은 저장소를 바꾸지 않는다.
  */
 export function ResultsScreen({ ingredients }: ResultsScreenProps) {
-  const [visit, setVisit] = useState(0);
-  useLayoutEffect(() => () => setVisit((current) => current + 1), []);
-  return <ResultsSearch key={visit} ingredients={ingredients} />;
-}
-
-/**
- * 입력을 확인하고 요리를 찾는다. 입력이 없으면(새로고침, 주소로 바로 들어옴) 시작 홈으로 보낸다.
- * 숨겨진 사이 입력이 바뀔 수 있어 저장소를 구독하고, 계산은 화면이 보일 때 시작한다. 이 화면은 저장소를 바꾸지 않는다.
- */
-function ResultsSearch({ ingredients }: ResultsScreenProps) {
   // 오류 화면은 연결이 끊겼을 때 나오므로 그때 다람쥐를 받지 못한다. 미리 받아 둔다
   preload(MASCOT_IMAGES.retry, { as: 'image' });
   const router = useRouter();

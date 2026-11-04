@@ -2,9 +2,10 @@
 
 import { getRecipeDetail } from '@/entities/recipe/index.server';
 
+import { withCors } from './cors';
 import { serverError } from './server-error';
 
-export async function GET(_request: Request, ctx: RouteContext<'/api/recipes/[id]'>) {
+export const GET = withCors('GET', async (_request: Request, ctx: RouteContext<'/api/recipes/[id]'>) => {
   const raw = (await ctx.params).id;
   // 0x10, 1e1, 12.0, 007처럼 같은 숫자의 다른 표기는 받지 않는다
   const id = /^(0|[1-9]\d*)$/.test(raw) ? Number(raw) : NaN;
@@ -17,4 +18,4 @@ export async function GET(_request: Request, ctx: RouteContext<'/api/recipes/[id
   } catch (error) {
     return serverError(error);
   }
-}
+});

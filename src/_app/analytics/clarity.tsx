@@ -1,12 +1,13 @@
 import Script from 'next/script';
-import { CLARITY_PROJECT_ID } from '@/shared/config';
+import { CLARITY_PROJECT_ID, IS_AIT } from '@/shared/config';
 
 /**
- * 유저 테스트용 Microsoft Clarity 세션 녹화. 프로젝트 ID가 없으면 아무것도 불러오지 않는다.
+ * 유저 테스트용 Microsoft Clarity 세션 녹화. 프로젝트 ID가 없거나 미니앱 빌드면 아무것도 불러오지 않는다.
  * 재료 이름과 양은 가리지 않는다(body의 data-clarity-unmask). 입력칸 값은 Clarity가 늘 가린다.
  */
 export function Clarity() {
-  if (!CLARITY_PROJECT_ID) return null;
+  // 앱인토스 문서에 외부 분석 스크립트의 허용 여부가 없어 미니앱에서는 쓰지 않는다
+  if (!CLARITY_PROJECT_ID || IS_AIT) return null;
 
   // Clarity 설치 안내의 태그. 프로젝트 ID는 영문자와 숫자만 들어 있다
   return (

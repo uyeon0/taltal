@@ -61,7 +61,7 @@
 
 `export const size`, `contentType`, `alt`는 Next가 정적으로 읽을 수 있어야 하므로, `app/opengraph-image.tsx`를 다시 내보내기만으로 만들면 인식하지 못할 수 있다. 구현할 때 `npm run build`로 확인하고, 인식하지 못하면 이 세 값만 `app/opengraph-image.tsx`에 직접 쓴다. 값은 설정이고 로직이 아니라서 `app/`에 두어도 구조 규칙에 어긋나지 않는다.
 
-`opengraph-image`는 캐시되지 않은 파일 읽기가 있으면 요청마다 그려지는 동적 경로가 된다(`cacheComponents`가 켜져 있다). 처음 구현에서 `npm run build`가 이 경로를 동적(`ƒ`)으로 표시했다. 글꼴, 색, 서비스 이름 PNG, 다람쥐를 읽는 부분을 `'use cache'` 함수 하나(`loadAssets`)로 묶었더니 정적(`○`)으로 바뀌었다. 캐시는 `Buffer`를 `Uint8Array`로 돌려줄 수 있으므로 글꼴 데이터를 `ArrayBuffer`로 바꿔 넘기고, 그린 PNG에서 글자가 빠지지 않는 것을 눈으로 확인했다. 빌드할 때만 그려지므로 `next.config.ts`의 `outputFileTracingIncludes`는 더하지 않는다.
+`opengraph-image`는 `dynamic = 'force-static'`으로 빌드할 때 한 번 그린다. 미니앱 빌드(정적 export)에도 이 설정이 있어야 들어간다. 글꼴 데이터는 `ArrayBuffer`로 넘긴다. 빌드할 때만 그려지므로 `next.config.ts`의 `outputFileTracingIncludes`는 더하지 않는다.
 
 `size`, `contentType`, `alt`는 `app/opengraph-image.tsx`에서 다시 내보내기만 해도 Next가 인식했다. 빌드한 HTML의 `og:image:width`, `og:image:height`, `og:image:alt`로 확인했다.
 

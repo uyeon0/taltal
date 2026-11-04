@@ -20,6 +20,7 @@ import {
 import { loadGumiFont, loadSuitFonts } from '../fonts/image-fonts.server';
 import { loadImageColors } from '../styles/image-colors.server';
 import { readJsonBody } from './read-json-body';
+import { preflight, withCors } from './cors';
 import { serverError } from './server-error';
 
 // 상한은 POST /api/candidates와 같은 이유로 둔다. 화면이 보내는 양보다 넉넉하다
@@ -89,7 +90,7 @@ function loadWordmark(colors: RecipeImageColors): Promise<Wordmark> {
   return wordmark;
 }
 
-export async function POST(request: Request, ctx: RouteContext<'/api/recipes/[id]/image'>) {
+export const POST = withCors('POST', async (request: Request, ctx: RouteContext<'/api/recipes/[id]/image'>) => {
   const raw = (await ctx.params).id;
   // GET /api/recipes/[id]와 같은 번호 규칙이다
   const id = /^(0|[1-9]\d*)$/.test(raw) ? Number(raw) : NaN;
@@ -130,4 +131,6 @@ export async function POST(request: Request, ctx: RouteContext<'/api/recipes/[id
   } catch (error) {
     return serverError(error);
   }
-}
+});
+
+export const OPTIONS = preflight('POST');
