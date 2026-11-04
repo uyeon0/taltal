@@ -22,7 +22,10 @@ export const metadata: Metadata = {
   },
   twitter: { card: 'summary_large_image' },
   icons: {
-    icon: BRAND.favicon,
+    icon: [
+      { url: BRAND.favicon, sizes: 'any' },
+      { url: BRAND.faviconPng, type: 'image/png', sizes: '32x32' }
+    ],
     apple: BRAND.appleIcon
   }
 };

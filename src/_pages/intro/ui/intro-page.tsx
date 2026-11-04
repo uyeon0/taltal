@@ -21,7 +21,6 @@ export function IntroPage() {
           </div>
           <div className="relative -ml-4 shrink-0">
             <Mascot pose="default" size={150} priority className="mr-4 size-(--mascot-header-size)" />
-            <Mascot pose="question" size={48} className="absolute top-0 right-0 size-(--mascot-question-size)" />
           </div>
         </div>
       </div>

@@ -25,18 +25,15 @@ test('제목 영역에 대체 텍스트 없는 다람쥐가 있다', () => {
   assert.match(mascot?.getAttribute('src') ?? '', /default/);
 });
 
-test('제목 영역 다람쥐 옆에 물음표가 있고 대체 텍스트가 비어 있다', () => {
+test('물음표는 다람쥐 그림에 들어 있어 따로 겹쳐 그리지 않는다', () => {
   const { container } = render(<IntroPage />);
-  const [, question] = [...container.querySelectorAll('main img')];
-  assert.match(question?.getAttribute('src') ?? '', /question/);
-  assert.equal(question?.getAttribute('alt'), '');
+  const sources = [...container.querySelectorAll('main img')].map((img) => img.getAttribute('src') ?? '');
+  assert.equal(sources.filter((src) => /question/.test(src)).length, 0);
 });
 
-test('제목 영역 다람쥐와 물음표가 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
+test('제목 영역 다람쥐가 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
   const { container } = render(<IntroPage />);
-  const [mascot, question] = [...container.querySelectorAll('main img')];
-  assert.ok(mascot?.className.includes('size-(--mascot-header-size)'));
-  assert.ok(question?.className.includes('size-(--mascot-question-size)'));
+  assert.ok(container.querySelector('main img')?.className.includes('size-(--mascot-header-size)'));
 });
 
 test('제목, 설명, 캐러셀, 시작 버튼이 순서대로 나온다', () => {

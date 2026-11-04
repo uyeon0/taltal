@@ -51,12 +51,10 @@ test('제목 영역 다람쥐가 화면 폭에 맞춰 줄어드는 크기를 쓴
   assert.ok(container.querySelector('main img')?.className.includes('size-(--mascot-header-size)'));
 });
 
-test('제목 영역 다람쥐 옆에 물음표가 있고 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
+test('물음표는 다람쥐 그림에 들어 있어 따로 겹쳐 그리지 않는다', () => {
   const { container } = render(<HomePage />);
-  const [, question] = [...container.querySelectorAll('main img')];
-  assert.match(question?.getAttribute('src') ?? '', /question/);
-  assert.equal(question?.getAttribute('alt'), '');
-  assert.ok(question?.className.includes('size-(--mascot-question-size)'));
+  const sources = [...container.querySelectorAll('main img')].map((img) => img.getAttribute('src') ?? '');
+  assert.equal(sources.filter((src) => /question/.test(src)).length, 0);
 });
 
 test('직접 고르기 아래에 예시 구역 제목이 있다', () => {

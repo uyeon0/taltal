@@ -54,7 +54,7 @@
 └─────────────────────┘
 ```
 
-- 제목 `h1`은 `copy.intro.title`, `font-display text-display-sm`(28px)다. 360×640에서 시작 버튼과 점 표시가 같이 보이도록 기본 32px 대신 28px를 쓴다. 제목 영역은 위 8px, 아래 16px 간격을 둔다. 다람쥐 머리 오른쪽 위에 `Mascot pose="question"`(48px, `alt` 비움)을 겹쳐 둔다. 다람쥐를 감싼 `relative` 틀에 `absolute top-0 -right-4`로 놓아서 제목 폭을 줄이지 않는다. 제목 오른쪽에 `Mascot pose="default"`(80px, `alt` 비움, `priority`)를 나란히 둔다. 제목은 `flex-1 min-w-0`이고 설명은 그 아래 전체 폭이다. 설명은 `copy.intro.description`이고 20px(`text-xl`)다. 장을 넘겨도 움직이지 않는다
+- 제목 `h1`은 `copy.intro.title`, `font-display text-display-sm`(28px)다. 360×640에서 시작 버튼과 점 표시가 같이 보이도록 기본 32px 대신 28px를 쓴다. 제목 영역은 위 8px, 아래 16px 간격을 둔다. 제목 오른쪽에 `Mascot pose="default"`(80px, `alt` 비움, `priority`)를 나란히 둔다. 제목은 `flex-1 min-w-0`이고 설명은 그 아래 전체 폭이다. 설명은 `copy.intro.description`이고 20px(`text-xl`)다. 장을 넘겨도 움직이지 않는다
 - 시작 버튼은 화면 아래에 붙인다(`sticky bottom-0`). 시작 버튼과 점 표시는 캐러셀 밖이라 장을 넘겨도 움직이지 않는다
 - 세로는 `min-h-svh`인 flex 열이다. 내용이 화면보다 높으면 페이지가 스크롤되고, 시작 버튼은 항상 보인다
 
@@ -133,11 +133,11 @@ const start = () => {
 
 헤더, 주황 상단 면, Light 영역이다.
 
-주황 상단 면: `surface-brand` 안에 헤더와 제목 영역을 둔다. 제목 영역의 구조와 클래스는 소개의 제목 영역(`intro-page.tsx`)과 같고, 설명 자리에 시작 안내(`copy.home.guide`, `text-xl`)를 둔다. 물음표(`mascot.question`)도 소개와 같다.
+주황 상단 면: `surface-brand` 안에 헤더와 제목 영역을 둔다. 제목 영역의 구조와 클래스는 소개의 제목 영역(`intro-page.tsx`)과 같고, 설명 자리에 시작 안내(`copy.home.guide`, `text-xl`)를 둔다. 다람쥐도 소개와 같다.
 
 - 제목 `h1`: `copy.home.title`, `font-display text-display-sm whitespace-pre-line`(28px). 문구의 `
 `이 줄바꿈이 되도록 `whitespace-pre-line`이 필요하다. 제목을 `flex flex-col gap-4` 열에 둔다
-- 다람쥐: `Mascot pose="default"`, 150px, `alt` 비움, `priority`. `relative -ml-4 shrink-0` 틀에 두고 이미지에 `mr-4`를 준다. 물음표는 같은 틀 안에서 `absolute top-0 right-0`이다. 제목 옆에 겹치지 않고 나란히 둔다
+- 다람쥐: `Mascot pose="default"`, 150px, `alt` 비움, `priority`. `relative -ml-4 shrink-0` 틀에 두고 이미지에 `mr-4`를 준다. 제목 옆에 겹치지 않고 나란히 둔다
 - 제목 영역 바깥 틀은 `flex flex-col gap-1 px-(--page-gutter) pt-4 pb-4`, 안쪽 줄은 `flex items-center gap-2`다. 소개를 고치면 같이 고친다
 - 360px 폭에서 제목이 두 줄로 나뉜다. 시작 홈의 "직접 고르기"는 360×560에서 298px 높이에 있어 스크롤 없이 보인다
 

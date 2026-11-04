@@ -43,21 +43,19 @@
 | 항목 | 결정 | 이유 |
 | --- | --- | --- |
 | 값을 두는 곳 | `docs/tokens.css`와 `src/_app/styles/globals.css`의 `:root`에 `--mascot-header-size: clamp(6.5rem, 30vw, 9.375rem)`를 둔다 | 디자인 값 검사가 코드의 임의 값을 막고, 토큰은 두 파일이 같아야 한다(`tokens.test.ts`). 104px와 150px를 rem으로 쓴다. 이 프로젝트의 간격 토큰도 rem이다 |
-| 물음표 크기 | `--mascot-question-size: calc(var(--mascot-header-size) * 0.32)`를 둔다 | 지금 다람쥐 150px에 물음표 48px이다. 같은 비율(48/150)로 줄인다 |
-| 적용 방법 | 두 화면의 `Mascot`에 `className="size-(--mascot-header-size)"`를 준다. 물음표는 `size-(--mascot-question-size)`를 준다. `size` 프롭(150, 48)은 그대로 둔다 | `next/image`가 폭과 높이를 요구하고, 이 값은 최대 크기이자 원본 비율을 알려 주는 용도로 남긴다. CSS의 `width`, `height`가 이 속성을 덮어쓴다. 컴포넌트는 고치지 않는다 |
-| 물음표 위치 | 지금 구조를 유지한다. 다람쥐를 감싼 `relative -ml-4 shrink-0` 요소 안에서 물음표가 `absolute top-0 right-0`이다 | 다람쥐 크기가 줄면 감싼 요소가 같이 줄어 물음표가 머리 오른쪽 위에 그대로 붙는다. 확인한 것은 크기를 바꿔도 같은 구조에서 위치가 유지된다는 것이다 |
+| 적용 방법 | 두 화면의 `Mascot`에 `className="size-(--mascot-header-size)"`를 준다. `size` 프롭(150)은 그대로 둔다 | `next/image`가 폭과 높이를 요구하고, 이 값은 최대 크기이자 원본 비율을 알려 주는 용도로 남긴다. CSS의 `width`, `height`가 이 속성을 덮어쓴다. 컴포넌트는 고치지 않는다 |
 | 다른 화면 | 계산 중, 추천 없음, 오류, 결과, 빈 목록의 다람쥐(200px, 112px 등)는 바꾸지 않는다 | 이슈 범위가 소개와 시작 홈의 제목 영역 다람쥐다 |
 
 ## 파일
 
 | 파일 | 내용 |
 | --- | --- |
-| `docs/tokens.css` | `--mascot-header-size`, `--mascot-question-size` |
+| `docs/tokens.css` | `--mascot-header-size` |
 | `src/_app/styles/globals.css` | 같은 토큰 |
 | `src/shared/copy/index.ts` | `copy.intro.description`을 새 문구로 바꾼다. 소개 설명, 메타 설명, 공유 이미지가 이 값을 쓴다 |
-| `src/_pages/intro/ui/intro-page.tsx` | 다람쥐와 물음표에 크기 클래스 |
+| `src/_pages/intro/ui/intro-page.tsx` | 다람쥐에 크기 클래스 |
 | `src/_pages/home/ui/home-page.tsx` | 다람쥐에 크기 클래스 |
-| `src/_pages/intro/ui/intro-page.test.tsx` | 다람쥐와 물음표의 크기 클래스를 확인한다 |
+| `src/_pages/intro/ui/intro-page.test.tsx` | 다람쥐의 크기 클래스를 확인한다 |
 | `src/_pages/home/ui/home-page.test.tsx` | 다람쥐의 크기 클래스를 확인한다 |
 
 ## 확인 방법
@@ -68,7 +66,6 @@
 - 소개 360×640에서 문서 높이가 640px 이하이고 시작 버튼과 점이 보인다. 제목이 "이 재료들을 / 어떻게 다 먹지?" 두 줄이고 설명이 두 줄이다.
 - 공유 이미지(`/opengraph-image`)의 설명이 단어 중간에서 끊기지 않고 글자가 넘치지 않는다.
 - 시작 홈 360×560에서 "직접 고르기"가 스크롤 없이 보인다.
-- 소개의 물음표가 다람쥐 머리 오른쪽 위에 있고 다람쥐와 겹치거나 잘리지 않는다.
 - 제목과 다람쥐가 겹치지 않고 가로로 넘치지 않는다.
 
 그 뒤 `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `fsd-review` 스킬로 점검한다.
@@ -81,3 +78,5 @@
 - `docs/design.md`: "다람쥐"에 제목 영역 다람쥐의 크기 규칙을 더한다.
 - `docs/tokens.css`: 위 토큰.
 - `docs/copy.md`: "소개"의 설명 문구. `docs/overview.md`와 `docs/specs/app-foundation.md`에 인용한 문구도 같이 고친다.
+
+물음표는 다람쥐 그림(`mascot.default`)에 들어 있어 따로 크기를 정하지 않는다.

@@ -112,7 +112,6 @@
   --control-height: 2.75rem;
   --control-height-primary: 3rem;
   --mascot-header-size: clamp(6.5rem, 30vw, 9.375rem); /* 소개와 시작 홈 제목 영역의 다람쥐 */
-  --mascot-question-size: calc(var(--mascot-header-size) * 0.32); /* 소개의 물음표 */
 
   /* 형태 */
   --radius-control: 0.5rem;
