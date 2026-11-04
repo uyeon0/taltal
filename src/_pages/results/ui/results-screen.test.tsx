@@ -15,6 +15,9 @@ vi.mock('next/navigation', () => ({
   useRouter: () => router,
   useSearchParams: () => new URLSearchParams(window.location.search)
 }));
+// 앱 안 기록이 있는지는 테스트마다 정한다
+const appHistory = { canGoBack: false };
+vi.mock('@/shared/lib/app-history', () => ({ canGoBackInApp: () => appHistory.canGoBack }));
 // 최소 표시 시간은 따로 테스트한다. 여기서는 기다리지 않는다
 vi.mock('@/shared/lib/with-min-duration', () => ({ withMinDuration: <T,>(promise: Promise<T>) => promise }));
 
@@ -82,6 +85,9 @@ beforeEach(() => {
   useInventory.getState().setAmount('두부', 1, '모');
   searchMeals.mockReset();
   router.replace.mockReset();
+  router.push.mockReset();
+  router.back.mockReset();
+  appHistory.canGoBack = false;
   window.history.replaceState(null, '', '/results');
 });
 afterEach(() => {
@@ -215,12 +221,42 @@ test('떠났다 다시 들어오면 이전 결과 없이 계산 중부터 시작
   await screen.findByText('바뀜1');
 });
 
-test('머리글이 스크롤해도 위에 붙는다', async () => {
+test('조건 칩이 재료와 인분을 보여 주고 스크롤해도 위에 붙는다. 머리글에는 뒤로가기가 없다', async () => {
   searchMeals.mockResolvedValue(search(comparison(result('붙음', 150)), none));
   const { container } = render(<ResultsScreen ingredients={INGREDIENTS} />);
 
   await screen.findByText('붙음1');
-  assert.ok(container.querySelector('header')?.className.includes('sticky'));
+  const chip = screen.getByRole('button', { name: '재료 수정: 두부 · 2인분' });
+  assert.ok(chip.parentElement?.className.includes('sticky'));
+  assert.equal(container.querySelector('header button'), null);
+  assert.equal(screen.queryByText('각 요리 2인분 기준'), null);
+});
+
+test('조건 칩을 누르면 앱 안 기록이 없을 때 재료 입력 주소로 간다', async () => {
+  searchMeals.mockResolvedValue(search(comparison(result('수정', 150)), none));
+  render(<ResultsScreen ingredients={INGREDIENTS} />);
+
+  await screen.findByText('수정1');
+  fireEvent.click(screen.getByRole('button', { name: /^재료 수정:/ }));
+  assert.deepEqual(router.push.mock.calls, [['/ingredients']]);
+  assert.equal(router.back.mock.calls.length, 0);
+});
+
+test('조건 칩을 누르면 앱 안 기록이 있을 때 뒤로 간다', async () => {
+  appHistory.canGoBack = true;
+  searchMeals.mockResolvedValue(search(comparison(result('뒤로', 150)), none));
+  render(<ResultsScreen ingredients={INGREDIENTS} />);
+
+  await screen.findByText('뒤로1');
+  fireEvent.click(screen.getByRole('button', { name: /^재료 수정:/ }));
+  assert.equal(router.back.mock.calls.length, 1);
+  assert.equal(router.push.mock.calls.length, 0);
+});
+
+test('조건 칩 문구는 재료를 두 개까지 쓰고 나머지는 개수로 줄인다', () => {
+  assert.equal(copy.results.condition(['두부'], 2), '두부 · 2인분');
+  assert.equal(copy.results.condition(['두부', '대파'], 3), '두부 · 대파 · 3인분');
+  assert.equal(copy.results.condition(['두부', '대파', '계란', '양파'], 1), '두부 · 대파 외 2개 · 1인분');
 });
 
 test('가짓수 탭 패널은 Tab 정지점이 아니다', async () => {
@@ -248,7 +284,7 @@ test('오류가 났을 때 포커스가 다른 곳에 있으면 옮기지 않는
   let fail: (error: Error) => void = () => {};
   searchMeals.mockReturnValueOnce(new Promise<MealSearch>((_, reject) => (fail = reject)));
   render(<ResultsScreen ingredients={INGREDIENTS} />);
-  const back = screen.getByRole('button', { name: copy.results.editIngredients });
+  const back = screen.getByRole('button', { name: /^재료 수정:/ });
   back.focus();
 
   await act(async () => fail(new Error('500')));
