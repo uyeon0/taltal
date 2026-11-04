@@ -187,7 +187,7 @@
 | `mascot.thinking` | `squirrel-thinking-v3.png` | 계산 중 |
 | `mascot.meal` | `squirrel-meal-v1.png` | 결과 도입부 |
 | `mascot.retry` | `squirrel-retry-straight-v4.png` | 추천 없음, 오류 |
-| `mascot.question` | `question-mark-v1.png` | 소개 제목 영역(머리글 다람쥐의 머리 오른쪽 위). 고민, 탐색을 나타내는 보조 표현이다(다람쥐 그림이 아니다). 계산이 정상 진행 중인데 오류나 혼란으로 읽히지 않는지 확인하고 쓴다 |
+| `mascot.question` | `question-mark-v1.png` | 소개 제목 영역(제목 영역 다람쥐의 머리 오른쪽 위). 고민, 탐색을 나타내는 보조 표현이다(다람쥐 그림이 아니다). 계산이 정상 진행 중인데 오류나 혼란으로 읽히지 않는지 확인하고 쓴다 |
 
 - 종횡비를 유지하고 전체를 보여 준다. 꼬리, 손, 접시를 잘라 맞추지 않는다.
 - 소개와 시작 홈 제목 영역의 다람쥐(`mascot.default`)는 화면 폭의 30%이고 104px에서 150px 사이다(`--mascot-header-size`). 물음표(`mascot.question`)는 다람쥐의 0.32배로 같이 줄어든다(`--mascot-question-size`). 다른 화면의 다람쥐는 각 화면에서 정한 크기를 쓴다.
