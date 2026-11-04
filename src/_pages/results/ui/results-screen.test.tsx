@@ -3,7 +3,7 @@
 
 import assert from 'node:assert/strict';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { Activity, StrictMode } from 'react';
+import { StrictMode } from 'react';
 import { afterEach, beforeEach, test, vi } from 'vitest';
 
 import type { Comparison, MealSearch, Result } from '@/features/find-meals';
@@ -195,23 +195,17 @@ test('가짓수 탭을 바꾸면 그 결과의 요리를 보여 준다', async (
   assert.equal(screen.queryByText('넷4'), null);
 });
 
-test('숨겼다 다시 보이면 이전 결과 없이 계산 중부터 시작해, 그때의 입력으로 다시 계산한다', async () => {
-  // cacheComponents에서 Next.js는 떠난 화면을 Activity로 숨긴다
-  const view = (mode: 'visible' | 'hidden') => (
-    <Activity mode={mode}>
-      <ResultsScreen ingredients={INGREDIENTS} />
-    </Activity>
-  );
+test('떠났다 다시 들어오면 이전 결과 없이 계산 중부터 시작해, 그때의 입력으로 다시 계산한다', async () => {
   searchMeals.mockResolvedValue(search(comparison(result('처음', 150)), none));
-  const { rerender } = render(view('visible'));
+  const first = render(<ResultsScreen ingredients={INGREDIENTS} />);
   await screen.findByText('처음1');
 
   // 재료 수정으로 가서 인분을 바꾸고 요리 찾기로 돌아온다
-  rerender(view('hidden'));
+  first.unmount();
   act(() => useInventory.getState().setServings(3));
   const next = deferred<MealSearch>();
   searchMeals.mockReturnValueOnce(next.promise);
-  rerender(view('visible'));
+  render(<ResultsScreen ingredients={INGREDIENTS} />);
   assert.equal(screen.queryByText('처음1'), null);
   screen.getByText(copy.loading.phrases[0]);
   assert.equal(searchMeals.mock.calls.length, 2);
