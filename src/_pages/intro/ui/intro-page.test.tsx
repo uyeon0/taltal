@@ -43,3 +43,11 @@ test('제목, 설명, 캐러셀, 시작 버튼이 순서대로 나온다', () =>
   getByRole('button', { name: copy.intro.start });
   assert.equal(container.querySelector('p')?.textContent, copy.intro.description);
 });
+
+test('설명은 제목과 다람쥐 줄 밖에서 화면 폭 전체를 쓴다', () => {
+  const { container } = render(<IntroPage />);
+  const row = container.querySelector('h1')?.parentElement;
+  assert.ok(row?.querySelector('img'));
+  assert.equal(row?.querySelector('p'), null);
+  assert.ok(row?.parentElement?.querySelector(':scope > p'));
+});

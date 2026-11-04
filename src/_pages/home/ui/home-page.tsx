@@ -21,16 +21,14 @@ export function HomePage() {
         <AppHeader />
 
         {/* 소개 화면의 제목 영역과 같은 구조다. 소개의 설명 자리에 시작 안내를 둔다. 아래를 앱 폭 전체의 Ink 선으로 나눈다 */}
-        <div className="flex flex-col gap-1 border-b border-foreground px-(--page-gutter) pt-4 pb-3">
+        <div className="flex flex-col gap-3 border-b border-foreground px-(--page-gutter) pt-4 pb-4">
           <div className="flex items-center gap-2">
-            <div className="flex flex-col gap-4">
-              <h1 className="min-w-0 flex-1 whitespace-pre-line font-display text-display-sm">{home.title}</h1>
-              <p className="text-xl">{home.guide}</p>
-            </div>
-            <div className="relative -ml-4 shrink-0">
-              <Mascot pose="default" size={150} priority className="mr-4 size-(--mascot-header-size)" />
+            <h1 className="min-w-0 flex-1 whitespace-pre-line font-display text-display-sm">{home.title}</h1>
+            <div className="-ml-4 shrink-0">
+              <Mascot pose="default" size={150} priority className="size-(--mascot-header-size)" />
             </div>
           </div>
+          <p className="text-xl">{home.guide}</p>
         </div>
 
         <section className="flex flex-col gap-(--section-gap) px-(--page-gutter) py-8">
