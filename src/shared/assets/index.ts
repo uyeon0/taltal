@@ -6,8 +6,7 @@ export const MASCOT_IMAGES = {
   discovery: '/images/mascot/discovery.png',
   thinking: '/images/mascot/thinking.png',
   meal: '/images/mascot/meal.png',
-  retry: '/images/mascot/retry.png',
-  question: '/images/mascot/question.png'
+  retry: '/images/mascot/retry.png'
 } as const;
 export type MascotPose = keyof typeof MASCOT_IMAGES;
 
