@@ -13,7 +13,7 @@
 | --- | --- |
 | Clarity 가림 범위 | 문서대로 재료 이름과 양을 가리지 않는다. `body`에 `data-clarity-unmask="true"`를 둔다. 입력칸 값은 Clarity가 어느 설정에서도 가리므로 검색어와 직접 입력한 수량은 녹화에 남지 않는다 |
 | 이미지 크기 | 재료 그림은 256px, 다람쥐는 640px PNG로 줄여 `public/`에 넣는다. 줄이는 스크립트를 저장소에 둔다 |
-| 임시 로고와 파비콘 | 로고 파일이 오기 전까지 헤더는 "탈탈" 글자를 낭만있구미체로 보여 주고, 파비콘은 `mascot.default`를 줄인 PNG를 쓴다 |
+| 로고와 파비콘 | 헤더는 "탈탈" 글자를 낭만있구미체로 보여 준다. 파비콘은 이미지 입력 폴더의 `brand/`에서 받는다 |
 | 입력 상태 위치 | 저장소(스토어, 타입)는 `features/build-inventory`의 model에 둔다 |
 | 입력 상태 도구 | zustand 스토어를 쓴다. 공급자 없이 모듈에 스토어 하나를 둔다 |
 | 방문 여부 | localStorage 대신 쿠키에 저장하고, `proxy.ts`가 첫 방문을 `/intro`로 보낸다 |
@@ -30,10 +30,10 @@
 
 ## 폰트
 
-`src/_app/fonts/`에 기록 저장소 `design/fonts/`의 다섯 파일을 복사한다: `SUIT-Variable.woff2`, `GumiRomance-Regular.woff2`, `LICENSE-SUIT.txt`, `NOTICE-GumiRomance.md`, `gumi-romance-hangul.txt`.
+`src/_app/fonts/`에 다섯 파일을 둔다: `SUIT-Variable.woff2`, `GumiRomance-Regular.woff2`, `LICENSE-SUIT.txt`, `NOTICE-GumiRomance.md`, `gumi-romance-hangul.txt`.
 
 - `src/_app/fonts/index.ts`에서 `next/font/local`로 두 서체를 불러오고 `variable`로 CSS 변수를 만든다.
-- 낭만있구미체는 `declarations`로 `unicode-range`를 지정한다. 값은 기록 저장소 `design/fonts/fonts.css`의 것을 옮긴다. 그 밖의 글자는 SUIT로 대체돼 공백이 되지 않는다.
+- 낭만있구미체는 `declarations`로 `unicode-range`를 지정한다. 값은 폰트를 받을 때 함께 받은 `unicode-range`다. 그 밖의 글자는 SUIT로 대체돼 공백이 되지 않는다.
 - `docs/design.md`의 "지원 글자 목록은 `gumi-romance-hangul.txt`다"는 경로를 `src/_app/fonts/gumi-romance-hangul.txt`로 적는다.
 
 ## 앱 레이아웃
@@ -50,16 +50,16 @@
 
 ### 파일과 스크립트
 
-`scripts/build-image-assets.mjs`가 기록 저장소에서 이미지를 읽어 줄이고 경로 파일을 만든다. 기록 저장소 경로는 인자로 받는다. `sharp`를 devDependency로 더한다.
+`scripts/build-image-assets.mjs`가 이미지 입력 폴더를 읽어 줄이고 경로 파일을 만든다. 입력 폴더는 인자로 받고, 형식은 `docs/specs/brand-images.md`의 "입력 폴더 형식"이다. `sharp`를 devDependency로 쓴다.
 
 | 출력 | 내용 |
 | --- | --- |
-| `public/images/ingredients/<file>` | `delivery-manifest.json`의 `assets` 32개를 256px로 줄인 PNG. 이름은 manifest의 `file`을 쓴다 |
-| `public/images/mascot/<식별자>.png` | design.md 표의 여섯 파일을 640px로 줄인 PNG. 이름은 `default`, `discovery`, `thinking`, `meal`, `retry`, `question` |
-| `public/brand/favicon.png`, `public/brand/apple-icon.png` | `squirrel-v2.png`를 64px, 180px로 줄인 PNG. 로고가 오면 바꾼다 |
-| `src/entities/ingredient/model/ingredient-images.ts` | manifest의 `ingredients`에서 만든 재료 ID → 경로 객체(`INGREDIENT_IMAGES`)와 대체 그림 경로(`INGREDIENT_FALLBACK_IMAGE`). 키가 재료 ID라서 shared가 아니라 entities에 둔다 |
+| `public/images/ingredients/<file>` | 입력 폴더 `ingredients/`의 그림을 256px로 줄인 PNG. 이름은 그대로 쓴다 |
+| `public/images/mascot/<식별자>.png` | 입력 폴더 `mascot/`의 다섯 파일을 640px로 줄인 PNG. 이름은 `default`, `discovery`, `thinking`, `meal`, `retry` |
+| `public/brand/favicon.ico`, `favicon-32x32.png`, `apple-touch-icon.png`, `app/opengraph-image.png` | 입력 폴더 `brand/`의 파일을 그대로 복사한다 |
+| `src/entities/ingredient/model/ingredient-images.ts` | 입력 폴더 `ingredients.json`에서 만든 재료 ID → 경로 객체(`INGREDIENT_IMAGES`)와 대체 그림 경로(`INGREDIENT_FALLBACK_IMAGE`). 키가 재료 ID라서 shared가 아니라 entities에 둔다 |
 
-스크립트는 manifest의 `source_sha256`과 실제 `ingredients.json`의 해시가 다르면 경고만 하고 계속한다. 데이터가 바뀌어도 대체 그림 규칙으로 동작하기 때문이다.
+데이터에 새 재료가 생겨 `ingredients.json`에 없으면 대체 그림을 쓴다.
 
 ### 경로 모음 `src/shared/assets`
 
@@ -68,7 +68,7 @@
 | 내보내는 것 | 내용 |
 | --- | --- |
 | `MASCOT_IMAGES` | `default`, `discovery`, `thinking`, `meal`, `retry` → 경로 |
-| `BRAND` | `logo: string \| null`, `favicon`, `appleIcon`. 지금 `logo`는 `null`이다 |
+| `BRAND` | `logo: string \| null`, `favicon`, `faviconPng`, `appleIcon`. 지금 `logo`는 `null`이다 |
 
 로고와 파비콘 경로는 `BRAND` 한 곳에만 있다. 로고 파일이 오면 `public/brand/`에 넣고 `BRAND.logo`를 채운다.
 
