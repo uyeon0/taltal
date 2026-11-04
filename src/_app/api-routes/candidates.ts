@@ -4,6 +4,7 @@ import type { Stock } from '@/entities/ingredient';
 import { getRecipes } from '@/entities/recipe/index.server';
 import { filterCandidates } from '@/features/find-meals/index.server';
 
+import { preflight, withCors } from './cors';
 import { readJsonBody } from './read-json-body';
 import { serverError } from './server-error';
 
@@ -37,7 +38,7 @@ function isBody(x: unknown): x is Body {
   );
 }
 
-export async function POST(request: Request) {
+export const POST = withCors('POST', async (request: Request) => {
   const body = await readJsonBody(request, MAX_BODY_BYTES);
   if (!isBody(body)) return Response.json({ error: '잘못된 요청입니다.' }, { status: 400 });
 
@@ -47,4 +48,6 @@ export async function POST(request: Request) {
   } catch (error) {
     return serverError(error);
   }
-}
+});
+
+export const OPTIONS = preflight('POST');
