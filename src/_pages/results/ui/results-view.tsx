@@ -21,7 +21,6 @@ type ResultsViewProps = {
   ingredients: Ingredient[];
   /** 재료 id → 사용자가 고른 단위 */
   units: Record<string, InputUnit>;
-  servings: number;
 };
 
 const bestDishes = (search: MealSearch, mode: Mode) => {
@@ -33,7 +32,7 @@ const bestDishes = (search: MealSearch, mode: Mode) => {
  * 추천 결과. 처음에는 사지 않는 묶음을 보여 주고, 없으면 조금 사는 묶음을 이유와 함께 보여 준다.
  * 묶음을 바꾸면 그 묶음에서 가짓수가 가장 많은 탭을 고른다.
  */
-export function ResultsView({ search, ingredients, units, servings }: ResultsViewProps) {
+export function ResultsView({ search, ingredients, units }: ResultsViewProps) {
   const noBuyAvailable = search.options.noBuy.options.length > 0;
   const [mode, setMode] = useState<Mode>(noBuyAvailable ? 'noBuy' : 'buy');
   const [dishes, setDishes] = useState(() => bestDishes(search, noBuyAvailable ? 'noBuy' : 'buy'));
@@ -80,7 +79,6 @@ export function ResultsView({ search, ingredients, units, servings }: ResultsVie
           <h1 ref={titleRef} tabIndex={-1} className="font-display text-display-sm break-keep">
             {title}
           </h1>
-          <p className="font-semibold">{copy.results.servings(servings)}</p>
         </div>
         <Mascot pose="meal" size={112} priority />
       </div>

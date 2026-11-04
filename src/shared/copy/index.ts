@@ -94,7 +94,13 @@ export const copy = {
     title: '이렇게 나눠 쓰면 이만큼 남아요',
     titleAllUsed: '가진 재료를 다 써요',
     titleWithPurchase: '조금 사면 이렇게 나눠 쓸 수 있어요',
-    servings: (servings: number) => `각 요리 ${servings}인분 기준`,
+    // 조건 칩. 재료는 앞의 두 개만 쓰고 나머지는 개수로 줄인다
+    condition: (names: string[], servings: number) => {
+      const shown = names.slice(0, 2).join(' · ');
+      const rest = names.length - 2;
+      return `${rest > 0 ? `${shown} 외 ${rest}개` : shown} · ${servings}인분`;
+    },
+    conditionLabel: (condition: string) => `재료 수정: ${condition}`,
     dishCountLabel: '몇 가지 요리를 만들까요?',
     dishCountTab: (count: number) => `${count}가지`,
     // 요약은 라벨 태그와 개수를 나눠 그린다. 이어 읽으면 "다 써요 1개"다
@@ -103,8 +109,7 @@ export const copy = {
     summaryCount: (count: number) => `${count}개`,
     summaryNoLeftover: '남는 재료 없음',
     openUsage: '재료별 사용량 보기',
-    estimateNotice: '양은 일반적인 무게로 계산해서 실제와 조금 다를 수 있어요.',
-    editIngredients: '재료 수정'
+    estimateNotice: '양은 일반적인 무게로 계산해서 실제와 조금 다를 수 있어요.'
   },
 
   mealCard: {
