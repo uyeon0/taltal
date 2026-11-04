@@ -46,12 +46,12 @@ test('다람쥐 대체 텍스트는 비어 있다', () => {
   assert.equal(container.querySelector('main img')?.getAttribute('alt'), '');
 });
 
-test('머리글 다람쥐가 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
+test('제목 영역 다람쥐가 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
   const { container } = render(<HomePage />);
   assert.ok(container.querySelector('main img')?.className.includes('size-(--mascot-header-size)'));
 });
 
-test('머리글 다람쥐 옆에 물음표가 있고 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
+test('제목 영역 다람쥐 옆에 물음표가 있고 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
   const { container } = render(<HomePage />);
   const [, question] = [...container.querySelectorAll('main img')];
   assert.match(question?.getAttribute('src') ?? '', /question/);

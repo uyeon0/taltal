@@ -221,7 +221,7 @@ test('떠났다 다시 들어오면 이전 결과 없이 계산 중부터 시작
   await screen.findByText('바뀜1');
 });
 
-test('조건 칩이 재료와 인분을 보여 주고 스크롤해도 위에 붙는다. 머리글에는 뒤로가기가 없다', async () => {
+test('조건 칩이 재료와 인분을 보여 주고 스크롤해도 위에 붙는다. 헤더에는 뒤로가기가 없다', async () => {
   searchMeals.mockResolvedValue(search(comparison(result('붙음', 150)), none));
   const { container } = render(<ResultsScreen ingredients={INGREDIENTS} />);
 

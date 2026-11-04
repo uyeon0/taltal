@@ -18,21 +18,21 @@ test('/로 가는 링크가 없다', () => {
   assert.equal(container.querySelectorAll('a[href="/"]').length, 0);
 });
 
-test('머리글 쪽에 대체 텍스트 없는 다람쥐가 있다', () => {
+test('제목 영역에 대체 텍스트 없는 다람쥐가 있다', () => {
   const { container } = render(<IntroPage />);
   const mascot = container.querySelector('main img');
   assert.equal(mascot?.getAttribute('alt'), '');
   assert.match(mascot?.getAttribute('src') ?? '', /default/);
 });
 
-test('머리글 다람쥐 옆에 물음표가 있고 대체 텍스트가 비어 있다', () => {
+test('제목 영역 다람쥐 옆에 물음표가 있고 대체 텍스트가 비어 있다', () => {
   const { container } = render(<IntroPage />);
   const [, question] = [...container.querySelectorAll('main img')];
   assert.match(question?.getAttribute('src') ?? '', /question/);
   assert.equal(question?.getAttribute('alt'), '');
 });
 
-test('머리글 다람쥐와 물음표가 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
+test('제목 영역 다람쥐와 물음표가 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
   const { container } = render(<IntroPage />);
   const [mascot, question] = [...container.querySelectorAll('main img')];
   assert.ok(mascot?.className.includes('size-(--mascot-header-size)'));
