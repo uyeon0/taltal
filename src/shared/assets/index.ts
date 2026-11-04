@@ -12,8 +12,8 @@ export const MASCOT_IMAGES = {
 export type MascotPose = keyof typeof MASCOT_IMAGES;
 
 /**
- * 머리글 로고와 파비콘. 모든 화면이 여기서 불러온다.
- * 로고 파일이 오면 public/brand/에 넣고 logo를 채운다. null이면 머리글이 서비스 이름을 글자로 보여 준다.
+ * 헤더 로고와 파비콘. 모든 화면이 여기서 불러온다.
+ * 로고 파일이 오면 public/brand/에 넣고 logo를 채운다. null이면 헤더가 서비스 이름을 글자로 보여 준다.
  */
 export const BRAND: { logo: string | null; favicon: string; appleIcon: string } = {
   logo: null,

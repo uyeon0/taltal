@@ -13,7 +13,7 @@
 | --- | --- |
 | Clarity 가림 범위 | 문서대로 재료 이름과 양을 가리지 않는다. `body`에 `data-clarity-unmask="true"`를 둔다. 입력칸 값은 Clarity가 어느 설정에서도 가리므로 검색어와 직접 입력한 수량은 녹화에 남지 않는다 |
 | 이미지 크기 | 재료 그림은 256px, 다람쥐는 640px PNG로 줄여 `public/`에 넣는다. 줄이는 스크립트를 저장소에 둔다 |
-| 임시 로고와 파비콘 | 로고 파일이 오기 전까지 머리글은 "탈탈" 글자를 낭만있구미체로 보여 주고, 파비콘은 `mascot.default`를 줄인 PNG를 쓴다 |
+| 임시 로고와 파비콘 | 로고 파일이 오기 전까지 헤더는 "탈탈" 글자를 낭만있구미체로 보여 주고, 파비콘은 `mascot.default`를 줄인 PNG를 쓴다 |
 | 입력 상태 위치 | 저장소(스토어, 타입)는 `features/build-inventory`의 model에 둔다 |
 | 입력 상태 도구 | zustand 스토어를 쓴다. 공급자 없이 모듈에 스토어 하나를 둔다 |
 | 방문 여부 | localStorage 대신 쿠키에 저장하고, `proxy.ts`가 첫 방문을 `/intro`로 보낸다 |
@@ -141,7 +141,7 @@ vaul `Drawer`로 만든다.
 
 본문 스크롤 위치는 열 때 기억하고 닫은 뒤 되돌린다. 포커스를 옮길 때 `preventScroll: true`를 준다.
 
-### 머리글 `AppHeader`
+### 헤더 `AppHeader`
 
 `shared/ui/app-header.tsx`. 왼쪽에 선택적인 뒤로가기 버튼(`data-back-button`), 가운데 로고를 둔다. 로고는 `BRAND.logo`가 있으면 이미지, 없으면 사이트 이름을 `font-display`로 보여 준다. 뒤로가기는 앱 안에서 온 기록이 있으면 `history.back()`, 없으면 받은 주소로 간다.
 
