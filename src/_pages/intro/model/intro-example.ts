@@ -7,3 +7,10 @@ export const INTRO_EXAMPLE_GRAMS = {
   meals: [150, 100, 30],
   left: 20
 } as const;
+
+/** 3장의 두부 밖 막대. 요리 순서별 쓰는 비율(0~1). copy.intro.exampleMoreUsage와 순서가 같다 */
+export const INTRO_EXAMPLE_MORE_RATIOS = [
+  [0.5, 0.25, 0],
+  [0, 0, 0.4],
+  [0, 0.5, 0]
+] as const;

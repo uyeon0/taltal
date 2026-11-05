@@ -4,6 +4,8 @@
 @import 'shadcn/tailwind.css';
 
 /* 주황 면(.surface-brand) 안. 그 안의 Light 영역(.surface-default)은 뺀다 */
+/* 휴대폰보다 높은 화면. 소개 모형이 늘린 내용을 보여 준다 */
+@custom-variant tall (@media (min-height: 860px));
 @custom-variant on-brand (&:where(.surface-brand, .surface-brand *):not(:where(.surface-default, .surface-default *)));
 
 /* hover는 마우스처럼 정밀한 포인터에서만 쓴다. 일부 휴대폰 브라우저가 (hover: hover)를 알려
@@ -112,6 +114,9 @@
   --control-height: 2.75rem;
   --control-height-primary: 3rem;
   --mascot-header-size: clamp(6rem, 30vw, 9.375rem); /* 소개와 시작 홈 제목 영역의 다람쥐 */
+  --intro-step-title-size: clamp(1rem, 5.3vw, 1.5rem); /* 소개 장 제목. 줄을 바꾸지 않는다 */
+  /* 소개 시작 버튼 영역. 버튼, 위아래 여백, 위 선 */
+  --intro-start-bar-height: calc(var(--control-height-primary) + 1.5rem + var(--border-width));
 
   /* 형태 */
   --radius-control: 0.5rem;
@@ -332,6 +337,12 @@
     color: var(--neutral-ink);
     line-height: var(--line-height-body);
     word-break: keep-all;
+  }
+  /* 앱 열이 화면 폭 전체인 휴대폰에서는 바깥도 주황이다. 주소창이 접히며 앱 열 아래가 드러나도 빈 Light 면이 보이지 않는다 */
+  @media (max-width: 28rem) {
+    body {
+      background-color: var(--brand-primary);
+    }
   }
   h1,
   h2,
