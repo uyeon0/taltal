@@ -92,7 +92,10 @@
   --section-gap: var(--space-6);
   --control-height: 2.75rem;
   --control-height-primary: 3rem;
-  --mascot-header-size: clamp(6.5rem, 30vw, 9.375rem); /* 소개와 시작 홈 제목 영역의 다람쥐 */
+  --mascot-header-size: clamp(6rem, 30vw, 9.375rem); /* 소개와 시작 홈 제목 영역의 다람쥐 */
+  --intro-step-title-size: clamp(1rem, 5.3vw, 1.5rem); /* 소개 장 제목. 줄을 바꾸지 않는다 */
+  /* 소개 시작 버튼 영역. 버튼, 위아래 여백, 위 선 */
+  --intro-start-bar-height: calc(var(--control-height-primary) + 1.5rem + var(--border-width));
 
   /* 형태 */
   --radius-control: 0.5rem;

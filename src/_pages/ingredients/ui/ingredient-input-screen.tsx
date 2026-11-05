@@ -117,7 +117,7 @@ export function IngredientInputScreen({ pickable, pantryBasics, seasonings }: In
 
   return (
     <div
-      className="flex min-h-dvh flex-col pb-(--fixed-footer-height)"
+      className="flex min-h-svh flex-col pb-(--fixed-footer-height)"
       style={{ '--fixed-footer-height': `${footerHeight}px` } as React.CSSProperties}
     >
       <AppHeader backHref="/" />

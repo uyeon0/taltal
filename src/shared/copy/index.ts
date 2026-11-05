@@ -23,14 +23,23 @@ export const copy = {
     exampleIngredients: [
       { name: '두부', amount: '300g' },
       { name: '대파', amount: '1단' },
-      { name: '계란', amount: '5개' }
+      { name: '계란', amount: '5개' },
+      { name: '양파', amount: '1개' }
     ],
+    exampleListLabel: (count: number) => `담은 재료 ${count}개`,
+    // others는 두부 말고 그 요리에 쓰는 재료다. 3장의 대파, 계란 막대와 양이 맞는다
     exampleMeals: [
-      { name: '두부조림', amount: '150g' },
-      { name: '두부찌개', amount: '100g' },
-      { name: '두부전', amount: '30g' }
+      { name: '두부조림', amount: '150g', others: ['대파 ½단'] },
+      { name: '두부찌개', amount: '100g', others: ['대파 ¼단', '양파 ½개'] },
+      { name: '두부전', amount: '30g', others: ['계란 2개'] }
     ],
     exampleLeftover: '20g 남아요',
+    // 3장의 대파, 계란, 양파 막대
+    exampleMoreUsage: [
+      { name: '대파 1단', leftover: '¼단 남아요' },
+      { name: '계란 5개', leftover: '3개 남아요' },
+      { name: '양파 1개', leftover: '½개 남아요' }
+    ],
     start: '내 재료로 시작하기',
     steps: ['가진 재료와 양을 넣어요.', '재료를 나눠 쓸 요리를 확인해요.', '어디에 얼마나 쓰고 남는지 봐요.'],
     carouselLabel: '서비스 소개'

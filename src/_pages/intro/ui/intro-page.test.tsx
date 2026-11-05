@@ -43,3 +43,21 @@ test('제목, 설명, 캐러셀, 시작 버튼이 순서대로 나온다', () =>
   getByRole('button', { name: copy.intro.start });
   assert.equal(container.querySelector('p')?.textContent, copy.intro.description);
 });
+
+test('설명은 제목과 다람쥐 줄 밖에서 화면 폭 전체를 쓴다', () => {
+  const { container } = render(<IntroPage />);
+  const row = container.querySelector('h1')?.parentElement;
+  assert.ok(row?.querySelector('img'));
+  assert.equal(row?.querySelector('p'), null);
+  assert.ok(row?.parentElement?.querySelector(':scope > p'));
+});
+
+test('페이지 높이는 svh이고, 시작 버튼 영역은 화면 바닥에 고정한 만큼 아래를 비운다', () => {
+  const { container, getByRole } = render(<IntroPage />);
+  const main = container.querySelector('main');
+  assert.ok(main?.className.includes('min-h-svh'));
+  assert.ok(main?.className.includes('pb-(--intro-start-bar-height)'));
+  const bar = getByRole('button', { name: copy.intro.start }).parentElement;
+  assert.ok(bar?.className.includes('fixed'));
+  assert.ok(bar?.className.includes('bottom-0'));
+});

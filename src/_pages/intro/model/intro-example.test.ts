@@ -5,7 +5,7 @@ import { test } from 'vitest';
 
 import { copy } from '@/shared/copy';
 
-import { INTRO_EXAMPLE_GRAMS } from './intro-example';
+import { INTRO_EXAMPLE_GRAMS, INTRO_EXAMPLE_MORE_RATIOS } from './intro-example';
 
 test('요리별 양과 남는 양을 더하면 처음 양이다', () => {
   const { start, meals, left } = INTRO_EXAMPLE_GRAMS;
@@ -17,4 +17,12 @@ test('요리별 양과 남는 양을 더하면 처음 양이다', () => {
 
 test('요리 수가 예시 문구와 같다', () => {
   assert.equal(INTRO_EXAMPLE_GRAMS.meals.length, copy.intro.exampleMeals.length);
+});
+
+test('3장의 다른 막대마다 요리별 비율이 있고, 합이 1을 넘지 않는다', () => {
+  assert.equal(INTRO_EXAMPLE_MORE_RATIOS.length, copy.intro.exampleMoreUsage.length);
+  for (const ratios of INTRO_EXAMPLE_MORE_RATIOS) {
+    assert.equal(ratios.length, copy.intro.exampleMeals.length);
+    assert.ok(ratios.reduce<number>((sum, ratio) => sum + ratio, 0) <= 1);
+  }
 });

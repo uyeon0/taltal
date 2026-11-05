@@ -100,3 +100,11 @@ test('예시 구역에는 링크와 버튼이 없다', () => {
   assert.equal(within(region).queryAllByRole('link').length, 0);
   assert.equal(within(region).queryAllByRole('button').length, 0);
 });
+
+test('설명은 제목과 다람쥐 줄 밖에서 화면 폭 전체를 쓴다', () => {
+  const { container } = render(<HomePage />);
+  const row = container.querySelector('h1')?.parentElement;
+  assert.ok(row?.querySelector('img'));
+  assert.equal(row?.querySelector('p'), null);
+  assert.ok(row?.parentElement?.querySelector(':scope > p'));
+});

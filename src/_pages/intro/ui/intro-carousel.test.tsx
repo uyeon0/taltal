@@ -3,7 +3,7 @@
 // Embla는 브라우저 API가 필요해서 가짜로 바꾼다.
 
 import assert from 'node:assert/strict';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, test, vi } from 'vitest';
 import { copy } from '@/shared/copy';
 
@@ -52,4 +52,51 @@ test('점 표시와 화살표가 있다', () => {
   render(<IntroCarousel />);
   screen.getByRole('button', { name: copy.common.goToSlide(1) });
   screen.getByRole('button', { name: copy.common.next });
+});
+
+test('장 제목은 줄을 바꾸지 않고 화면 폭에 맞춰 줄어드는 크기를 쓴다', () => {
+  render(<IntroCarousel />);
+  for (const step of copy.intro.steps) {
+    const { className } = screen.getByText(step, { selector: 'h2' });
+    assert.ok(className.includes('whitespace-nowrap'));
+    assert.ok(className.includes('text-(length:--intro-step-title-size)'));
+  }
+});
+
+test('모형은 화면 높이에 따라 내용을 숨기지 않는다', () => {
+  const { container } = render(<IntroCarousel />);
+  const previews = [...container.querySelectorAll('[data-slot="intro-preview"]')];
+  assert.ok(previews.every((preview) => preview.querySelector('.hidden') === null));
+});
+
+test('1장은 재료 목록 머리 줄과 예시 재료를 모두 보여 준다', () => {
+  const { container } = render(<IntroCarousel />);
+  const [first] = container.querySelectorAll('[data-slot="intro-preview"]');
+  const text = first.textContent ?? '';
+  assert.ok(text.includes(copy.intro.exampleListLabel(copy.intro.exampleIngredients.length)));
+  assert.ok(text.includes(copy.ingredients.servingsOption(2)));
+  for (const { name, amount } of copy.intro.exampleIngredients) assert.ok(text.includes(name) && text.includes(amount));
+});
+
+test('2장은 요리마다 두부 양과 다른 재료를 한 줄로 쓴다', () => {
+  const { container } = render(<IntroCarousel />);
+  const second = container.querySelectorAll('[data-slot="intro-preview"]')[1];
+  const [tofu] = copy.intro.exampleIngredients;
+  for (const meal of copy.intro.exampleMeals) {
+    within(second as HTMLElement).getByText([`${tofu.name} ${meal.amount}`, ...meal.others].join(' · '));
+  }
+});
+
+test('3장은 1장의 재료마다 막대가 있고, 요리 색 설명은 요리명만 쓴다', () => {
+  const { container } = render(<IntroCarousel />);
+  const third = container.querySelectorAll('[data-slot="intro-preview"]')[2];
+  const text = third.textContent ?? '';
+  for (const usage of copy.intro.exampleMoreUsage)
+    assert.ok(text.includes(usage.name) && text.includes(usage.leftover));
+  assert.equal(copy.intro.exampleMoreUsage.length + 1, copy.intro.exampleIngredients.length);
+  const legend = [...third.querySelectorAll('ul li')].map((item) => item.textContent);
+  assert.deepEqual(
+    legend,
+    copy.intro.exampleMeals.map((meal) => meal.name)
+  );
 });
