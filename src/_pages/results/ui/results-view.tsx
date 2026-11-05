@@ -76,7 +76,7 @@ export function ResultsView({ search, ingredients, units }: ResultsViewProps) {
     <main className="flex flex-col gap-6 px-(--page-gutter) pt-2 pb-12">
       <div className="flex items-end gap-3">
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <h1 ref={titleRef} tabIndex={-1} className="font-display text-display-sm break-keep">
+          <h1 ref={titleRef} tabIndex={-1} className="font-display text-display-sm break-keep text-balance">
             {title}
           </h1>
         </div>
